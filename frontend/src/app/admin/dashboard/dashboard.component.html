@@ -42,16 +42,13 @@
 
   <section class="tab-content">
     <div *ngIf="activeTab === 'products'">
-      <!-- Aquí irá tu componente/lista de productos -->
-      <p>Gestión de productos…</p>
+      <app-manage-products></app-manage-products>
     </div>
     <div *ngIf="activeTab === 'inventory'">
-      <!-- Aquí irá tu vista de inventario -->
-      <p>Inventario…</p>
+      <app-manage-inventory></app-manage-inventory>
     </div>
     <div *ngIf="activeTab === 'promotions'">
-      <!-- Aquí irá tu gestión de promociones -->
-      <p>Promociones…</p>
+      <app-manage-promotions></app-manage-promotions>
     </div>
   </section>
 </div>

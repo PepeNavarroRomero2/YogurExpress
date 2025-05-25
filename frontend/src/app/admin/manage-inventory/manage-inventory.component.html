@@ -1,0 +1,43 @@
+<div class="container">
+  <div class="header">
+    <h1>Manage Inventory</h1>
+    <input
+      placeholder="Search"
+      [(ngModel)]="searchTerm"
+      (input)="filterInventory()"
+      class="form-input"
+    >
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr><th>Product</th><th>Quantity</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of filtered">
+        <td>{{ item.product }}</td>
+        <td>
+          <span *ngIf="editId !== item.id">{{ item.quantity }}</span>
+          <input
+            *ngIf="editId === item.id"
+            type="number"
+            min="0"
+            [(ngModel)]="item.quantity"
+            class="form-input"
+          >
+        </td>
+        <td>
+          <button *ngIf="editId !== item.id" class="btn btn-sm" (click)="startEdit(item)">
+            Edit
+          </button>
+          <button *ngIf="editId === item.id" class="btn btn-sm btn-primary" (click)="saveEdit(item)">
+            Save
+          </button>
+          <button *ngIf="editId === item.id" class="btn btn-sm btn-secondary" (click)="cancelEdit(item)">
+            Cancel
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

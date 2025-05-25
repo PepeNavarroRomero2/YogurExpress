@@ -1,0 +1,50 @@
+<div class="container">
+  <div class="header">
+    <h1>Manage Promotions</h1>
+    <button class="btn btn-secondary" (click)="onCreate()">New Promo</button>
+  </div>
+
+  <!-- Formulario -->
+  <div *ngIf="showForm" class="form">
+    <div class="form-group">
+      <label>Code</label>
+      <input class="form-input" [(ngModel)]="newPromotion.code" placeholder="e.g. SPRING20">
+    </div>
+    <div class="form-group">
+      <label>Discount (%)</label>
+      <input
+        type="number"
+        min="1"
+        class="form-input"
+        [(ngModel)]="newPromotion.discount"
+      >
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" (click)="onSave()">
+        {{ editingId != null ? 'Update' : 'Save' }}
+      </button>
+      <button class="btn btn-secondary" (click)="onCancel()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Tabla de promociones -->
+  <table *ngIf="promotions.length" class="table">
+    <thead>
+      <tr><th>Code</th><th>Discount</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of promotions">
+        <td>{{p.code}}</td>
+        <td>-{{p.discount}}%</td>
+        <td>
+          <button class="btn btn-sm" (click)="onEdit(p)">Edit</button>
+          <button class="btn btn-sm btn-danger" (click)="onDelete(p.id)">Del</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!promotions.length" class="placeholder">
+    No promotions yet.
+  </div>
+</div>
