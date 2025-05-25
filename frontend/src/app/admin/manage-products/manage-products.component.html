@@ -1,0 +1,62 @@
+<div class="container">
+  <div class="header">
+    <h1>Manage Products</h1>
+    <button class="btn btn-secondary" (click)="onCreate()">New Product</button>
+  </div>
+
+  <!-- Formulario -->
+  <form *ngIf="showForm" #f="ngForm" (ngSubmit)="onSave(f)" class="form">
+    <div class="form-group">
+      <label>Name</label>
+      <input name="name" class="form-input" required [(ngModel)]="product.name">
+    </div>
+    <div class="form-group">
+      <label>Type</label>
+      <select name="type" class="form-select" required [(ngModel)]="product.type">
+        <option value="" disabled>Select</option>
+        <option *ngFor="let t of types" [value]="t">{{t}}</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Price</label>
+      <input name="price" type="number" min="0" class="form-input" required [(ngModel)]="product.price">
+    </div>
+    <div class="form-group">
+      <label>Image</label>
+      <label class="btn-upload">
+        Upload
+        <input type="file" hidden (change)="onFileChange($event)">
+      </label>
+      <img *ngIf="product.imagePreview" [src]="product.imagePreview" class="preview">
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit" [disabled]="f.invalid">
+        {{ editingId != null ? 'Update' : 'Save' }}
+      </button>
+      <button class="btn btn-secondary" type="button" (click)="onCancel(f)">
+        Cancel
+      </button>
+    </div>
+  </form>
+
+  <!-- Tabla de productos -->
+  <table *ngIf="products.length" class="table">
+    <thead>
+      <tr><th>Name</th><th>Type</th><th>Price</th><th>Image</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of products">
+        <td>{{p.name}}</td>
+        <td>{{p.type}}</td>
+        <td>{{p.price | currency}}</td>
+        <td>
+          <img *ngIf="p.imagePreview" [src]="p.imagePreview" class="thumb">
+        </td>
+        <td>
+          <button class="btn btn-sm" (click)="onEdit(p)">Edit</button>
+          <button class="btn btn-sm btn-danger" (click)="onDelete(p.id)">Del</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

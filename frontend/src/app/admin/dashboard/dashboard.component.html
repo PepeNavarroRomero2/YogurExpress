@@ -1,0 +1,54 @@
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <img src="assets/logo.png" alt="Logo" class="logo" />
+    <h1>Admin Dashboard</h1>
+  </header>
+
+  <section class="stats-cards">
+    <div class="card">
+      <h3>Today's Orders</h3>
+      <p>{{ todaysOrders }}</p>
+    </div>
+    <div class="card">
+      <h3>Revenue (Today)</h3>
+      <p>{{ todaysRevenue | currency:'USD':'symbol' }}</p>
+    </div>
+    <div class="card">
+      <h3>Top Product</h3>
+      <p>{{ topProduct }}</p>
+    </div>
+  </section>
+
+  <nav class="dashboard-tabs">
+    <button
+      (click)="setTab('products')"
+      [class.active]="activeTab === 'products'"
+    >
+      Manage Products
+    </button>
+    <button
+      (click)="setTab('inventory')"
+      [class.active]="activeTab === 'inventory'"
+    >
+      Inventory
+    </button>
+    <button
+      (click)="setTab('promotions')"
+      [class.active]="activeTab === 'promotions'"
+    >
+      Promotions
+    </button>
+  </nav>
+
+  <section class="tab-content">
+    <div *ngIf="activeTab === 'products'">
+      <app-manage-products></app-manage-products>
+    </div>
+    <div *ngIf="activeTab === 'inventory'">
+      <app-manage-inventory></app-manage-inventory>
+    </div>
+    <div *ngIf="activeTab === 'promotions'">
+      <app-manage-promotions></app-manage-promotions>
+    </div>
+  </section>
+</div>
