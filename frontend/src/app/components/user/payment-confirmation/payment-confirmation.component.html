@@ -1,0 +1,33 @@
+<div class="payment-confirmation">
+  <h2>Resumen y pago</h2>
+
+  <ul class="summary">
+    <li><strong>Sabor:</strong> {{ cart.flavor?.name }}</li>
+    <li><strong>Toppings:</strong> {{ formatToppings() }}</li>
+    <li><strong>Tamaño:</strong> {{ cart.size?.name }}</li>
+    <li><strong>Recogida:</strong> {{ cart.pickupTime | date:'short' }}</li>
+    <li><strong>Subtotal:</strong> {{ subtotal | currency:'EUR' }}</li>
+    <li *ngIf="discount > 0"><strong>Descuento:</strong> -{{ discount | currency:'EUR' }}</li>
+    <li><strong>Total:</strong> {{ total | currency:'EUR' }}</li>
+  </ul>
+
+  <div class="points-redeem">
+    <label for="pts">Canjear puntos (saldo: {{ currentPoints }} pts):</label>
+    <input
+      id="pts"
+      type="number"
+      min="0"
+      [max]="currentPoints"
+      [(ngModel)]="pointsToRedeem"
+      (ngModelChange)="onRedeemChange()"
+      class="form-control"
+    />
+  </div>
+
+  <div class="buttons">
+    <button class="btn-back" (click)="onBack()">Atrás</button>
+    <button class="btn-confirm" (click)="confirmPayment()">
+      Confirmar y pagar
+    </button>
+  </div>
+</div>
