@@ -1,0 +1,39 @@
+<div class="customize-order">
+  <h2>Personaliza tu {{ flavorName }}</h2>
+  <p>Precio base: {{ flavorPrice | currency:'EUR' }}</p>
+
+  <section class="section">
+    <h3>Toppings</h3>
+    <div class="options">
+      <label *ngFor="let t of toppings">
+        <input
+          type="checkbox"
+          [checked]="isSelectedTopping(t)"
+          (change)="toggleTopping(t)"
+        />
+        {{ t.name }} (+{{ t.price | currency:'EUR' }})
+      </label>
+    </div>
+  </section>
+
+  <section class="section">
+    <h3>Tamaño</h3>
+    <div class="options">
+      <label *ngFor="let s of sizes">
+        <input
+          type="radio"
+          name="size"
+          [checked]="selectedSize?.id === s.id"
+          (change)="selectSize(s)"
+        />
+        {{ s.name }} (+{{ s.price | currency:'EUR' }})
+      </label>
+    </div>
+  </section>
+
+  <div class="total">
+    <strong>Total:</strong> {{ total | currency:'EUR' }}
+  </div>
+
+  <button class="btn-next" (click)="next()">Siguiente</button>
+</div>
