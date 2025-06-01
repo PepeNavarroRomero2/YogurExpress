@@ -1,0 +1,10 @@
+<div class="productos-container">
+    <div *ngFor="let p of productos" class="producto-card">
+      <img [src]="p.imagen_url" alt="{{ p.nombre }}" class="imagen">
+      <h3>{{ p.nombre }}</h3>
+      <p>{{ p.descripcion }}</p>
+      <p><strong>Precio:</strong> {{ p.precio | currency:'EUR' }}</p>
+      <p *ngIf="p.alergenos"><em>Alergenos:</em> {{ p.alergenos }}</p>
+    </div>
+  </div>
+  
