@@ -1,23 +1,45 @@
-const express = require('express');
-const { supabase } = require('../lib/supabaseClient');
-const { authenticateToken } = require('./authMiddleware');
+// backend/routes/users.js
+
+import express from 'express';
+import jwt from 'jsonwebtoken';
+import { supabase } from '../lib/supabaseClient.js';
 
 const router = express.Router();
 
 /**
- * GET /api/users/me
- * Devuelve la información del usuario autenticado (sin contraseña)
+ * Middleware para extraer userId desde el JWT
  */
-router.get('/me', authenticateToken, async (req, res) => {
-  const id_usuario = req.user.id_usuario;
-  const { data: user, error } = await supabase
-    .from('usuarios')
-    .select('id_usuario, nombre, email, rol, puntos')
-    .eq('id_usuario', id_usuario)
-    .single();
+const authenticate = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ error: 'Token no proporcionado.' });
+  const token = authHeader.split(' ')[1];
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = payload; // contiene { id_usuario, email, rol }
+    next();
+  } catch {
+    return res.status(401).json({ error: 'Token inválido.' });
+  }
+};
 
-  if (error) return res.status(500).json({ error: 'No se pudo cargar usuario' });
-  res.json(user);
+/**
+ * GET /api/users/me
+ * Devuelve los datos del usuario autenticado (sin contraseña)
+ */
+router.get('/me', authenticate, async (req, res) => {
+  try {
+    const userId = req.user.id_usuario;
+    const { data: user, error } = await supabase
+      .from('usuarios')
+      .select('id_usuario, nombre, email, rol, puntos')
+      .eq('id_usuario', userId)
+      .single();
+    if (error) throw error;
+    res.json(user);
+  } catch (error) {
+    console.error('GET /users/me error:', error);
+    res.status(500).json({ error: 'No se pudo cargar el perfil de usuario.' });
+  }
 });
 
-module.exports = router;
+export default router;

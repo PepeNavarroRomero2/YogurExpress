@@ -1,6 +1,16 @@
-<div class="points-container">
-  <h2>Tu saldo de puntos</h2>
-  <p class="points-balance">{{ currentPoints }} pts</p>
+<!-- frontend/src/app/components/user/points/points.component.html -->
 
-  <button class="btn-redeem" (click)="goBack()">Volver al menú</button>
+<div class="points-container">
+  <h1>Mis Puntos</h1>
+
+  <!-- Mensaje de error si falla la carga -->
+  <div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
+
+  <!-- Mostrar puntos si no hay error -->
+  <div *ngIf="!errorMsg" class="points-info">
+    <p><strong>Tienes:</strong> {{ puntos }} puntos</p>
+    <button class="btn-primary" (click)="router.navigate(['/user/menu'])">
+      Volver al Menú
+    </button>
+  </div>
 </div>

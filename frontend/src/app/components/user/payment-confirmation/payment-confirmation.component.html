@@ -1,33 +1,63 @@
-<div class="payment-confirmation">
-  <h2>Resumen y pago</h2>
+<!-- frontend/src/app/components/user/payment-confirmation/payment-confirmation.component.html -->
 
-  <ul class="summary">
-    <li><strong>Sabor:</strong> {{ cart.flavor?.name }}</li>
-    <li><strong>Toppings:</strong> {{ formatToppings() }}</li>
-    <li><strong>Tamaño:</strong> {{ cart.size?.name }}</li>
-    <li><strong>Recogida:</strong> {{ cart.pickupTime | date:'short' }}</li>
-    <li><strong>Subtotal:</strong> {{ subtotal | currency:'EUR' }}</li>
-    <li *ngIf="discount > 0"><strong>Descuento:</strong> -{{ discount | currency:'EUR' }}</li>
-    <li><strong>Total:</strong> {{ total | currency:'EUR' }}</li>
-  </ul>
+<div class="payment-confirmation-container">
+  <h1>Confirmación y Pago</h1>
 
-  <div class="points-redeem">
-    <label for="pts">Canjear puntos (saldo: {{ currentPoints }} pts):</label>
-    <input
-      id="pts"
-      type="number"
-      min="0"
-      [max]="currentPoints"
-      [(ngModel)]="pointsToRedeem"
-      (ngModelChange)="onRedeemChange()"
-      class="form-control"
-    />
+  <!-- Mensaje de error general -->
+  <div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
+
+  <!-- Resumen de pedido -->
+  <div class="order-summary">
+    <h2>Tu Pedido</h2>
+    <p>
+      <strong>Sabor:</strong> {{ flavor.nombre }}
+      – €{{ flavor.precio.toFixed(2) }}
+    </p>
+
+    <p *ngIf="toppings.length > 0">
+      <strong>Toppings:</strong>
+      {{ toppingNames }}
+      (€{{ toppingsPrice.toFixed(2) }})
+    </p>
+
+    <p>
+      <strong>Tamaño:</strong> {{ size.nombre }}
+      – €{{ size.precio.toFixed(2) }}
+    </p>
   </div>
 
-  <div class="buttons">
-    <button class="btn-back" (click)="onBack()">Atrás</button>
-    <button class="btn-confirm" (click)="confirmPayment()">
-      Confirmar y pagar
-    </button>
+  <!-- Hora de recogida -->
+  <div class="pickup-time">
+    <p><strong>Hora de Recogida:</strong> {{ pickupTime }}</p>
   </div>
+
+  <hr />
+
+  <!-- Totales y canje de puntos -->
+  <div class="totals">
+    <p><strong>Subtotal:</strong> €{{ subtotal.toFixed(2) }}</p>
+
+    <div class="points-row">
+      <label for="puntos">
+        Puntos a canjear (disponibles: {{ puntosUsuario }}):
+      </label>
+      <input
+        type="number"
+        id="puntos"
+        class="form-control"
+        [max]="puntosUsuario"
+        [min]="0"
+        [value]="puntosAUsar"
+        (input)="onPointsChange($event)"
+      />
+    </div>
+
+    <p><strong>Descuento:</strong> €{{ descuento.toFixed(2) }}</p>
+    <p><strong>Total a pagar:</strong> €{{ total.toFixed(2) }}</p>
+  </div>
+
+  <!-- Botón final de pago -->
+  <button class="btn-primary" (click)="confirmPayment()">
+    Confirmar y pagar
+  </button>
 </div>

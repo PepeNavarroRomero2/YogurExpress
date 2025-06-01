@@ -1,21 +1,21 @@
-<div class="select-time">
-  <h2>¿Cuándo pasas a recoger?</h2>
+<!-- frontend/src/app/components/user/select-time/select-time.component.html -->
 
-  <form (ngSubmit)="onSubmit()">
-    <label for="pickupTime">Fecha y hora:</label>
+<div class="select-time-container">
+  <h1>Elige Hora de Recogida</h1>
+
+  <!-- Input de hora -->
+  <div class="form-group">
+    <label for="hora">Hora:</label>
     <input
-      id="pickupTime"
-      name="pickupTime"
-      type="datetime-local"
-      required
-      [min]="minDateTime"
-      [(ngModel)]="pickupTime"
+      type="time"
+      id="hora"
       class="form-control"
+      [(ngModel)]="hora"
     />
+  </div>
 
-    <div class="buttons">
-      <button type="button" class="btn-back" (click)="onBack()">Atrás</button>
-      <button type="submit" class="btn-next">Siguiente</button>
-    </div>
-  </form>
+  <!-- Botón de confirmar -->
+  <button class="btn-primary" (click)="onConfirm()">
+    Confirmar Hora
+  </button>
 </div>

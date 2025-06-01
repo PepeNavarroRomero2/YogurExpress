@@ -1,72 +1,76 @@
 import { Injectable } from '@angular/core';
-
-export type UserRole = 'user' | 'admin';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { Observable, tap } from 'rxjs';
 
 export interface User {
-  name?: string;
+  id_usuario: number;
+  nombre: string;
   email: string;
-  password: string;
-  points: number;
-  role: UserRole;
+  rol: string;
+  puntos: number;
 }
 
-@Injectable({ providedIn: 'root' })
+export interface AuthResponse {
+  user: User;
+  token: string;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
 export class AuthService {
-  private localUsers: User[] = [];
-  private users: User[] = [];
-  private currentUser?: User;
+  private API_URL = 'http://localhost:3000/api/auth';
 
-  // Usuario administrador por defecto
-  private defaultAdmin: User = {
-    name: 'Admin',
-    email: 'admin@yogurtexpress.com',
-    password: 'admin123',
-    points: 0,
-    role: 'admin'
-  };
+  constructor(private http: HttpClient, private router: Router) {}
 
-  constructor() {
-    const saved = localStorage.getItem('users');
-    this.localUsers = saved ? JSON.parse(saved) : [];
-    // Siempre tenemos al admin primero, más los usuarios registrados
-    this.users = [this.defaultAdmin, ...this.localUsers];
-
-    const savedCurrent = localStorage.getItem('currentUser');
-    this.currentUser = savedCurrent ? JSON.parse(savedCurrent) : undefined;
+  /** REGISTRO: llama a POST /api/auth/register y guarda el token automáticamente */
+  register(nombre: string, email: string, contraseña: string): Observable<AuthResponse> {
+    const body = { nombre, email, contraseña };
+    return this.http.post<AuthResponse>(`${this.API_URL}/register`, body).pipe(
+      tap(res => {
+        this.setToken(res.token);
+      })
+    );
   }
 
-  login(email: string, password: string): boolean {
-    const user = this.users.find(u => u.email === email && u.password === password);
-    if (user) {
-      this.currentUser = user;
-      localStorage.setItem('currentUser', JSON.stringify(user));
-      return true;
-    }
-    return false;
+  /** LOGIN: llama a POST /api/auth/login y guarda el token automáticamente */
+  login(email: string, contraseña: string): Observable<AuthResponse> {
+    const body = { email, contraseña };
+    return this.http.post<AuthResponse>(`${this.API_URL}/login`, body).pipe(
+      tap(res => {
+        this.setToken(res.token);
+      })
+    );
   }
 
-  register(name: string, email: string, password: string): boolean {
-    // Sólo registramos usuarios con rol 'user'
-    if (this.localUsers.some(u => u.email === email)) {
-      return false;
-    }
-    const newUser: User = { name, email, password, points: 0, role: 'user' };
-    this.localUsers.push(newUser);
-    localStorage.setItem('users', JSON.stringify(this.localUsers));
-    this.users = [this.defaultAdmin, ...this.localUsers];
-    return true;
+  /** Guarda el JWT en localStorage */
+  private setToken(token: string) {
+    localStorage.setItem('auth_token', token);
   }
 
-  logout(): void {
-    this.currentUser = undefined;
-    localStorage.removeItem('currentUser');
+  /** Recupera el JWT de localStorage */
+  getToken(): string | null {
+    return localStorage.getItem('auth_token');
   }
 
+  /** Comprueba si hay token en localStorage */
   isLoggedIn(): boolean {
-    return !!this.currentUser;
+    return !!this.getToken();
   }
 
-  getUser(): User | undefined {
-    return this.currentUser;
+  /** Elimina el JWT y redirige al login */
+  logout() {
+    localStorage.removeItem('auth_token');
+    this.router.navigate(['/user/login']);
+  }
+
+  /** Headers con JWT para llamadas protegidas */
+  getAuthHeaders(): HttpHeaders {
+    const token = this.getToken() || '';
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    });
   }
 }

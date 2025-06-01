@@ -1,67 +1,37 @@
-// src/app/services/product.service.ts
-
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 export interface Flavor {
-  id: number;
-  name: string;
-  price: number;
-  imageUrl?: string;
+  id_producto: number;
+  nombre: string;
+  tipo: string;
+  precio: number;
+  descripcion?: string;
+  alergenos?: string;
+  imagen_url?: string;
 }
 
-export interface Topping {
-  id: number;
-  name: string;
-  price: number;
-}
-
-export interface SizeOption {
-  id: number;
-  name: string;
-  price: number;
-}
-
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class ProductService {
-  private flavors: Flavor[] = [
-    { id: 1, name: 'Fresa',     price: 2.5, imageUrl: 'assets/images/fresa.png' },
-    { id: 2, name: 'Vainilla',  price: 2.0, imageUrl: 'assets/images/vainilla.png' },
-    { id: 3, name: 'Chocolate', price: 3.0, imageUrl: 'assets/images/chocolate.png' },
-    // …añade más sabores según necesites
-  ];
+  private API_URL = 'http://localhost:3000/api/products';
 
-  private toppings: Topping[] = [
-    { id: 1, name: 'Chispas de chocolate', price: 0.5 },
-    { id: 2, name: 'Granola',              price: 0.7 },
-    { id: 3, name: 'Frutos secos',         price: 1.0 },
-    { id: 4, name: 'Miel',                 price: 0.3 },
-    // …añade más toppings según necesites
-  ];
+  constructor(private http: HttpClient) { }
 
-  private sizes: SizeOption[] = [
-    { id: 1, name: 'Pequeño', price: 0   },
-    { id: 2, name: 'Mediano', price: 1   },
-    { id: 3, name: 'Grande',  price: 2   },
-  ];
-
-  /**  
-   * Devuelve una copia de la lista de sabores disponibles.  
-   */  
-  getFlavors(): Flavor[] {
-    return [...this.flavors];
+  /** GET /api/products/sabores */
+  getFlavors(): Observable<Flavor[]> {
+    return this.http.get<Flavor[]>(`${this.API_URL}/sabores`);
   }
 
-  /**  
-   * Devuelve una copia de la lista de toppings disponibles.  
-   */  
-  getToppings(): Topping[] {
-    return [...this.toppings];
+  /** GET /api/products/toppings */
+  getToppings(): Observable<Flavor[]> {
+    return this.http.get<Flavor[]>(`${this.API_URL}/toppings`);
   }
 
-  /**  
-   * Devuelve una copia de las opciones de tamaño disponibles.  
-   */  
-  getSizes(): SizeOption[] {
-    return [...this.sizes];
+  /** GET /api/products/tamanos */
+  getSizes(): Observable<Flavor[]> {
+    return this.http.get<Flavor[]>(`${this.API_URL}/tamanos`);
   }
 }

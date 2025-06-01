@@ -1,112 +1,136 @@
+// frontend/src/app/components/user/payment-confirmation/payment-confirmation.component.ts
+
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule }   from '@angular/forms';
-import { Router }        from '@angular/router';
-import Swal              from 'sweetalert2';
-import { CartService, Cart } from '../../../services/cart.service';
-import { OrderService }      from '../../../services/order.service';
-import { PointsService }     from '../../../services/points.service';
+import { FormsModule } from '@angular/forms';
+import { RouterModule, Router } from '@angular/router';
+import Swal from 'sweetalert2';
+import { CartService } from '../../../services/cart.service';
+import { OrderService, CreateOrderRequest, OrderProduct } from '../../../services/order.service';
+import { UserService } from '../../../services/user.service';
+import { User, AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-payment-confirmation',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule
+  ],
   templateUrl: './payment-confirmation.component.html',
   styleUrls: ['./payment-confirmation.component.scss']
 })
 export class PaymentConfirmationComponent implements OnInit {
-  cart!: Cart;
-  subtotal = 0;
-  currentPoints = 0;
-
-  // Puntos a canjear y cálculo de descuento
-  pointsToRedeem = 0;
-  discount = 0;
-
-  // Total tras aplicar descuento
-  total = 0;
+  flavor: any;
+  toppings: any[] = [];
+  size: any;
+  pickupTime: string = '';
+  puntosUsuario: number = 0;
+  puntosAUsar: number = 0;
+  subtotal: number = 0;
+  descuento: number = 0;
+  total: number = 0;
+  errorMsg: string = '';
 
   constructor(
-    private cartSvc: CartService,
-    private orderSvc: OrderService,
-    private ptsSvc: PointsService,
+    private cartService: CartService,
+    private authService: AuthService,
+    private userService: UserService,
+    private orderService: OrderService,
     private router: Router
   ) {}
 
-  ngOnInit() {
-    this.cart = this.cartSvc.getCart();
-    // calculamos subtotales
-    this.subtotal = this.cartSvc.getSubtotal();
-    this.currentPoints = this.ptsSvc.getPoints();
-    this.discount = 0;
-    this.pointsToRedeem = 0;
-    this.total = this.subtotal;
-
-    // Si falta algún dato básico, volvemos al menú
-    if (!this.cart.flavor || !this.cart.size || !this.cart.pickupTime) {
-      this.router.navigate(['/user/menu']);
-    }
-  }
-
-  /** Cuando cambia la cantidad de puntos a canjear, recalcula descuento y total */
-  onRedeemChange() {
-    if (this.pointsToRedeem > this.currentPoints) {
-      this.pointsToRedeem = this.currentPoints;
-    }
-    // Definimos: 10 pts = 1€
-    this.discount = this.pointsToRedeem / 10;
-    this.total = Math.max(0, this.subtotal - this.discount);
-  }
-
-  /** Formatea la lista de toppings o devuelve 'Sin toppings' */
-  formatToppings(): string {
-    return this.cart.toppings.length
-      ? this.cart.toppings.map(t => t.name).join(', ')
-      : 'Sin toppings';
-  }
-
-  confirmPayment() {
-    // 1) Canjear puntos (se resta saldo)
-    if (this.pointsToRedeem > 0) {
-      const ok = this.ptsSvc.redeemPoints(this.pointsToRedeem);
-      if (!ok) {
-        Swal.fire('Error', 'No tienes suficientes puntos.', 'error');
-        return;
-      }
-    }
-
-    // 2) Ajustar crédito en carrito para el pedido
-    this.cartSvc.setCredit(this.discount);
-
-    // 3) Crear pedido
-    const order = this.orderSvc.placeOrder();
-    if (!order) {
-      Swal.fire('Error', 'No se pudo procesar tu pedido.', 'error');
+  ngOnInit(): void {
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/user/login']);
       return;
     }
 
-    // 4) Recompensar nuevos puntos: 1 pt por cada € gastado
-    const earned = Math.floor(order.total);
-    if (earned > 0) {
-      this.ptsSvc.addPoints(earned);
+    this.flavor = this.cartService.getFlavor();
+    this.toppings = this.cartService.getToppings();
+    this.size = this.cartService.getSize();
+    this.pickupTime = localStorage.getItem('pickup_time') || '';
+
+    if (!this.flavor || !this.size || !this.pickupTime) {
+      this.router.navigate(['/user/menu']);
+      return;
     }
 
-    // 5) Mostrar modal de éxito con detalle de canje y recompensa
-    Swal.fire({
-      icon: 'success',
-      title: 'Pedido confirmado',
-      html: `
-        ${ this.discount > 0
-            ? `Has canjeado ${this.pointsToRedeem} pts y descontado ${this.discount.toFixed(2)}€.<br/>`
-            : ''
-        }
-        Has ganado ${earned} pts.
-      `,
-      confirmButtonText: 'Volver a inicio'
-    }).then(() => this.router.navigate(['/user/menu']));
+    this.subtotal = this.flavor.precio + this.size.precio;
+    for (let t of this.toppings) {
+      this.subtotal += t.precio;
+    }
+
+    this.userService.getProfile().subscribe({
+      next: (user: User) => {
+        this.puntosUsuario = user.puntos;
+        this.calculateTotal();
+      },
+      error: () => {
+        this.errorMsg = 'No se pudieron cargar tus puntos.';
+      }
+    });
   }
 
-  onBack() {
-    this.router.navigate(['/user/pickup']);
+  /** Nombres de todos los toppings separados por coma */
+  get toppingNames(): string {
+    return this.toppings.map(t => t.nombre).join(', ');
+  }
+
+  /** Precio total de toppings */
+  get toppingsPrice(): number {
+    return this.toppings.reduce((sum, t) => sum + t.precio, 0);
+  }
+
+  calculateTotal() {
+    this.descuento = this.puntosAUsar / 10;
+    this.total = Math.max(0, this.subtotal - this.descuento);
+  }
+
+  onPointsChange(event: Event) {
+    const val = +(event.target as HTMLInputElement).value;
+    this.puntosAUsar = val;
+    this.calculateTotal();
+  }
+
+  confirmPayment() {
+    this.errorMsg = '';
+
+    if (this.puntosAUsar > this.puntosUsuario) {
+      Swal.fire('Error', 'No tienes suficientes puntos para canjear.', 'error');
+      return;
+    }
+
+    const productosParaApi: OrderProduct[] = [];
+    productosParaApi.push({ id_producto: this.flavor.id_producto, cantidad: 1 });
+    for (let t of this.toppings) {
+      productosParaApi.push({ id_producto: t.id_producto, cantidad: 1 });
+    }
+    productosParaApi.push({ id_producto: this.size.id_producto, cantidad: 1 });
+
+    const body: CreateOrderRequest = {
+      productos: productosParaApi,
+      hora_recogida: this.pickupTime,
+      puntos_usados: this.puntosAUsar
+    };
+
+    this.orderService.createOrder(body).subscribe({
+      next: res => {
+        Swal.fire({
+          title: '¡Pedido confirmado!',
+          text: `Código de seguimiento: ${res.codigo_pedido}`,
+          icon: 'success',
+          confirmButtonText: 'Aceptar'
+        }).then(() => {
+          this.cartService.clear();
+          this.router.navigate(['/user/menu']);
+        });
+      },
+      error: err => {
+        const msg = err.error?.error || 'Error al crear el pedido.';
+        Swal.fire('Error', msg, 'error');
+      }
+    });
   }
 }

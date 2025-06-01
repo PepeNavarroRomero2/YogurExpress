@@ -1,19 +1,37 @@
-<div class="order-history">
-  <h2>Historial de pedidos</h2>
+<!-- frontend/src/app/components/user/order-history/order-history.component.html -->
 
-  <div *ngIf="orders.length; else noOrders">
-    <div class="order-card" *ngFor="let order of orders">
-      <p><strong>ID:</strong> {{ order.id }}</p>
-      <p><strong>Fecha:</strong> {{ order.date | date:'short' }}</p>
-      <p><strong>Sabor:</strong> {{ order.flavor.name }}</p>
-      <p><strong>Toppings:</strong> {{ formatToppings(order) }}</p>
-      <p><strong>Tamaño:</strong> {{ order.size.name }}</p>
-      <p><strong>Recogida:</strong> {{ order.pickupTime | date:'short' }}</p>
-      <p><strong>Total:</strong> {{ order.total | currency:'EUR' }}</p>
-    </div>
+<div class="order-history-container">
+  <h1>Historial de Pedidos</h1>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
+
+  <!-- Si no hay pedidos, mostrar mensaje -->
+  <div *ngIf="history.length === 0 && !errorMsg" class="no-orders">
+    <p>No tienes pedidos aún.</p>
+    <button class="btn-primary" (click)="router.navigate(['/user/menu'])">
+      Volver al Menú
+    </button>
   </div>
 
-  <ng-template #noOrders>
-    <p class="no-orders">No has realizado ningún pedido aún.</p>
-  </ng-template>
+  <!-- Lista de pedidos -->
+  <div *ngIf="history.length > 0" class="orders-list">
+    <div *ngFor="let order of history" class="order-card">
+      <h3>Código: {{ order.codigo_pedido }}</h3>
+      <p><strong>Fecha:</strong> {{ order.fecha_hora | date: 'short' }}</p>
+      <p><strong>Hora de Recogida:</strong> {{ order.hora_recogida }}</p>
+      <p><strong>Total:</strong> €{{ order.total.toFixed(2) }}</p>
+      <p><strong>Estado:</strong> {{ order.estado }}</p>
+
+      <div class="order-detail">
+        <p><strong>Detalle de Productos:</strong></p>
+        <ul>
+          <li *ngFor="let item of order.detalle_pedido">
+            {{ item.productos.nombre }} – cantidad: {{ item.cantidad }}
+            (€/u: {{ item.productos.precio.toFixed(2) }})
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
 </div>

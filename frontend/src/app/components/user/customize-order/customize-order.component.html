@@ -1,39 +1,54 @@
-<div class="customize-order">
-  <h2>Personaliza tu {{ flavorName }}</h2>
-  <p>Precio base: {{ flavorPrice | currency:'EUR' }}</p>
+<!-- frontend/src/app/components/user/customize-order/customize-order.component.html -->
 
-  <section class="section">
-    <h3>Toppings</h3>
-    <div class="options">
-      <label *ngFor="let t of toppings">
-        <input
-          type="checkbox"
-          [checked]="isSelectedTopping(t)"
-          (change)="toggleTopping(t)"
-        />
-        {{ t.name }} (+{{ t.price | currency:'EUR' }})
-      </label>
-    </div>
-  </section>
+<div class="customize-order-container">
+  <h1>Personaliza tu Pedido</h1>
 
-  <section class="section">
-    <h3>Tamaño</h3>
-    <div class="options">
-      <label *ngFor="let s of sizes">
-        <input
-          type="radio"
-          name="size"
-          [checked]="selectedSize?.id === s.id"
-          (change)="selectSize(s)"
-        />
-        {{ s.name }} (+{{ s.price | currency:'EUR' }})
-      </label>
-    </div>
-  </section>
+  <!-- Error al cargar toppings o tamaños -->
+  <div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
 
-  <div class="total">
-    <strong>Total:</strong> {{ total | currency:'EUR' }}
+  <!-- Información del sabor seleccionado -->
+  <div class="flavor-summary">
+    <h2>
+      Has elegido: {{ flavor.nombre }} – €{{ flavor.precio.toFixed(2) }}
+    </h2>
   </div>
 
-  <button class="btn-next" (click)="next()">Siguiente</button>
+  <!-- Sección: Toppings -->
+  <div class="section">
+    <h3>Selecciona Toppings (opcional)</h3>
+    <div class="grid toppings-grid">
+      <div
+        class="card topping-card"
+        *ngFor="let t of toppings"
+        [class.selected]="isToppingSelected(t)"
+        (click)="toggleTopping(t)"
+      >
+        <img
+          [src]="t.imagen_url || 'assets/default-topping.png'"
+          alt="{{ t.nombre }}"
+        />
+        <p>{{ t.nombre }} – €{{ t.precio.toFixed(2) }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección: Tamaños -->
+  <div class="section">
+    <h3>Selecciona Tamaño (obligatorio)</h3>
+    <div class="grid sizes-grid">
+      <div
+        class="card size-card"
+        *ngFor="let s of sizes"
+        [class.selected]="isSizeSelected(s)"
+        (click)="selectSize(s)"
+      >
+        <p>{{ s.nombre }} – €{{ s.precio.toFixed(2) }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón para avanzar -->
+  <button class="btn-primary" (click)="addToCart()">
+    Agregar al pedido
+  </button>
 </div>
