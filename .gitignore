@@ -42,5 +42,3 @@ coverage/
 *.ntvs*
 *.njsproj
 
-# macOS
-.DS_Store
