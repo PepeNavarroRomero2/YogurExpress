@@ -1,0 +1,68 @@
+.payment-confirmation {
+  max-width: 480px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+
+  h2 { text-align: center; margin-bottom: 1rem; }
+
+  .summary {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1.5rem;
+
+    li {
+      margin-bottom: 0.5rem;
+      strong { width: 100px; display: inline-block; }
+    }
+  }
+
+  .points-redeem {
+    margin-bottom: 1rem;
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+    }
+
+    small {
+      display: block;
+      margin-bottom: 1rem;
+    }
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: space-between;
+
+    .btn-back,
+    .btn-confirm {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .btn-back {
+      background: #6c757d;
+      color: #fff;
+    }
+
+    .btn-confirm {
+      background: #28a745;
+      color: #fff;
+    }
+  }
+}

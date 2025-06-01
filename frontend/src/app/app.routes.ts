@@ -4,8 +4,15 @@ export const routes: Routes = [
   {
     path: 'admin',
     loadChildren: () =>
-      import('./admin/admin.module').then(m => m.AdminModule)
+      import('./components/admin/admin.module').then(m => m.AdminModule)
   },
-  { path: '', redirectTo: '/admin', pathMatch: 'full' },
-  { path: '**', redirectTo: '/admin' }
+  {
+    path: 'user',
+    loadChildren: () =>
+      import('./components/user/user.module').then(m => m.UserModule)
+  },
+  // Por defecto arranca en la zona de usuario
+  { path: '', redirectTo: '/user', pathMatch: 'full' },
+  // Cualquier ruta no reconocida va a /user
+  { path: '**', redirectTo: '/user' }
 ];

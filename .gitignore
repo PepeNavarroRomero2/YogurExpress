@@ -32,3 +32,4 @@ coverage/
 *.suo
 *.ntvs*
 *.njsproj
+frontend/src.zip

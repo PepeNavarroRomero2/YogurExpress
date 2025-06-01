@@ -1,0 +1,37 @@
+<div class="product-menu-container">
+  <div class="menu-content" [class.full-width]="!showHistory">
+    <div class="header">
+      <h2>Elige tu sabor</h2>
+      <div class="actions">
+        <div class="header-points" (click)="goToPoints()" title="Tus puntos">
+          ★ <span class="badge">{{ currentPoints }} pts</span>
+        </div>
+        <button class="btn-history" (click)="toggleHistory()">
+          {{ showHistory ? 'Cerrar Historial' : 'Ver Historial' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="flavor-list">
+      <div
+        class="flavor-card"
+        *ngFor="let f of flavors"
+        (click)="selectFlavor(f)"
+      >
+        <img
+          *ngIf="f.imageUrl"
+          [src]="f.imageUrl"
+          [alt]="f.name"
+          class="flavor-img"
+        />
+        <h3>{{ f.name }}</h3>
+        <p>{{ f.price | currency:'EUR' }}</p>
+        <button class="btn-select">Seleccionar</button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="showHistory" class="history-content">
+    <app-order-history></app-order-history>
+  </div>
+</div>

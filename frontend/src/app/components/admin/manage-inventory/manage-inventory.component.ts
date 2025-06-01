@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule }      from '@angular/common';
 import { FormsModule }       from '@angular/forms';
+import Swal             from 'sweetalert2';
+
 
 interface InventoryItem {
   id: number;
@@ -47,6 +49,7 @@ export class ManageInventoryComponent implements OnInit {
   saveEdit(item: InventoryItem) {
     this.editId = null;
     // automáticamente reflejado en el array original
+    Swal.fire('Actualizado','Producto modificado','success');
   }
 
   cancelEdit(item: InventoryItem) {
