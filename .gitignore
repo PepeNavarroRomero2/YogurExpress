@@ -1,35 +1,44 @@
-# Node modules (tanto en frontend como backend)
+# ----------------------------
+# Ignorar dependencias de Node
+# ----------------------------
+# Esta regla se aplica recursivamente a cualquier carpeta “node_modules”:
 **/node_modules/
 
+# ----------------------------
 # Archivos de entorno
+# ----------------------------
 .env
 variables.env
 **/*.env
 
-# Logs
+# ----------------------------
+# Ignorar logs
+# ----------------------------
 npm-debug.log*
 yarn-debug.log*
 lerna-debug.log*
 *.log
 
-# Directorios de build / artefactos compilados
-/dist/
+# ----------------------------
+# Directorios de build / distribución
+# ----------------------------
+# capas específicas del backend y frontend
 /backend/dist/
 /frontend/dist/
 /frontend/.angular/
+/dist/
 
-# Coverage (tests)
+# ----------------------------
+# Cobertura de tests
+# ----------------------------
 coverage/
 
-# VSCode
+# ----------------------------
+# Configuración de editores / OS
+# ----------------------------
 .vscode/
-
-# Mac
-.DS_Store
-
-# IDEs/otros
-.idea/
+/.idea/
 *.suo
 *.ntvs*
 *.njsproj
-frontend/src.zip
+
