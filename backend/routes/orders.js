@@ -8,11 +8,7 @@ const router = express.Router();
 
 /**
  * POST /api/orders
- * Crea un nuevo pedido basado en tu esquema actual:
- *   - Inserta en pedidos: { id_usuario, fecha_hora, hora_recogida, estado, total, codigo_pedido }
- *   - Luego inserta en detalle_pedido solo { id_pedido, id_producto, cantidad }
- *   - Calcula el total en memoria (sumando precio* cantidad de cada producto)
- *   - Actualiza el campo total en pedidos
+ * Crea un nuevo pedido, guarda los detalles y suma puntos al usuario.
  *
  * Body esperado:
  *   {
@@ -20,7 +16,13 @@ const router = express.Router();
  *       { id_producto: number, cantidad: number },
  *       ...
  *     ],
- *     hora_recogida: string    // p.ej. "20:21:00"
+ *     hora_recogida: string    // por ejemplo "20:21:00"
+ *   }
+ *
+ * Respuesta:
+ *   {
+ *     codigo_pedido: string,
+ *     puntos_ganados: number
  *   }
  */
 router.post('/', authenticateToken, async (req, res) => {
@@ -28,7 +30,7 @@ router.post('/', authenticateToken, async (req, res) => {
     const { productos, hora_recogida } = req.body;
     const id_usuario = req.user.id_usuario;
 
-    // 1) Validaciones básicas
+    // 1) Validaciones
     if (!Array.isArray(productos) || productos.length === 0) {
       return res.status(400).json({ error: 'Debe enviar al menos un producto.' });
     }
@@ -36,13 +38,11 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Debe enviar hora_recogida válida.' });
     }
 
-    // 2) Generar un código de pedido único (aquí uso timestamp sencillo)
+    // 2) Generar un código de pedido único (aquí usamos timestamp)
     const codigoPedido = `${Date.now()}`;
 
-    // Fecha actual en ISO
+    // 3) Insertar en "pedidos" (todos los campos NOT NULL)
     const fechaActual = new Date().toISOString();
-
-    // 3) Insertar en "pedidos" (sin incluir precio_unitario porque no existe) 
     const { data: insertedPedido, error: insertError } = await supabase
       .from('pedidos')
       .insert([
@@ -51,7 +51,7 @@ router.post('/', authenticateToken, async (req, res) => {
           fecha_hora: fechaActual,
           hora_recogida: hora_recogida,
           estado: 'pendiente',
-          total: 0,            // lo actualizaremos tras insertar los productos
+          total: 0,            // se actualizará después
           codigo_pedido: codigoPedido
         }
       ])
@@ -66,18 +66,14 @@ router.post('/', authenticateToken, async (req, res) => {
     const idPedido = insertedPedido.id_pedido;
     let montoAcumulado = 0;
 
-    // 4) Recorrer cada producto para poblar "detalle_pedido" y acumular total
+    // 4) Recorrer cada producto para poblar "detalle_pedido" y calcular subtotal
     for (const prod of productos) {
       const { id_producto, cantidad } = prod;
-      if (
-        typeof id_producto !== 'number' ||
-        typeof cantidad !== 'number' ||
-        cantidad <= 0
-      ) {
+      if (typeof id_producto !== 'number' || typeof cantidad !== 'number' || cantidad <= 0) {
         return res.status(400).json({ error: 'Formato inválido en productos.' });
       }
 
-      // 4.a) Obtener precio unitario desde la tabla "productos"
+      // 4.a) Obtener precio unitario de la tabla "productos"
       const { data: prodInfo, error: prodInfoError } = await supabase
         .from('productos')
         .select('precio')
@@ -94,7 +90,7 @@ router.post('/', authenticateToken, async (req, res) => {
       const precioUnitario = Number(prodInfo.precio) || 0;
       montoAcumulado += precioUnitario * cantidad;
 
-      // 4.b) Insertar en "detalle_pedido" solo los campos existentes
+      // 4.b) Insertar en "detalle_pedido" sin precio_unitario
       const { error: detalleError } = await supabase
         .from('detalle_pedido')
         .insert([
@@ -129,8 +125,47 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(500).json({ error: 'Error al actualizar total del pedido.' });
     }
 
-    // 6) Devolver el código de pedido al frontend
-    return res.status(201).json({ codigo_pedido: codigoPedido });
+    // 6) Sumar puntos al usuario: 1 punto por cada euro entero gastado
+
+    // 6.a) Leer los puntos actuales del usuario
+    const { data: userRow, error: userSelectError } = await supabase
+      .from('usuarios')
+      .select('puntos')
+      .eq('id_usuario', id_usuario)
+      .single();
+
+    let puntosGanados = 0;
+    if (!userSelectError && userRow && typeof userRow.puntos === 'number') {
+      puntosGanados = Math.floor(totalFinal);
+      if (puntosGanados > 0) {
+        const nuevosPuntos = userRow.puntos + puntosGanados;
+        const { error: userUpdateError } = await supabase
+          .from('usuarios')
+          .update({ puntos: nuevosPuntos })
+          .eq('id_usuario', id_usuario);
+
+        if (userUpdateError) {
+          console.error(
+            `[Supabase] Error actualizando puntos al usuario ${id_usuario}:`,
+            userUpdateError
+          );
+          // No abortamos el pedido; solo registramos el error
+        }
+      }
+    } else {
+      console.error(
+        `[Supabase] Error leyendo puntos actuales del usuario ${id_usuario}:`,
+        userSelectError
+      );
+      // Incluso si falla la lectura, no abortamos el pedido; puntosGanados queda en 0
+    }
+
+    // 7) Devolver el código de pedido y puntos ganados
+    return res.status(201).json({
+      codigo_pedido: codigoPedido,
+      puntos_ganados: puntosGanados
+    });
+
   } catch (err) {
     console.error('Error general en POST /api/orders:', err);
     return res.status(500).json({ error: 'Error interno al crear pedido.' });
@@ -145,7 +180,7 @@ router.get('/history', authenticateToken, async (req, res) => {
   try {
     const id_usuario = req.user.id_usuario;
 
-    // 1) Obtener todos los pedidos de este usuario, ordenados por fecha_hora desc
+    // 1) Obtener todos los pedidos de este usuario
     const { data: pedidos, error: pedidosError } = await supabase
       .from('pedidos')
       .select('id_pedido, fecha_hora, hora_recogida, total, codigo_pedido')
@@ -159,7 +194,7 @@ router.get('/history', authenticateToken, async (req, res) => {
 
     const historyResult = [];
 
-    // 2) Para cada pedido, obtener un solo detalle (id_producto) y luego obtener nombre de producto
+    // 2) Para cada pedido, obtener un solo detalle y luego nombre de producto
     for (const ped of pedidos) {
       const { data: dets, error: detError } = await supabase
         .from('detalle_pedido')

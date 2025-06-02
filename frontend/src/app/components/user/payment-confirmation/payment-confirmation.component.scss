@@ -44,6 +44,7 @@
       .summary-item {
         display: flex;
         justify-content: space-between;
+        align-items: center;
         padding: 0.5rem 0;
         border-bottom: 1px solid #e0e0e0;
 
@@ -58,6 +59,15 @@
 
         .value {
           color: #222;
+
+          input {
+            width: 4rem;
+            padding: 0.25rem 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            text-align: right;
+          }
         }
 
         &.total-line {

@@ -1,44 +1,33 @@
 // backend/routes/users.js
 
 import express from 'express';
-import jwt from 'jsonwebtoken';
 import { supabase } from '../lib/supabaseClient.js';
+import { authenticateToken } from './authMiddleware.js';
 
 const router = express.Router();
 
 /**
- * Middleware para extraer userId desde el JWT
+ * GET /api/users/profile
+ * Devuelve los datos del usuario autenticado (incluidos puntos).
  */
-const authenticate = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ error: 'Token no proporcionado.' });
-  const token = authHeader.split(' ')[1];
+router.get('/profile', authenticateToken, async (req, res) => {
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = payload; // contiene { id_usuario, email, rol }
-    next();
-  } catch {
-    return res.status(401).json({ error: 'Token inválido.' });
-  }
-};
+    const id_usuario = req.user.id_usuario;
 
-/**
- * GET /api/users/me
- * Devuelve los datos del usuario autenticado (sin contraseña)
- */
-router.get('/me', authenticate, async (req, res) => {
-  try {
-    const userId = req.user.id_usuario;
-    const { data: user, error } = await supabase
+    const { data: user, error: userError } = await supabase
       .from('usuarios')
       .select('id_usuario, nombre, email, rol, puntos')
-      .eq('id_usuario', userId)
+      .eq('id_usuario', id_usuario)
       .single();
-    if (error) throw error;
-    res.json(user);
-  } catch (error) {
-    console.error('GET /users/me error:', error);
-    res.status(500).json({ error: 'No se pudo cargar el perfil de usuario.' });
+
+    if (userError) {
+      console.error('[Supabase] Error obteniendo perfil de usuario:', userError);
+      return res.status(500).json({ error: 'Error al obtener datos de usuario.' });
+    }
+    return res.json(user);
+  } catch (err) {
+    console.error('Error general en GET /api/users/profile:', err);
+    return res.status(500).json({ error: 'Error interno del servidor.' });
   }
 });
 

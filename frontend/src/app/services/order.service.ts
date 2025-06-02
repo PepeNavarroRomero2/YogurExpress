@@ -11,7 +11,7 @@ export interface OrderHistoryItem {
   hora_recogida: string;
   total: number;
   producto: string;
-  codigo_pedido?: string; // opcional, si lo recuperas del backend
+  codigo_pedido?: string;
 }
 
 export interface OrderProduct {
@@ -19,14 +19,16 @@ export interface OrderProduct {
   cantidad: number;
 }
 
-// -- Eliminamos "puntos_usados" de esta interfaz --
+// Incluimos puntos_usados en la interfaz
 export interface CreateOrderRequest {
   productos: OrderProduct[];
   hora_recogida: string;
+  puntos_usados: number;
 }
 
 export interface CreateOrderResponse {
   codigo_pedido: string;
+  puntos_ganados: number;
 }
 
 @Injectable({
@@ -53,7 +55,7 @@ export class OrderService {
     );
   }
 
-  /** Obtiene historial de pedidos (GET /api/orders/history) */
+  /** Obtiene el historial de pedidos (GET /api/orders/history) */
   getOrderHistory(): Observable<{ history: OrderHistoryItem[] }> {
     return this.http.get<{ history: OrderHistoryItem[] }>(
       `${this.apiUrl}/history`,

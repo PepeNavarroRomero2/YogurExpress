@@ -1,3 +1,5 @@
+<!-- src/app/components/user/payment-confirmation/payment-confirmation.component.html -->
+
 <div class="payment-confirmation-container">
   <h1>Confirmación y Pago</h1>
 
@@ -25,7 +27,7 @@
         </span>
       </li>
 
-      <!-- Toppings (si existen) -->
+      <!-- Toppings -->
       <li class="summary-item" *ngIf="toppings && toppings.length > 0">
         <span class="label">Toppings:</span>
         <span class="value">
@@ -43,6 +45,32 @@
       <li class="summary-item">
         <span class="label">Subtotal:</span>
         <span class="value">€{{ subtotal.toFixed(2) }}</span>
+      </li>
+
+      <!-- Puntos disponibles -->
+      <li class="summary-item">
+        <span class="label">Tienes:</span>
+        <span class="value">{{ puntosUsuario }} puntos</span>
+      </li>
+
+      <!-- Puntos a usar -->
+      <li class="summary-item">
+        <span class="label">Puntos a usar:</span>
+        <span class="value">
+          <input
+            type="number"
+            min="0"
+            [max]="puntosUsuario"
+            [(ngModel)]="puntosAUsar"
+            (ngModelChange)="calculateTotal()"
+          />
+        </span>
+      </li>
+
+      <!-- Descuento (si aplica) -->
+      <li class="summary-item" *ngIf="descuento > 0">
+        <span class="label">Descuento:</span>
+        <span class="value">€{{ descuento.toFixed(2) }}</span>
       </li>
 
       <!-- Total -->

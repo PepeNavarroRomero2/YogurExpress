@@ -1,30 +1,28 @@
+<!-- src/app/components/user/order-history/order-history.component.html -->
+
 <div class="order-history-container">
   <h2>Historial de Pedidos</h2>
 
-  <div *ngIf="loading" class="loading">
-    Cargando tus pedidos...
-  </div>
+  <div *ngIf="loading" class="loading">Cargando tus pedidos...</div>
 
-  <div *ngIf="!loading && errorMsg" class="error">
-    {{ errorMsg }}
-  </div>
+  <div *ngIf="!loading && errorMsg" class="error">{{ errorMsg }}</div>
 
   <table *ngIf="!loading && !errorMsg && orders.length > 0" class="orders-table">
     <thead>
       <tr>
-        <th>ID Pedido</th>
+        <th>Código</th>
         <th>Fecha/Hora</th>
         <th>Hora Recogida</th>
-        <th>Total</th>
+        <th>Total (€)</th>
         <th>Primer Producto</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let o of orders">
-        <td>{{ o.id_pedido }}</td>
-        <td>{{ o.fecha_hora | date: 'short' }}</td>
+        <td>{{ o.codigo_pedido || o.id_pedido }}</td>
+        <td>{{ o.fecha_hora | date:'short' }}</td>
         <td>{{ o.hora_recogida }}</td>
-        <td>€ {{ o.total }}</td>
+        <td>{{ o.total.toFixed(2) }}</td>
         <td>{{ o.producto }}</td>
       </tr>
     </tbody>
