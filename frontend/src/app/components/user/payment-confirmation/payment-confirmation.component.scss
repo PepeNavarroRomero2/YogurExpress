@@ -1,68 +1,98 @@
-.payment-confirmation {
+/* src/app/components/user/payment-confirmation/payment-confirmation.component.scss */
+
+.payment-confirmation-container {
   max-width: 480px;
   margin: 2rem auto;
   padding: 1.5rem;
-  background: #fff;
+  background: #ffffff;
   border-radius: 8px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
 
-  h2 { text-align: center; margin-bottom: 1rem; }
+  h1 {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 1.75rem;
+    color: #333;
+  }
 
-  .summary {
-    list-style: none;
-    padding: 0;
+  .error {
+    color: #d32f2f;
+    background-color: #fdecea;
+    border: 1px solid #f5c2c2;
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-weight: 500;
+  }
+
+  .order-summary {
     margin-bottom: 1.5rem;
 
-    li {
-      margin-bottom: 0.5rem;
-      strong { width: 100px; display: inline-block; }
-    }
-  }
-
-  .points-redeem {
-    margin-bottom: 1rem;
-
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    }
-
-    .form-control {
-      width: 100%;
-      padding: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      margin-bottom: 0.5rem;
-    }
-
-    small {
-      display: block;
+    h2 {
+      text-align: center;
       margin-bottom: 1rem;
+      font-size: 1.5rem;
+      color: #444;
+    }
+
+    .summary-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      .summary-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e0e0e0;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .label {
+          font-weight: 500;
+          color: #555;
+        }
+
+        .value {
+          color: #222;
+        }
+
+        &.total-line {
+          padding-top: 1rem;
+          padding-bottom: 0;
+          border-top: 1px solid #e0e0e0;
+          margin-top: 0.5rem;
+
+          .label {
+            font-size: 1.1rem;
+          }
+          .value {
+            font-size: 1.1rem;
+          }
+        }
+      }
     }
   }
 
-  .buttons {
-    display: flex;
-    justify-content: space-between;
+  .btn-primary {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #28a745;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.2s ease-in-out;
+  }
 
-    .btn-back,
-    .btn-confirm {
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 4px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    .btn-back {
-      background: #6c757d;
-      color: #fff;
-    }
-
-    .btn-confirm {
-      background: #28a745;
-      color: #fff;
-    }
+  .btn-primary:hover {
+    background-color: #218838;
   }
 }

@@ -1,37 +1,38 @@
-<!-- frontend/src/app/components/user/order-history/order-history.component.html -->
-
 <div class="order-history-container">
-  <h1>Historial de Pedidos</h1>
+  <h2>Historial de Pedidos</h2>
 
-  <!-- Mensaje de error -->
-  <div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
-
-  <!-- Si no hay pedidos, mostrar mensaje -->
-  <div *ngIf="history.length === 0 && !errorMsg" class="no-orders">
-    <p>No tienes pedidos aún.</p>
-    <button class="btn-primary" (click)="router.navigate(['/user/menu'])">
-      Volver al Menú
-    </button>
+  <div *ngIf="loading" class="loading">
+    Cargando tus pedidos...
   </div>
 
-  <!-- Lista de pedidos -->
-  <div *ngIf="history.length > 0" class="orders-list">
-    <div *ngFor="let order of history" class="order-card">
-      <h3>Código: {{ order.codigo_pedido }}</h3>
-      <p><strong>Fecha:</strong> {{ order.fecha_hora | date: 'short' }}</p>
-      <p><strong>Hora de Recogida:</strong> {{ order.hora_recogida }}</p>
-      <p><strong>Total:</strong> €{{ order.total.toFixed(2) }}</p>
-      <p><strong>Estado:</strong> {{ order.estado }}</p>
-
-      <div class="order-detail">
-        <p><strong>Detalle de Productos:</strong></p>
-        <ul>
-          <li *ngFor="let item of order.detalle_pedido">
-            {{ item.productos.nombre }} – cantidad: {{ item.cantidad }}
-            (€/u: {{ item.productos.precio.toFixed(2) }})
-          </li>
-        </ul>
-      </div>
-    </div>
+  <div *ngIf="!loading && errorMsg" class="error">
+    {{ errorMsg }}
   </div>
+
+  <table *ngIf="!loading && !errorMsg && orders.length > 0" class="orders-table">
+    <thead>
+      <tr>
+        <th>ID Pedido</th>
+        <th>Fecha/Hora</th>
+        <th>Hora Recogida</th>
+        <th>Total</th>
+        <th>Primer Producto</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let o of orders">
+        <td>{{ o.id_pedido }}</td>
+        <td>{{ o.fecha_hora | date: 'short' }}</td>
+        <td>{{ o.hora_recogida }}</td>
+        <td>€ {{ o.total }}</td>
+        <td>{{ o.producto }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && !errorMsg && orders.length === 0" class="no-orders">
+    No tienes pedidos en tu historial.
+  </div>
+
+  <button (click)="goBack()" class="btn-back">Volver al menú</button>
 </div>

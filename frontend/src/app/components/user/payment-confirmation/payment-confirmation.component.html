@@ -1,62 +1,59 @@
-<!-- frontend/src/app/components/user/payment-confirmation/payment-confirmation.component.html -->
-
 <div class="payment-confirmation-container">
   <h1>Confirmación y Pago</h1>
 
-  <!-- Mensaje de error general -->
+  <!-- Mensaje de error -->
   <div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
 
   <!-- Resumen de pedido -->
   <div class="order-summary">
     <h2>Tu Pedido</h2>
-    <p>
-      <strong>Sabor:</strong> {{ flavor.nombre }}
-      – €{{ flavor.precio.toFixed(2) }}
-    </p>
 
-    <p *ngIf="toppings.length > 0">
-      <strong>Toppings:</strong>
-      {{ toppingNames }}
-      (€{{ toppingsPrice.toFixed(2) }})
-    </p>
+    <ul class="summary-list">
+      <!-- Sabor -->
+      <li class="summary-item">
+        <span class="label">Sabor:</span>
+        <span class="value">
+          {{ flavor.nombre }} – €{{ flavor.precio.toFixed(2) }}
+        </span>
+      </li>
 
-    <p>
-      <strong>Tamaño:</strong> {{ size.nombre }}
-      – €{{ size.precio.toFixed(2) }}
-    </p>
+      <!-- Tamaño -->
+      <li class="summary-item">
+        <span class="label">Tamaño:</span>
+        <span class="value">
+          {{ size.nombre }} – €{{ size.precio.toFixed(2) }}
+        </span>
+      </li>
+
+      <!-- Toppings (si existen) -->
+      <li class="summary-item" *ngIf="toppings && toppings.length > 0">
+        <span class="label">Toppings:</span>
+        <span class="value">
+          {{ toppingNames }}
+        </span>
+      </li>
+
+      <!-- Hora de recogida -->
+      <li class="summary-item">
+        <span class="label">Hora de recogida:</span>
+        <span class="value">{{ pickupTime }}</span>
+      </li>
+
+      <!-- Subtotal -->
+      <li class="summary-item">
+        <span class="label">Subtotal:</span>
+        <span class="value">€{{ subtotal.toFixed(2) }}</span>
+      </li>
+
+      <!-- Total -->
+      <li class="summary-item total-line">
+        <span class="label">Total a pagar:</span>
+        <span class="value bold">€{{ total.toFixed(2) }}</span>
+      </li>
+    </ul>
   </div>
 
-  <!-- Hora de recogida -->
-  <div class="pickup-time">
-    <p><strong>Hora de Recogida:</strong> {{ pickupTime }}</p>
-  </div>
-
-  <hr />
-
-  <!-- Totales y canje de puntos -->
-  <div class="totals">
-    <p><strong>Subtotal:</strong> €{{ subtotal.toFixed(2) }}</p>
-
-    <div class="points-row">
-      <label for="puntos">
-        Puntos a canjear (disponibles: {{ puntosUsuario }}):
-      </label>
-      <input
-        type="number"
-        id="puntos"
-        class="form-control"
-        [max]="puntosUsuario"
-        [min]="0"
-        [value]="puntosAUsar"
-        (input)="onPointsChange($event)"
-      />
-    </div>
-
-    <p><strong>Descuento:</strong> €{{ descuento.toFixed(2) }}</p>
-    <p><strong>Total a pagar:</strong> €{{ total.toFixed(2) }}</p>
-  </div>
-
-  <!-- Botón final de pago -->
+  <!-- Botón de confirmación -->
   <button class="btn-primary" (click)="confirmPayment()">
     Confirmar y pagar
   </button>

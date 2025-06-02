@@ -74,6 +74,7 @@ export class ProductMenuComponent implements OnInit {
         this.authService.logout();
         this.cartService.clear();
         Swal.fire('Desconectado', 'Has cerrado sesión.', 'success');
+        this.router.navigate(['/user/login']);
       }
     });
   }

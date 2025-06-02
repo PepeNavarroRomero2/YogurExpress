@@ -1,54 +1,55 @@
 <!-- frontend/src/app/components/user/customize-order/customize-order.component.html -->
+<div class="co-wrapper">
+  <div class="co-card">
+    <!-- Título con el nombre del sabor principal -->
+    <h1 class="co-title">{{ flavor.nombre }}</h1>
 
-<div class="customize-order-container">
-  <h1>Personaliza tu Pedido</h1>
+    <!-- Imagen del sabor base -->
+    <div class="co-flavor-image">
+      <img
+        [src]="flavor.imagen_url || 'assets/default-flavor.png'"
+        alt="{{ flavor.nombre }}"
+      />
+    </div>
 
-  <!-- Error al cargar toppings o tamaños -->
-  <div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
+    <!-- Si hay error cargando toppings o tamaños -->
+    <div *ngIf="errorMsg" class="co-error">{{ errorMsg }}</div>
 
-  <!-- Información del sabor seleccionado -->
-  <div class="flavor-summary">
-    <h2>
-      Has elegido: {{ flavor.nombre }} – €{{ flavor.precio.toFixed(2) }}
-    </h2>
-  </div>
-
-  <!-- Sección: Toppings -->
-  <div class="section">
-    <h3>Selecciona Toppings (opcional)</h3>
-    <div class="grid toppings-grid">
+    <!-- Sección de Toppings -->
+    <h2 class="co-section-title">Toppings</h2>
+    <div class="co-cards-grid">
       <div
-        class="card topping-card"
         *ngFor="let t of toppings"
+        class="co-card-item"
         [class.selected]="isToppingSelected(t)"
         (click)="toggleTopping(t)"
       >
         <img
           [src]="t.imagen_url || 'assets/default-topping.png'"
           alt="{{ t.nombre }}"
+          class="co-card-img"
         />
-        <p>{{ t.nombre }} – €{{ t.precio.toFixed(2) }}</p>
+        <span class="co-card-label">{{ t.nombre }}</span>
       </div>
     </div>
-  </div>
 
-  <!-- Sección: Tamaños -->
-  <div class="section">
-    <h3>Selecciona Tamaño (obligatorio)</h3>
-    <div class="grid sizes-grid">
+    <!-- Sección de Tamaños -->
+    <h2 class="co-section-title">Tamaños</h2>
+    <div class="co-cards-grid">
       <div
-        class="card size-card"
         *ngFor="let s of sizes"
+        class="co-card-item"
         [class.selected]="isSizeSelected(s)"
         (click)="selectSize(s)"
       >
-        <p>{{ s.nombre }} – €{{ s.precio.toFixed(2) }}</p>
+        <span class="co-card-label">{{ s.nombre }}</span>
+        <span class="co-card-price">€{{ s.precio.toFixed(2) }}</span>
       </div>
     </div>
-  </div>
 
-  <!-- Botón para avanzar -->
-  <button class="btn-primary" (click)="addToCart()">
-    Agregar al pedido
-  </button>
+    <!-- Botón para agregar al carrito -->
+    <button class="co-btn-primary" (click)="addToCart()">
+      Agregar al pedido
+    </button>
+  </div>
 </div>

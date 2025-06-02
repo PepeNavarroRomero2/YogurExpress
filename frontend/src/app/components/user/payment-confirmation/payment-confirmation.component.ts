@@ -1,22 +1,24 @@
-// frontend/src/app/components/user/payment-confirmation/payment-confirmation.component.ts
-
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { RouterModule, Router } from '@angular/router';
+import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';    // <— Importa CommonModule
+import { FormsModule } from '@angular/forms';      // <— Importa FormsModule si usas [(ngModel)]
 import Swal from 'sweetalert2';
-import { CartService } from '../../../services/cart.service';
-import { OrderService, CreateOrderRequest, OrderProduct } from '../../../services/order.service';
+import { AuthService } from '../../../services/auth.service';
 import { UserService } from '../../../services/user.service';
-import { User, AuthService } from '../../../services/auth.service';
+import { CartService } from '../../../services/cart.service';
+import {
+  OrderService,
+  OrderProduct,
+  CreateOrderRequest
+} from '../../../services/order.service';
+import { User } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-payment-confirmation',
-  standalone: true,
+  standalone: true,          // ← Asegúrate de que sea standalone
   imports: [
-    CommonModule,
-    FormsModule,
-    RouterModule
+    CommonModule,             // ← Necesario para *ngIf, pipe date, etc.
+    FormsModule               // ← Solo si en tu plantilla usas [(ngModel)]; si no, bórralo
   ],
   templateUrl: './payment-confirmation.component.html',
   styleUrls: ['./payment-confirmation.component.scss']
@@ -26,12 +28,9 @@ export class PaymentConfirmationComponent implements OnInit {
   toppings: any[] = [];
   size: any;
   pickupTime: string = '';
-  puntosUsuario: number = 0;
-  puntosAUsar: number = 0;
-  subtotal: number = 0;
-  descuento: number = 0;
-  total: number = 0;
-  errorMsg: string = '';
+  subtotal = 0;
+  total = 0;
+  errorMsg = '';
 
   constructor(
     private cartService: CartService,
@@ -50,69 +49,36 @@ export class PaymentConfirmationComponent implements OnInit {
     this.flavor = this.cartService.getFlavor();
     this.toppings = this.cartService.getToppings();
     this.size = this.cartService.getSize();
-    this.pickupTime = localStorage.getItem('pickup_time') || '';
+    this.pickupTime = this.cartService.getPickupTime() || '';
 
     if (!this.flavor || !this.size || !this.pickupTime) {
       this.router.navigate(['/user/menu']);
       return;
     }
 
-    this.subtotal = this.flavor.precio + this.size.precio;
-    for (let t of this.toppings) {
-      this.subtotal += t.precio;
-    }
-
-    this.userService.getProfile().subscribe({
-      next: (user: User) => {
-        this.puntosUsuario = user.puntos;
-        this.calculateTotal();
-      },
-      error: () => {
-        this.errorMsg = 'No se pudieron cargar tus puntos.';
-      }
+    // Calcular subtotal
+    this.subtotal = 0;
+    if (this.flavor.precio) this.subtotal += Number(this.flavor.precio);
+    if (this.size.precio)   this.subtotal += Number(this.size.precio);
+    this.toppings.forEach(t => {
+      if (t.precio) this.subtotal += Number(t.precio);
     });
-  }
-
-  /** Nombres de todos los toppings separados por coma */
-  get toppingNames(): string {
-    return this.toppings.map(t => t.nombre).join(', ');
-  }
-
-  /** Precio total de toppings */
-  get toppingsPrice(): number {
-    return this.toppings.reduce((sum, t) => sum + t.precio, 0);
-  }
-
-  calculateTotal() {
-    this.descuento = this.puntosAUsar / 10;
-    this.total = Math.max(0, this.subtotal - this.descuento);
-  }
-
-  onPointsChange(event: Event) {
-    const val = +(event.target as HTMLInputElement).value;
-    this.puntosAUsar = val;
-    this.calculateTotal();
+    this.total = this.subtotal;
   }
 
   confirmPayment() {
     this.errorMsg = '';
 
-    if (this.puntosAUsar > this.puntosUsuario) {
-      Swal.fire('Error', 'No tienes suficientes puntos para canjear.', 'error');
-      return;
-    }
-
     const productosParaApi: OrderProduct[] = [];
     productosParaApi.push({ id_producto: this.flavor.id_producto, cantidad: 1 });
-    for (let t of this.toppings) {
+    this.toppings.forEach(t => {
       productosParaApi.push({ id_producto: t.id_producto, cantidad: 1 });
-    }
+    });
     productosParaApi.push({ id_producto: this.size.id_producto, cantidad: 1 });
 
     const body: CreateOrderRequest = {
       productos: productosParaApi,
-      hora_recogida: this.pickupTime,
-      puntos_usados: this.puntosAUsar
+      hora_recogida: this.pickupTime
     };
 
     this.orderService.createOrder(body).subscribe({
@@ -132,5 +98,13 @@ export class PaymentConfirmationComponent implements OnInit {
         Swal.fire('Error', msg, 'error');
       }
     });
+  }
+
+  // Getter para reemplazar el arrow function en la plantilla
+  get toppingNames(): string {
+    if (!this.toppings || this.toppings.length === 0) {
+      return '';
+    }
+    return this.toppings.map(t => t.nombre).join(', ');
   }
 }

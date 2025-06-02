@@ -1,63 +1,63 @@
+// src/app/services/order.service.ts
+
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
+
+export interface OrderHistoryItem {
+  id_pedido: number;
+  fecha_hora: string;
+  hora_recogida: string;
+  total: number;
+  producto: string;
+  codigo_pedido?: string; // opcional, si lo recuperas del backend
+}
 
 export interface OrderProduct {
   id_producto: number;
   cantidad: number;
 }
 
+// -- Eliminamos "puntos_usados" de esta interfaz --
 export interface CreateOrderRequest {
   productos: OrderProduct[];
-  hora_recogida: string;   // “HH:MM”
-  puntos_usados: number;
+  hora_recogida: string;
 }
 
 export interface CreateOrderResponse {
-  id_pedido: number;
   codigo_pedido: string;
-  total: number;
-  earned: number;
-}
-
-export interface OrderDetail {
-  id_producto: number;
-  cantidad: number;
-  productos: {
-    nombre: string;
-    precio: number;
-    tipo: string;
-  };
-}
-
-export interface Order {
-  id_pedido: number;
-  fecha_hora: string;
-  hora_recogida: string;
-  estado: string;
-  total: number;
-  codigo_pedido: string;
-  detalle_pedido: OrderDetail[];
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class OrderService {
-  private API_URL = 'http://localhost:3000/api/orders';
+  private apiUrl = 'http://localhost:3000/api/orders';
 
-  constructor(private http: HttpClient, private auth: AuthService) { }
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) { }
 
-  /** POST /api/orders (cuerpo CreateOrderRequest) */
-  createOrder(orderData: CreateOrderRequest): Observable<CreateOrderResponse> {
-    const headers: HttpHeaders = this.auth.getAuthHeaders();
-    return this.http.post<CreateOrderResponse>(this.API_URL, orderData, { headers });
+  private getAuthHeaders(): HttpHeaders {
+    return this.authService.getAuthHeaders();
   }
 
-  /** GET /api/orders/history */
-  getOrderHistory(): Observable<Order[]> {
-    const headers: HttpHeaders = this.auth.getAuthHeaders();
-    return this.http.get<Order[]>(`${this.API_URL}/history`, { headers });
+  /** Crea un nuevo pedido (POST /api/orders) */
+  createOrder(body: CreateOrderRequest): Observable<CreateOrderResponse> {
+    return this.http.post<CreateOrderResponse>(
+      `${this.apiUrl}`,
+      body,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /** Obtiene historial de pedidos (GET /api/orders/history) */
+  getOrderHistory(): Observable<{ history: OrderHistoryItem[] }> {
+    return this.http.get<{ history: OrderHistoryItem[] }>(
+      `${this.apiUrl}/history`,
+      { headers: this.getAuthHeaders() }
+    );
   }
 }

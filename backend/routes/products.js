@@ -52,7 +52,7 @@ router.get('/tamanos', async (req, res) => {
     const { data, error } = await supabase
       .from('productos')
       .select('*')
-      .eq('tipo', 'tamaño')
+      .eq('tipo', 'tamanos')
       .order('id_producto', { ascending: true });
     if (error) throw error;
     res.json(data);

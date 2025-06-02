@@ -1,112 +1,105 @@
 // backend/routes/auth.js
 
 import express from 'express';
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { v4 as uuid } from 'uuid';
+import bcrypt from 'bcryptjs';
 import { supabase } from '../lib/supabaseClient.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const router = express.Router();
 
-/**
- * POST /api/auth/register
- * Crea un usuario (email único), hashea la contraseña y devuelve token + user.
- */
+// REGISTRO
 router.post('/register', async (req, res) => {
+  const { nombre, email, contraseña } = req.body;
+  if (!nombre || !email || !contraseña) {
+    return res.status(400).json({ error: 'Faltan campos obligatorios.' });
+  }
+
+  // Aquí podrías comprobar si el email ya existe, hashear la contraseña, etc.
+  // Por simplicidad, hacemos insert directo en supabase
+
   try {
-    const { nombre, email, contraseña } = req.body;
-    if (!nombre || !email || !contraseña) {
-      return res.status(400).json({ error: 'Faltan campos obligatorios.' });
-    }
-
-    // 1) Comprobar si el email ya existe
-    const { data: existing, error: errExisting } = await supabase
+    // 1) Insertar usuario en tabla "usuarios"
+    const hashedPassword = await bcrypt.hash(contraseña, 10);
+    const { data: newUser, error: userError } = await supabase
       .from('usuarios')
-      .select('*')
-      .eq('email', email)
-      .single();
-    if (errExisting && errExisting.code !== 'PGRST116') {
-      // PGRST116: no rows found, es OK
-      throw errExisting;
-    }
-    if (existing) {
-      return res.status(409).json({ error: 'El email ya está registrado.' });
-    }
-
-    // 2) Hashear contraseña
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(contraseña, saltRounds);
-
-    // 3) Insertar usuario en la tabla
-    const { data: newUser, error: errInsert } = await supabase
-      .from('usuarios')
-      .insert({
-        nombre,
-        email,
-        contraseña: hashedPassword,
-        rol: 'cliente', // por defecto
-        puntos: 0
-      })
+      .insert([
+        {
+          nombre: nombre,
+          email: email,
+          contraseña: hashedPassword,
+          rol: 'user',
+          puntos: 0
+        }
+      ])
       .select('id_usuario, nombre, email, rol, puntos')
       .single();
-    if (errInsert) {
-      throw errInsert;
+
+    if (userError) {
+      console.error('[Supabase] Error insertando usuario:', userError);
+      return res.status(500).json({ error: 'Error al registrar usuario.' });
     }
 
-    // 4) Generar JWT
-    const token = jwt.sign(
-      { id_usuario: newUser.id_usuario, email: newUser.email, rol: newUser.rol },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    // 2) Generar token JWT
+    const tokenPayload = {
+      id_usuario: newUser.id_usuario,
+      email: newUser.email,
+      role: newUser.rol
+    };
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '3h' });
 
-    res.status(201).json({ user: newUser, token });
-  } catch (error) {
-    console.error('Register error:', error);
-    res.status(500).json({ error: 'Error al registrar usuario.' });
+    return res.status(201).json({ user: newUser, token });
+  } catch (err) {
+    console.error('Error en POST /api/auth/register:', err);
+    return res.status(500).json({ error: 'Error interno en registro.' });
   }
 });
 
-/**
- * POST /api/auth/login
- * Valida credenciales y devuelve token + user.
- */
+// LOGIN
 router.post('/login', async (req, res) => {
+  const { email, contraseña } = req.body;
+  if (!email || !contraseña) {
+    return res.status(400).json({ error: 'Faltan campos obligatorios.' });
+  }
+
   try {
-    const { email, contraseña } = req.body;
-    if (!email || !contraseña) {
-      return res.status(400).json({ error: 'Faltan campos obligatorios.' });
-    }
-
-    // 1) Obtener usuario por email
-    const { data: user, error: errUser } = await supabase
+    // 1) Buscar usuario por email
+    const { data: users, error: fetchError } = await supabase
       .from('usuarios')
-      .select('id_usuario, nombre, email, contraseña, rol, puntos')
-      .eq('email', email)
-      .single();
-    if (errUser) {
-      return res.status(401).json({ error: 'Credenciales inválidas.' });
+      .select('id_usuario, nombre, email, rol, puntos, contraseña')
+      .eq('email', email);
+
+    if (fetchError) {
+      console.error('[Supabase] Error buscando usuario:', fetchError);
+      return res.status(500).json({ error: 'Error al iniciar sesión.' });
+    }
+    if (!users || users.length === 0) {
+      return res.status(400).json({ error: 'Credenciales inválidas.' });
     }
 
-    // 2) Comparar contraseñas
-    const match = await bcrypt.compare(contraseña, user.contraseña);
-    if (!match) {
-      return res.status(401).json({ error: 'Credenciales inválidas.' });
+    const user = users[0];
+    // 2) Verificar contraseña
+    const validPassword = await bcrypt.compare(contraseña, user.contraseña);
+    if (!validPassword) {
+      return res.status(400).json({ error: 'Credenciales inválidas.' });
     }
 
-    // 3) Generar JWT
-    const token = jwt.sign(
-      { id_usuario: user.id_usuario, email: user.email, rol: user.rol },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    // 3) Generar token 
+    const tokenPayload = {
+      id_usuario: user.id_usuario,
+      email: user.email,
+      role: user.rol
+    };
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '3h' });
 
-    // 4) Devolver user sin contraseña + token
+    // Eliminar el campo "contraseña" del objeto que devolvemos
     delete user.contraseña;
-    res.status(200).json({ user, token });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Error al iniciar sesión.' });
+
+    return res.json({ user: user, token });
+  } catch (err) {
+    console.error('Error en POST /api/auth/login:', err);
+    return res.status(500).json({ error: 'Error interno en login.' });
   }
 });
 

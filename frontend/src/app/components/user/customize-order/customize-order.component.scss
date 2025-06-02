@@ -1,55 +1,153 @@
-/* src/app/components/user/customize-order/customize-order.component.scss */
+/* frontend/src/app/components/user/customize-order/customize-order.component.scss */
 
-.customize-order {
+/* Contenedor general */
+.co-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
   padding: 1rem;
-  max-width: 480px;
-  margin: 0 auto;
+  background-color: #F5F7FA; /* Gris muy claro */
+  min-height: 100vh;
+}
 
-  h2 {
-    text-align: center;
-    margin-bottom: .5rem;
-  }
-  p {
-    text-align: center;
-    margin-bottom: 1.5rem;
-  }
-  .section {
-    margin-bottom: 1.25rem;
+/* Tarjeta principal */
+.co-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E0E6ED;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
 
-    h3 {
-      margin-bottom: .5rem;
-    }
-    .options {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .75rem;
+/* Título: nombre del sabor */
+.co-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 1rem;
+}
 
-      label {
-        background: #fff;
-        padding: .5rem .75rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        cursor: pointer;
-        user-select: none;
-        display: flex;
-        align-items: center;
-        gap: .5rem;
-      }
-    }
+/* Imagen grande del sabor base */
+.co-flavor-image {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 1.5rem auto;
+}
+
+.co-flavor-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #E0E6ED;
+}
+
+/* Mensaje de error (si falla la carga de toppings o tamaños) */
+.co-error {
+  color: #DC2626; /* Rojo */
+  font-size: 1rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+/* Títulos de sección (“Toppings” y “Tamaños”) */
+.co-section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1F2937;
+  margin-top: 1.5rem;
+  margin-bottom: 0.8rem;
+  text-align: left;
+}
+
+/* Grid de tarjetas (toppings / tamaños) */
+.co-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Cada tarjeta individual */
+.co-card-item {
+  background-color: #F9FAFB;
+  border: 1px solid #E0E6ED;
+  border-radius: 12px;
+  padding: 0.8rem;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease-in-out,
+              transform 0.1s ease-in-out,
+              border-color 0.2s ease-in-out,
+              background-color 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Efecto hover */
+.co-card-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Estado seleccionado: fondo y borde */
+.co-card-item.selected {
+  background-color: #E0F0FF; /* Azul muy pálido */
+  border-color: #3B82F6;     /* Azul vivo */
+}
+
+/* Imagen dentro de cada tarjeta de topping */
+.co-card-img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: 0.5rem;
+}
+
+/* Etiqueta/nombre dentro de cada tarjeta */
+.co-card-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1F2937;
+  text-align: center;
+  margin-bottom: 0.3rem;
+}
+
+/* Precio en la tarjeta de tamaño */
+.co-card-price {
+  font-size: 0.9rem;
+  color: #4B5563;
+}
+
+/* Botón “Agregar al pedido” */
+.co-btn-primary {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #3B82F6; /* Azul vivo */
+  color: #FFFFFF;
+  font-size: 1rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: filter 0.2s ease-in-out;
+}
+
+.co-btn-primary:hover {
+  filter: brightness(0.95);
+}
+
+/* Ajuste responsivo para pantallas muy pequeñas */
+@media (max-width: 480px) {
+  .co-card {
+    padding: 1.5rem;
   }
-  .total {
-    text-align: right;
-    font-size: 1.1rem;
-    margin-bottom: 1.5rem;
-  }
-  .btn-next {
-    width: 100%;
-    padding: .75rem;
-    border: none;
-    border-radius: 4px;
-    background: #28a745;
-    color: #fff;
-    font-size: 1rem;
-    cursor: pointer;
+  .co-cards-grid {
+    grid-template-columns: 1fr 1fr; /* Dos columnas en móvil */
   }
 }

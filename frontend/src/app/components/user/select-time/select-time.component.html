@@ -1,21 +1,27 @@
 <!-- frontend/src/app/components/user/select-time/select-time.component.html -->
+<div class="st-wrapper">
+  <div class="st-card">
+    <div class="st-image">
+      <img src="assets/clock-icon.png" alt="Selecciona hora" />
+    </div>
 
-<div class="select-time-container">
-  <h1>Elige Hora de Recogida</h1>
+    <h1 class="st-title">Selecciona hora de recogida</h1>
+    <p class="st-subtitle">Selecciona una hora para recoger tu pedido</p>
 
-  <!-- Input de hora -->
-  <div class="form-group">
-    <label for="hora">Hora:</label>
-    <input
-      type="time"
-      id="hora"
-      class="form-control"
-      [(ngModel)]="hora"
-    />
+    <form (ngSubmit)="onConfirm()" class="st-form">
+      <div class="st-form-group">
+        <label for="pickupTime" class="st-label">Hora</label>
+        <input
+          type="time"
+          id="pickupTime"
+          name="pickupTime"
+          class="st-input"
+          [(ngModel)]="hora"
+          required
+        />
+      </div>
+
+      <button type="submit" class="st-btn-primary">Confirmar</button>
+    </form>
   </div>
-
-  <!-- Botón de confirmar -->
-  <button class="btn-primary" (click)="onConfirm()">
-    Confirmar Hora
-  </button>
 </div>

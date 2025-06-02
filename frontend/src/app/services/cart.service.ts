@@ -1,45 +1,71 @@
+// frontend/src/app/services/cart.service.ts
+
 import { Injectable } from '@angular/core';
 import { Flavor } from './product.service';
-
-export interface Cart {
-  flavor?: Flavor;
-  toppings: Flavor[];
-  size?: Flavor;
-}
 
 @Injectable({
   providedIn: 'root'
 })
 export class CartService {
-  private cart: Cart = { toppings: [] };
+  private flavorKey = 'cart_flavor';
+  private sizeKey = 'cart_size';
+  private toppingsKey = 'cart_toppings';
+  private pickupTimeKey = 'cart_pickup_time';
 
-  /** Guardar el sabor seleccionado */
-  setFlavor(flavor: Flavor) {
-    this.cart.flavor = flavor;
+  constructor() { }
+
+  /** ------------- SABOR ------------- */
+  setFlavor(flavor: Flavor): void {
+    localStorage.setItem(this.flavorKey, JSON.stringify(flavor));
   }
-  getFlavor(): Flavor | undefined {
-    return this.cart.flavor;
+  getFlavor(): Flavor | null {
+    const json = localStorage.getItem(this.flavorKey);
+    return json ? JSON.parse(json) : null;
+  }
+  clearFlavor(): void {
+    localStorage.removeItem(this.flavorKey);
   }
 
-  /** Guardar toppings seleccionados */
-  setToppings(toppings: Flavor[]) {
-    this.cart.toppings = toppings;
+  /** ------------- TAMAÑO ------------- */
+  setSize(size: Flavor): void {
+    localStorage.setItem(this.sizeKey, JSON.stringify(size));
+  }
+  getSize(): Flavor | null {
+    const json = localStorage.getItem(this.sizeKey);
+    return json ? JSON.parse(json) : null;
+  }
+  clearSize(): void {
+    localStorage.removeItem(this.sizeKey);
+  }
+
+  /** ------------- TOPPINGS ------------- */
+  setToppings(toppings: Flavor[]): void {
+    localStorage.setItem(this.toppingsKey, JSON.stringify(toppings));
   }
   getToppings(): Flavor[] {
-    return this.cart.toppings;
+    const json = localStorage.getItem(this.toppingsKey);
+    return json ? JSON.parse(json) : [];
+  }
+  clearToppings(): void {
+    localStorage.removeItem(this.toppingsKey);
   }
 
-  /** Guardar tamaño seleccionado */
-  setSize(size: Flavor) {
-    this.cart.size = size;
+  /** ------------- HORA DE RECOGIDA ------------- */
+  setPickupTime(hora: string): void {
+    localStorage.setItem(this.pickupTimeKey, hora);
   }
-  getSize(): Flavor | undefined {
-    return this.cart.size;
+  getPickupTime(): string | null {
+    return localStorage.getItem(this.pickupTimeKey);
+  }
+  clearPickupTime(): void {
+    localStorage.removeItem(this.pickupTimeKey);
   }
 
-  /** Limpiar todo el carrito (y la hora de recogida de localStorage) */
-  clear() {
-    this.cart = { toppings: [] };
-    localStorage.removeItem('pickup_time');
+  /** ------------- MÉTODO PARA LIMPIAR TODO ------------- */
+  clear(): void {
+    this.clearFlavor();
+    this.clearSize();
+    this.clearToppings();
+    this.clearPickupTime();
   }
 }
