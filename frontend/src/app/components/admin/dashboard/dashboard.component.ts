@@ -1,25 +1,45 @@
-// src/app/admin/dashboard/dashboard.component.ts
-import { Component }      from '@angular/core';
-import { CommonModule }   from '@angular/common';
-import { ManageInventoryComponent } from '../manage-inventory/manage-inventory.component';
-import { ManageProductsComponent }  from '../manage-products/manage-products.component';
-import { ManagePromotionsComponent } from '../manage-promotions/manage-promotions.component';
+// src/app/components/admin/dashboard/dashboard.component.ts
 
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { AuthService } from '../../../services/auth.service'; // Ajusta la ruta si es distinto
+
+import { ManageProductsComponent } from '../manage-products/manage-products.component';
+import { ManageInventoryComponent } from '../manage-inventory/manage-inventory.component';
+import { ManagePromotionsComponent } from '../manage-promotions/manage-promotions.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [ CommonModule, ManageInventoryComponent, ManageProductsComponent, ManagePromotionsComponent ],   // <— aquí le decimos que traiga NgIf, CurrencyPipe, etc.
+  imports: [
+    CommonModule,
+    ManageProductsComponent,
+    ManageInventoryComponent,
+    ManagePromotionsComponent
+  ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent {
-  todaysOrders = 42;
-  todaysRevenue = 1234.56;
-  topProduct = 'UltraWidget 3000';
-
+export class DashboardComponent implements OnInit {
+  todaysOrders: number = 0;
+  todaysRevenue: number = 0;
+  topProduct: string = '';
   activeTab: 'products' | 'inventory' | 'promotions' = 'products';
-  setTab(tab: 'products' | 'inventory' | 'promotions') {
+
+  constructor(private authService: AuthService) {}
+
+  ngOnInit(): void {
+    this.todaysOrders = 12;
+    this.todaysRevenue = 230;
+    this.topProduct = 'Strawberry Yogurt';
+  }
+
+  setTab(tab: 'products' | 'inventory' | 'promotions'): void {
     this.activeTab = tab;
+  }
+
+  /** Invocado al pulsar “Cerrar sesión” */
+  onLogout(): void {
+    this.authService.logout();
   }
 }

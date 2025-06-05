@@ -1,0 +1,139 @@
+/* src/app/components/admin/dashboard/dashboard.component.scss */
+
+.dashboard-wrapper {
+  max-width: 600px;
+  margin: 2rem auto;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+
+  .dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+
+    .logo-area {
+      height: 40px;
+      /* Aquí podrías agregar tu logo si lo tienes */
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      color: #333;
+      margin: 0;
+    }
+
+    .btn-logout {
+      background: #EF4444; /* Rojo para resaltar */
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background: #DC2626;
+      }
+    }
+  }
+
+  .stats-cards {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+
+    .stat-card {
+      flex: 1;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+
+      .stat-card-header {
+        background: #F5F7FA;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        text-align: center;
+        padding: 0.5rem 0;
+
+        h3 {
+          margin: 0;
+          font-size: 1rem;
+          color: #555;
+        }
+      }
+
+      .stat-card-body {
+        padding: 1rem 0;
+        text-align: center;
+
+        p {
+          font-size: 1.5rem;
+          color: #222;
+          margin: 0;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+
+  .tabs-container {
+    display: flex;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+
+    button {
+      flex: 1;
+      background: #F5F7FA;
+      border: none;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      color: #333;
+      cursor: pointer;
+      transition: background-color 0.2s;
+
+      &.active {
+        background: #3B82F6;
+        color: #fff;
+      }
+
+      &:not(.active):hover {
+        background: #EFF6FF;
+      }
+    }
+  }
+
+  .tab-content {
+    .tab-panel {
+      border: 2px dashed #CCCCCC;
+      border-radius: 8px;
+      padding: 1rem;
+      min-height: 200px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-wrapper {
+    padding: 1rem;
+
+    .stats-cards {
+      flex-direction: column;
+      gap: 0.5rem;
+
+      .stat-card {
+        width: 100%;
+      }
+    }
+  }
+}

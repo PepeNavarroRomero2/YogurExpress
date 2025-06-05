@@ -1,50 +1,72 @@
-<div class="container">
-  <div class="header">
-    <h1>Manage Promotions</h1>
-    <button class="btn btn-secondary" (click)="onCreate()">New Promo</button>
-  </div>
+<!-- frontend/src/app/components/admin/manage-promotions/manage-promotions.component.html -->
 
-  <!-- Formulario -->
-  <div *ngIf="showForm" class="form">
-    <div class="form-group">
-      <label>Code</label>
-      <input class="form-input" [(ngModel)]="newPromotion.code" placeholder="e.g. SPRING20">
-    </div>
-    <div class="form-group">
-      <label>Discount (%)</label>
-      <input
-        type="number"
-        min="1"
-        class="form-input"
-        [(ngModel)]="newPromotion.discount"
-      >
-    </div>
-    <div class="form-actions">
-      <button class="btn btn-primary" (click)="onSave()">
-        {{ editingId != null ? 'Update' : 'Save' }}
-      </button>
-      <button class="btn btn-secondary" (click)="onCancel()">Cancel</button>
-    </div>
+<div class="promotions-wrapper">
+  <header class="promotions-header">
+    <h1>Manage Promotions</h1>
+    <button class="btn-create" (click)="onCreate()">Create Promotion</button>
+  </header>
+
+  <!-- Formulario de creación/edición -->
+  <div *ngIf="showForm">
+    <form #f="ngForm" (ngSubmit)="onSave(f)">
+      <div class="form-group">
+        <label for="codigo">Code</label>
+        <input
+          id="codigo"
+          name="codigo"
+          class="form-input"
+          required
+          [(ngModel)]="promotion.codigo"
+        />
+      </div>
+      <div class="form-group">
+        <label for="descuento">Discount (%)</label>
+        <input
+          id="descuento"
+          name="descuento"
+          type="number"
+          class="form-input"
+          required
+          [(ngModel)]="promotion.descuento"
+        />
+      </div>
+      <div class="buttons-group">
+        <button type="submit" class="btn-save">
+          {{ isEditing ? 'Save Changes' : 'Create' }}
+        </button>
+        <button type="button" class="btn-cancel" (click)="onCancel()">Cancel</button>
+      </div>
+    </form>
   </div>
 
   <!-- Tabla de promociones -->
-  <table *ngIf="promotions.length" class="table">
-    <thead>
-      <tr><th>Code</th><th>Discount</th><th>Actions</th></tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let p of promotions">
-        <td>{{p.code}}</td>
-        <td>-{{p.discount}}%</td>
-        <td>
-          <button class="btn btn-sm" (click)="onEdit(p)">Edit</button>
-          <button class="btn btn-sm btn-danger" (click)="onDelete(p.id)">Del</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="promotions-table-wrapper" *ngIf="!showForm">
+    <table class="promotions-table">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Discount</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of promotions">
+          <td>{{ p.codigo }}</td>
+          <td>-{{ p.descuento }}%</td>
+          <td class="actions-cell">
+            <button class="btn-edit" (click)="onEdit(p)">Edit</button>
+            <button class="btn-delete" (click)="onDelete(p.id_promocion)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div *ngIf="!promotions.length" class="no-promos">
+      No promotions yet.
+    </div>
+  </div>
 
-  <div *ngIf="!promotions.length" class="placeholder">
-    No promotions yet.
+  <!-- Placeholder para añadir promoción cuando no hay registro -->
+  <div class="add-promo-placeholder" *ngIf="!showForm && !promotions.length">
+    + Add promotion
   </div>
 </div>
