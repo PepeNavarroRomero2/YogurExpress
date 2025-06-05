@@ -1,53 +1,168 @@
-/* src/app/components/user/select-time/select-time.component.scss */
+/* frontend/src/app/components/user/select-time/select-time.component.scss */
 
-.select-time {
-  max-width: 400px;
-  margin: 2rem auto;
-  padding: 1.5rem;
-  background: #fff;
+/* ──────────────────────────────────────────────────────── */
+/* 1) Contenedor global: fondo gris y centrado vertical/horiz */
+/* ──────────────────────────────────────────────────────── */
+.st-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center; /* Centrado vertical */
+  background-color: #F5F7FA; /* Gris muy claro */
+  min-height: 100vh; /* Ocupa toda la pantalla */
+  padding: 1rem; /* Evita scroll horizontal en móviles */
+  box-sizing: border-box;
+}
+
+/* ──────────────────────────────────────────────────────── */
+/* 2) Tarjeta blanca interna (bordes redondeados + sombra)  */
+/* ──────────────────────────────────────────────────────── */
+.st-card {
+  background-color: #FFFFFF;
   border-radius: 8px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 400px; /* Igual que otras vistas (ancho fijo en desktop) */
+  padding: 2rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: padding 0.2s ease-in-out;
+}
 
-  h2 {
-    text-align: center;
+/* ──────────────────────────────────────────────────────── */
+/* 3) Título y subtítulo                                    */
+/* ──────────────────────────────────────────────────────── */
+.st-title {
+  font-size: 1.75rem; /* Igual que en maqueta */
+  color: #1F2937;     /* Gris oscuro */
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.st-subtitle {
+  font-size: 1rem;
+  color: #374151;     /* Gris medio */
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+/* ──────────────────────────────────────────────────────── */
+/* 4) Icono de reloj                                         */
+/* ──────────────────────────────────────────────────────── */
+.st-icon-wrapper {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 1.5rem;
+}
+
+.st-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ──────────────────────────────────────────────────────── */
+/* 5) Formulario (time + botón confirmar)                    */
+/* ──────────────────────────────────────────────────────── */
+.st-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.st-label {
+  font-size: 1rem;
+  color: #374151;     /* Gris medio */
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
+.st-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #D1D5DB;  /* Gris claro */
+  border-radius: 4px;
+  background-color: #F9FAFB;  /* Gris muy muy claro */
+  color: #374151;
+  margin-bottom: 1.5rem;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
+
+.st-input:focus {
+  outline: none;
+  border-color: #3B82F6;  /* Azul primario */
+  background-color: #FFFFFF;
+}
+
+/* Botón principal azul “Confirmar” */
+.st-btn-primary {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: #3B82F6; /* Azul primario */
+  color: #FFFFFF;            /* Texto blanco */
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 0; /* Ya no hay botones inferiores */
+  transition: background-color 0.2s ease-in-out;
+}
+
+.st-btn-primary:hover {
+  background-color: #2563EB; /* Azul más oscuro en hover */
+}
+
+/* ──────────────────────────────────────────────────────── */
+/* 6) Media queries para dispositivos pequeños               */
+/* ──────────────────────────────────────────────────────── */
+/* En pantallas ≤ 400px */
+@media (max-width: 400px) {
+  .st-card {
+    padding: 1.5rem;
+  }
+  .st-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .st-subtitle {
+    font-size: 0.95rem;
     margin-bottom: 1rem;
   }
-
-  label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
+  .st-icon-wrapper {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 1rem;
   }
-
-  .form-control {
-    width: 100%;
-    padding: 0.5rem;
-    margin-bottom: 1.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+  .st-input {
+    padding: 0.65rem 0.9rem;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
   }
+  .st-btn-primary {
+    padding: 0.65rem 0;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+  }
+}
 
-  .buttons {
-    display: flex;
-    justify-content: space-between;
-
-    .btn-back,
-    .btn-next {
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 4px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    .btn-back {
-      background: #6c757d;
-      color: #fff;
-    }
-
-    .btn-next {
-      background: #007bff;
-      color: #fff;
-    }
+/* En pantallas ≤ 320px */
+@media (max-width: 320px) {
+  .st-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 0.75rem;
+  }
+  .st-input {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  .st-btn-primary {
+    padding: 0.6rem 0;
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
   }
 }

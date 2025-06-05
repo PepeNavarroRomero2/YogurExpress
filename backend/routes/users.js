@@ -1,23 +1,34 @@
-const express = require('express');
-const { supabase } = require('../lib/supabaseClient');
-const { authenticateToken } = require('./authMiddleware');
+// backend/routes/users.js
+
+import express from 'express';
+import { supabase } from '../lib/supabaseClient.js';
+import { authenticateToken } from './authMiddleware.js';
 
 const router = express.Router();
 
 /**
- * GET /api/users/me
- * Devuelve la información del usuario autenticado (sin contraseña)
+ * GET /api/users/profile
+ * Devuelve los datos del usuario autenticado (incluidos puntos).
  */
-router.get('/me', authenticateToken, async (req, res) => {
-  const id_usuario = req.user.id_usuario;
-  const { data: user, error } = await supabase
-    .from('usuarios')
-    .select('id_usuario, nombre, email, rol, puntos')
-    .eq('id_usuario', id_usuario)
-    .single();
+router.get('/profile', authenticateToken, async (req, res) => {
+  try {
+    const id_usuario = req.user.id_usuario;
 
-  if (error) return res.status(500).json({ error: 'No se pudo cargar usuario' });
-  res.json(user);
+    const { data: user, error: userError } = await supabase
+      .from('usuarios')
+      .select('id_usuario, nombre, email, rol, puntos')
+      .eq('id_usuario', id_usuario)
+      .single();
+
+    if (userError) {
+      console.error('[Supabase] Error obteniendo perfil de usuario:', userError);
+      return res.status(500).json({ error: 'Error al obtener datos de usuario.' });
+    }
+    return res.json(user);
+  } catch (err) {
+    console.error('Error general en GET /api/users/profile:', err);
+    return res.status(500).json({ error: 'Error interno del servidor.' });
+  }
 });
 
-module.exports = router;
+export default router;

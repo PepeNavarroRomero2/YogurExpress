@@ -1,86 +1,71 @@
+// frontend/src/app/services/cart.service.ts
+
 import { Injectable } from '@angular/core';
-import { Flavor, Topping, SizeOption } from './product.service';
+import { Flavor } from './product.service';
 
-export interface Cart {
-  flavor?: Flavor;
-  toppings: Topping[];
-  size?: SizeOption;
-  pickupTime?: Date;
-}
-
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class CartService {
-  private cart: Cart = { toppings: [] };
-  private credit = 0;  // descuento (€) por puntos canjeados
+  private flavorKey = 'cart_flavor';
+  private sizeKey = 'cart_size';
+  private toppingsKey = 'cart_toppings';
+  private pickupTimeKey = 'cart_pickup_time';
 
-  /** Guarda el sabor seleccionado */
+  constructor() { }
+
+  /** ------------- SABOR ------------- */
   setFlavor(flavor: Flavor): void {
-    this.cart.flavor = flavor;
+    localStorage.setItem(this.flavorKey, JSON.stringify(flavor));
+  }
+  getFlavor(): Flavor | null {
+    const json = localStorage.getItem(this.flavorKey);
+    return json ? JSON.parse(json) : null;
+  }
+  clearFlavor(): void {
+    localStorage.removeItem(this.flavorKey);
   }
 
-  getFlavor(): Flavor | undefined {
-    return this.cart.flavor;
+  /** ------------- TAMAÑO ------------- */
+  setSize(size: Flavor): void {
+    localStorage.setItem(this.sizeKey, JSON.stringify(size));
+  }
+  getSize(): Flavor | null {
+    const json = localStorage.getItem(this.sizeKey);
+    return json ? JSON.parse(json) : null;
+  }
+  clearSize(): void {
+    localStorage.removeItem(this.sizeKey);
   }
 
-  /** Toggle de toppings */
-  toggleTopping(t: Topping): void {
-    const idx = this.cart.toppings.findIndex(x => x.id === t.id);
-    if (idx > -1) this.cart.toppings.splice(idx, 1);
-    else this.cart.toppings.push(t);
+  /** ------------- TOPPINGS ------------- */
+  setToppings(toppings: Flavor[]): void {
+    localStorage.setItem(this.toppingsKey, JSON.stringify(toppings));
+  }
+  getToppings(): Flavor[] {
+    const json = localStorage.getItem(this.toppingsKey);
+    return json ? JSON.parse(json) : [];
+  }
+  clearToppings(): void {
+    localStorage.removeItem(this.toppingsKey);
   }
 
-  getToppings(): Topping[] {
-    return [...this.cart.toppings];
+  /** ------------- HORA DE RECOGIDA ------------- */
+  setPickupTime(hora: string): void {
+    localStorage.setItem(this.pickupTimeKey, hora);
+  }
+  getPickupTime(): string | null {
+    return localStorage.getItem(this.pickupTimeKey);
+  }
+  clearPickupTime(): void {
+    localStorage.removeItem(this.pickupTimeKey);
   }
 
-  /** Selecciona el tamaño */
-  setSize(s: SizeOption): void {
-    this.cart.size = s;
-  }
-
-  getSize(): SizeOption | undefined {
-    return this.cart.size;
-  }
-
-  /** Fecha y hora de recogida */
-  setPickupTime(date: Date): void {
-    this.cart.pickupTime = date;
-  }
-
-  getPickupTime(): Date | undefined {
-    return this.cart.pickupTime;
-  }
-
-  /** Define un crédito (€) obtenido al canjear puntos */
-  setCredit(amount: number): void {
-    this.credit = amount;
-  }
-
-  /** Devuelve el crédito (€) pendiente de aplicar */
-  getCredit(): number {
-    return this.credit;
-  }
-
-  /** Precio total sin descuento */
-  getSubtotal(): number {
-    const base = this.cart.flavor?.price ?? 0;
-    const extras = this.cart.toppings.reduce((sum, t) => sum + t.price, 0);
-    const sizePrice = this.cart.size?.price ?? 0;
-    return base + extras + sizePrice;
-  }
-
-  /** Precio total - crédito */
-  getTotal(): number {
-    return Math.max(0, this.getSubtotal() - this.credit);
-  }
-
-  /** Limpia carrito y crédito */
+  /** ------------- MÉTODO PARA LIMPIAR TODO ------------- */
   clear(): void {
-    this.cart = { toppings: [] };
-    this.credit = 0;
-  }
-
-  getCart(): Cart {
-    return { ...this.cart };
+    this.clearFlavor();
+    this.clearSize();
+    this.clearToppings();
+    this.clearPickupTime();
   }
 }

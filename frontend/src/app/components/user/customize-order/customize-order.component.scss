@@ -1,55 +1,236 @@
 /* src/app/components/user/customize-order/customize-order.component.scss */
 
-.customize-order {
+/* ────────────────────────────────────────────────────────── */
+/* 1) Contenedor global: fondo gris y centrado vertical/horiz. */
+/* ────────────────────────────────────────────────────────── */
+.co-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #F5F7FA;   /* Gris muy claro */
+  min-height: 100vh;           /* Ocupa toda la pantalla */
+  padding: 1rem;               /* Evita scroll horizontal en móviles */
+  box-sizing: border-box;
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* 2) Tarjeta blanca interna (bordes redondeados + sombra)   */
+/* ────────────────────────────────────────────────────────── */
+.co-card {
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 600px;            /* Ajustable: quepan varias secciones en desktop */
+  padding: 2rem;
+  box-sizing: border-box;
+  transition: padding 0.2s ease-in-out;
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* 3) Título de la página                                     */
+/* ────────────────────────────────────────────────────────── */
+.co-page-title {
+  text-align: center;
+  font-size: 2rem;             /* Tamaño destacado */
+  color: #1F2937;              /* Gris oscuro */
+  margin-bottom: 1.5rem;       /* Espacio debajo del título */
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* 4) Etiqueta de sección (Sabor, Toppings, Tamaño)           */
+/* ────────────────────────────────────────────────────────── */
+.co-section-label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #374151;              /* Gris medio */
+  margin-bottom: 0.5rem;
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* 5) “Box” para Sabor y para Toppings (cajas con fondo claro) */
+/* ────────────────────────────────────────────────────────── */
+.co-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #F9FAFB;   /* Gris muy muy claro */
+  border: 1px solid #D1D5DB;   /* Gris claro para el borde */
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  cursor: default;
+}
+
+.co-box-text {
+  font-size: 1rem;
+  color: #1F2937;              /* Gris oscuro */
+}
+
+.co-box-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  margin-left: 1rem;
+  border-radius: 4px;
+  background-color: #FFFFFF;   /* Fondo blanco para la imagen */
+}
+
+/* Si esta caja es “link” (Toppings), cambia cursor y color del texto al hover */
+.co-box.co-box-link {
+  cursor: pointer;
+}
+
+.co-box.co-box-link:hover {
+  background-color: #EFF6FF;   /* Azul muy claro en hover */
+}
+
+.co-box-arrow {
+  width: 20px;
+  height: 20px;
+  color: #3B82F6;              /* Azul primario */
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* 6) Mensaje de error si falla al cargar toppings o tamaños  */
+/* ────────────────────────────────────────────────────────── */
+.co-error {
+  background-color: #FDECEA;   /* Rojo suave */
+  color: #D32F2F;              /* Rojo intenso */
+  border: 1px solid #F5C2C2;   /* Borde rojo claro */
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* 7) Grilla de “cards” para tamaños                           */
+/* ────────────────────────────────────────────────────────── */
+.co-sizes-grid {
+  display: grid;
+  /* En desktop: 3 columnas (mínimo 160px c/u), en tablet: 2, en móvil: 1 */
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Cada tarjeta de tamaño */
+.co-card-item {
+  background-color: #F9FAFB;   /* Gris muy muy claro */
+  border-radius: 8px;
+  text-align: center;
   padding: 1rem;
-  max-width: 480px;
-  margin: 0 auto;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  transition:
+    background-color 0.2s ease-in-out,
+    border 0.2s ease-in-out;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
 
-  h2 {
-    text-align: center;
-    margin-bottom: .5rem;
-  }
-  p {
-    text-align: center;
-    margin-bottom: 1.5rem;
-  }
-  .section {
-    margin-bottom: 1.25rem;
+.co-card-item:hover {
+  background-color: #EFF6FF;   /* Azul muy claro en hover */
+}
 
-    h3 {
-      margin-bottom: .5rem;
-    }
-    .options {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .75rem;
+.co-card-item.selected {
+  border-color: #3B82F6;       /* Borde azul vivo cuando está seleccionado */
+  background-color: #EFF6FF;   /* Fondo azul muy claro para resaltar */
+}
 
-      label {
-        background: #fff;
-        padding: .5rem .75rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        cursor: pointer;
-        user-select: none;
-        display: flex;
-        align-items: center;
-        gap: .5rem;
-      }
-    }
+/* Etiqueta de cada tamaño */
+.co-card-label {
+  display: block;
+  font-size: 1rem;
+  color: #1F2937;              /* Gris oscuro */
+  margin-bottom: 0.5rem;
+}
+
+/* Precio dentro de cada tarjeta */
+.co-card-price {
+  display: block;
+  font-size: 0.95rem;
+  color: #374151;              /* Gris medio */
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* 8) Botón principal “Agregar al pedido”                     */
+/* ────────────────────────────────────────────────────────── */
+.co-btn-primary {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: #3B82F6;   /* Azul primario */
+  color: #FFFFFF;              /* Texto blanco */
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  margin-top: 1rem;
+}
+
+.co-btn-primary:hover {
+  background-color: #2563EB;   /* Azul más oscuro en hover */
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* 9) Media queries para dispositivos pequeños               */
+/* ────────────────────────────────────────────────────────── */
+
+/* En pantallas ≤ 768px (tablet) */
+@media (max-width: 768px) {
+  .co-card {
+    max-width: 100%;
+    padding: 1.5rem;
   }
-  .total {
-    text-align: right;
-    font-size: 1.1rem;
-    margin-bottom: 1.5rem;
+  .co-page-title {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
   }
-  .btn-next {
-    width: 100%;
-    padding: .75rem;
-    border: none;
-    border-radius: 4px;
-    background: #28a745;
-    color: #fff;
-    font-size: 1rem;
-    cursor: pointer;
+  .co-box {
+    padding: 0.65rem 0.85rem;
+  }
+  .co-box-icon {
+    width: 36px;
+    height: 36px;
+  }
+  .co-sizes-grid {
+    gap: 0.75rem;
+  }
+  .co-card-item {
+    padding: 0.85rem;
+  }
+  .co-card-label {
+    font-size: 0.95rem;
+  }
+  .co-card-price {
+    font-size: 0.9rem;
+  }
+  .co-btn-primary {
+    padding: 0.65rem 0;
+    font-size: 0.95rem;
+  }
+}
+
+/* En pantallas ≤ 480px (móvil) */
+@media (max-width: 480px) {
+  .co-sizes-grid {
+    grid-template-columns: 1fr; /* Una sola tarjeta por fila */
+    gap: 0.5rem;
+  }
+  .co-box {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .co-box-icon {
+    margin-top: 0.5rem;
+    margin-left: 0;
+  }
+  .co-btn-primary {
+    padding: 0.6rem 0;
+    font-size: 0.9rem;
   }
 }
