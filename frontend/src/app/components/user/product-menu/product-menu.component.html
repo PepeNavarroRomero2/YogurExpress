@@ -1,37 +1,51 @@
-<div class="product-menu-container">
-  <div class="menu-content" [class.full-width]="!showHistory">
-    <div class="header">
-      <h2>Elige tu sabor</h2>
-      <div class="actions">
-        <div class="header-points" (click)="goToPoints()" title="Tus puntos">
-          ★ <span class="badge">{{ currentPoints }} pts</span>
-        </div>
-        <button class="btn-history" (click)="toggleHistory()">
-          {{ showHistory ? 'Cerrar Historial' : 'Ver Historial' }}
-        </button>
-      </div>
+<!-- src/app/components/user/product-menu/product-menu.component.html -->
+
+<div class="menu-wrapper">
+  <div class="menu-card">
+    <!-- 1) Título centrado -->
+    <h2 class="menu-title">Menú de productos</h2>
+
+    <!-- 2) Mensaje de error si no se cargan sabores -->
+    <div *ngIf="errorMsg" class="menu-error">
+      {{ errorMsg }}
     </div>
 
-    <div class="flavor-list">
+    <!-- 3) Grilla de tarjetas de “sabores” -->
+    <div *ngIf="!errorMsg" class="cards-grid">
       <div
-        class="flavor-card"
-        *ngFor="let f of flavors"
-        (click)="selectFlavor(f)"
+        class="card-item"
+        *ngFor="let flavor of sabores"
+        (click)="viewFlavorInfo(flavor)"
       >
         <img
-          *ngIf="f.imageUrl"
-          [src]="f.imageUrl"
-          [alt]="f.name"
-          class="flavor-img"
+          class="card-icon"
+          [src]="
+            flavor.imagen_url
+              ? flavor.imagen_url
+              : 'assets/images/placeholder-item.png'
+          "
+          alt="{{ flavor.nombre }}"
         />
-        <h3>{{ f.name }}</h3>
-        <p>{{ f.price | currency:'EUR' }}</p>
-        <button class="btn-select">Seleccionar</button>
+        <h3 class="card-name">{{ flavor.nombre }}</h3>
+        <a
+          class="info-link"
+          (click)="viewFlavorInfo(flavor); $event.stopPropagation()"
+          >Información</a
+        >
       </div>
     </div>
-  </div>
 
-  <div *ngIf="showHistory" class="history-content">
-    <app-order-history></app-order-history>
+    <!-- 4) Botones inferiores: Historial / Mis Puntos / Cerrar Sesión -->
+    <div class="bottom-buttons">
+      <button class="btn-secondary" (click)="goToHistory()">
+        Historial
+      </button>
+      <button class="btn-secondary" (click)="goToPoints()">
+        Mis Puntos
+      </button>
+      <button class="btn-secondary" (click)="logout()">
+        Cerrar Sesión
+      </button>
+    </div>
   </div>
 </div>

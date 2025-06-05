@@ -1,58 +1,64 @@
-<div class="login-register-container">
-  <h2>{{ isLoginMode ? 'Iniciar sesión' : 'Registro de usuario' }}</h2>
+<!-- src/app/components/user/login-register/login-register.component.html -->
+<div class="login-container">
+  <div class="login-card">
+    <!-- Título dinámico según el modo (Login vs Registro) -->
+    <h2 class="login-title">
+      {{ isLoginMode ? 'Login / Registro' : 'Registro' }}
+    </h2>
 
-  <form (ngSubmit)="onSubmit()" #form="ngForm">
-    <!-- Nombre solo en registro -->
-    <div *ngIf="!isLoginMode" class="form-group">
-      <label for="name">Nombre</label>
-      <input
-        id="name"
-        name="name"
-        type="text"
-        required
-        [(ngModel)]="name"
-        class="form-control"
-      />
-    </div>
+    <form (ngSubmit)="onSubmit()">
+      <!-- Si NO es Login (es decir, estamos en modo “Registro”), mostramos el campo Nombre -->
+      <div *ngIf="!isLoginMode" class="form-group">
+        <label for="name">Nombre</label>
+        <input
+          id="name"
+          name="name"
+          type="text"
+          [(ngModel)]="name"
+          required
+        />
+      </div>
 
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input
-        id="email"
-        name="email"
-        type="email"
-        required
-        [(ngModel)]="email"
-        class="form-control"
-      />
-    </div>
+      <!-- Campo Email -->
+      <div class="form-group">
+        <label for="email">Correo electrónico</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          [(ngModel)]="email"
+          required
+        />
+      </div>
 
-    <div class="form-group">
-      <label for="password">Contraseña</label>
-      <input
-        id="password"
-        name="password"
-        type="password"
-        required
-        [(ngModel)]="password"
-        class="form-control"
-      />
-    </div>
+      <!-- Campo Password -->
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          [(ngModel)]="password"
+          required
+        />
+      </div>
 
-    <button
-      type="submit"
-      class="btn"
-      [ngClass]="isLoginMode ? 'btn-primary' : 'btn-success'"
-      [disabled]="form.invalid"
-    >
-      {{ isLoginMode ? 'Entrar' : 'Registrar' }}
-    </button>
-  </form>
+      <!-- Botón principal: “Continuar” si es Login, “Registrarse” si es Registro -->
+      <button class="btn-primary" type="submit">
+        {{ isLoginMode ? 'Continuar' : 'Registrarse' }}
+      </button>
+    </form>
 
-  <p class="toggle-text">
-    {{ isLoginMode ? '¿Aún no tienes cuenta?' : '¿Ya tienes cuenta?' }}
-    <a (click)="toggleMode()">
-      {{ isLoginMode ? 'Regístrate' : 'Iniciar sesión' }}
-    </a>
-  </p>
+    <!-- Link para alternar entre Login y Registro -->
+    <p class="toggle-text">
+      <span *ngIf="isLoginMode">¿No tienes cuenta? </span>
+      <span *ngIf="!isLoginMode">¿Ya tienes cuenta? </span>
+      <a
+        href="#"
+        (click)="toggleMode(); $event.preventDefault();"
+      >
+        {{ isLoginMode ? 'Regístrate' : 'Inicia Sesión' }}
+      </a>
+    </p>
+  </div>
 </div>

@@ -1,52 +1,81 @@
+// frontend/src/app/components/user/product-menu/product-menu.component.ts
+
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';    // ← para NgIf, NgFor
+import { RouterModule, Router } from '@angular/router';
+import Swal from 'sweetalert2';
 import { ProductService, Flavor } from '../../../services/product.service';
 import { CartService } from '../../../services/cart.service';
-import { PointsService } from '../../../services/points.service';
-import { OrderHistoryComponent } from '../order-history/order-history.component';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-product-menu',
   standalone: true,
-  imports: [CommonModule, OrderHistoryComponent],
+  imports: [
+    CommonModule,
+    RouterModule
+  ],
   templateUrl: './product-menu.component.html',
   styleUrls: ['./product-menu.component.scss']
 })
 export class ProductMenuComponent implements OnInit {
-  flavors: Flavor[] = [];
-  showHistory = false;
-  currentPoints = 0;
+  sabores: Flavor[] = [];
+  errorMsg: string = '';
 
   constructor(
-    private productSvc: ProductService,
-    private cartSvc: CartService,
-    private ptsSvc: PointsService,
+    private productService: ProductService,
+    private cartService: CartService,
+    private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
-  ngOnInit() {
-    this.flavors = this.productSvc.getFlavors();
-    this.cartSvc.clear();
-    this.refreshPoints();
+  ngOnInit(): void {
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/user/login']);
+      return;
+    }
+    this.loadFlavors();
   }
 
-  selectFlavor(flavor: Flavor) {
-    this.cartSvc.setFlavor(flavor);
+  loadFlavors() {
+    this.productService.getFlavors().subscribe({
+      next: data => {
+        this.sabores = data;
+      },
+      error: () => {
+        this.errorMsg = 'No se pudieron cargar los sabores';
+      }
+    });
+  }
+
+  viewFlavorInfo(flavor: Flavor) {
+    this.cartService.setFlavor(flavor);
     this.router.navigate(['/user/personalize']);
   }
 
-  toggleHistory() {
-    this.showHistory = !this.showHistory;
-    this.refreshPoints();
+  goToHistory() {
+    this.router.navigate(['/user/history']);
   }
 
-  /** Navega a la pantalla de canje de puntos */
   goToPoints() {
     this.router.navigate(['/user/points']);
   }
 
-  private refreshPoints() {
-    this.currentPoints = this.ptsSvc.getPoints();
+  logout() {
+    Swal.fire({
+      title: '¿Cerrar sesión?',
+      text: 'Se borrará tu sesión actual.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, cerrar sesión',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
+      if (result.isConfirmed) {
+        this.authService.logout();
+        this.cartService.clear();
+        Swal.fire('Desconectado', 'Has cerrado sesión.', 'success');
+        this.router.navigate(['/user/login']);
+      }
+    });
   }
 }

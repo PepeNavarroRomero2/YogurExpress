@@ -1,68 +1,147 @@
-.payment-confirmation {
+/* src/app/components/user/payment-confirmation/payment-confirmation.component.scss */
+
+.payment-confirmation-container {
   max-width: 480px;
   margin: 2rem auto;
   padding: 1.5rem;
-  background: #fff;
+  background: #ffffff;
   border-radius: 8px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
 
-  h2 { text-align: center; margin-bottom: 1rem; }
+  h1 {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 1.75rem;
+    color: #333;
+  }
 
-  .summary {
-    list-style: none;
-    padding: 0;
+  .error {
+    color: #d32f2f;
+    background-color: #fdecea;
+    border: 1px solid #f5c2c2;
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-weight: 500;
+  }
+
+  .order-summary {
     margin-bottom: 1.5rem;
 
-    li {
-      margin-bottom: 0.5rem;
-      strong { width: 100px; display: inline-block; }
-    }
-  }
-
-  .points-redeem {
-    margin-bottom: 1rem;
-
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    }
-
-    .form-control {
-      width: 100%;
-      padding: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      margin-bottom: 0.5rem;
-    }
-
-    small {
-      display: block;
+    h2 {
+      text-align: center;
       margin-bottom: 1rem;
+      font-size: 1.5rem;
+      color: #444;
+    }
+
+    .summary-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e0e0e0;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .label {
+          font-weight: 500;
+          color: #555;
+        }
+
+        .value {
+          color: #222;
+
+          input {
+            width: 4rem;
+            padding: 0.25rem 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            text-align: right;
+          }
+        }
+
+        &.total-line {
+          padding-top: 1rem;
+          padding-bottom: 0;
+          border-top: 1px solid #e0e0e0;
+          margin-top: 0.5rem;
+
+          .label {
+            font-size: 1.1rem;
+          }
+          .value {
+            font-size: 1.1rem;
+          }
+        }
+      }
     }
   }
 
-  .buttons {
-    display: flex;
-    justify-content: space-between;
+  /* Continuamos usando .btn-primary de Angular que ya tienes */
+  .btn-primary {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #3b82f6; /* Azul primario consistente con otras vistas */
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.2s ease-in-out;
+    margin-bottom: 1rem; /* separación antes de PayPal */
+  }
 
-    .btn-back,
-    .btn-confirm {
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 4px;
+  .btn-primary:hover {
+    background-color: #2563eb; /* Azul más oscuro en hover */
+  }
+
+  /* CONTENEDOR DEL BOTÓN PAYPAL: que ocupe el 100% */
+  #paypal-button-container {
+    width: 100%;
+    margin-top: 1rem;
+  }
+}
+
+/* Media queries para pantallas muy pequeñas */
+@media (max-width: 400px) {
+  .payment-confirmation-container {
+    padding: 1rem;
+    margin: 1rem auto;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .order-summary {
+    h2 {
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+    .summary-item {
+      padding: 0.4rem 0;
+    }
+    .summary-item .label,
+    .summary-item .value {
+      font-size: 0.95rem;
+    }
+    .total-line .label,
+    .total-line .value {
       font-size: 1rem;
-      cursor: pointer;
-    }
-
-    .btn-back {
-      background: #6c757d;
-      color: #fff;
-    }
-
-    .btn-confirm {
-      background: #28a745;
-      color: #fff;
     }
   }
 }

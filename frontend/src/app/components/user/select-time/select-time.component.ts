@@ -1,65 +1,59 @@
+// frontend/src/app/components/user/select-time/select-time.component.ts
+
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { CartService } from '../../../services/cart.service';
 
 @Component({
   selector: 'app-select-time',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule
+  ],
   templateUrl: './select-time.component.html',
   styleUrls: ['./select-time.component.scss']
 })
 export class SelectTimeComponent implements OnInit {
-  pickupTime = '';
-  minDateTime = '';
+  hora: string = ''; // enlazado con [(ngModel)] del <input type="time">
 
   constructor(
-    private cartSvc: CartService,
+    private cartService: CartService,
     private router: Router
-  ) {}
+  ) { }
 
-  ngOnInit() {
-    // Si no hay sabor ni personalización, volvemos atrás
-    if (!this.cartSvc.getFlavor()) {
-      this.router.navigate(['/user/menu']);
+  ngOnInit(): void {
+    // Comprobamos que flavor y size estén en el carrito
+    const flavor = this.cartService.getFlavor();
+    const size = this.cartService.getSize();
+    if (!flavor || !size) {
+      this.router.navigate(['/user/personalize']);
       return;
     }
-    // Si ya había hora seleccionada, precargamos
-    const existing = this.cartSvc.getPickupTime();
-    if (existing) {
-      this.pickupTime = this.formatLocal(existing);
+
+    // Precargamos la hora si ya existe
+    const savedTime: string | null = this.cartService.getPickupTime();
+    if (savedTime) {
+      this.hora = savedTime;
+    } else {
+      // Tomamos la hora actual en formato "HH:MM"
+      const now = new Date();
+      const hh = now.getHours().toString().padStart(2, '0');
+      const mm = now.getMinutes().toString().padStart(2, '0');
+      this.hora = `${hh}:${mm}`;
     }
-    // Mínimo: ahora + 15 minutos
-    const now = new Date();
-    now.setMinutes(now.getMinutes() + 15);
-    this.minDateTime = this.formatLocal(now);
   }
 
-  /** Formatea Date a string "YYYY-MM-DDTHH:mm" para input[type=datetime-local] */
-  private formatLocal(d: Date): string {
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    const YYYY = d.getFullYear();
-    const MM   = pad(d.getMonth() + 1);
-    const DD   = pad(d.getDate());
-    const hh   = pad(d.getHours());
-    const mm   = pad(d.getMinutes());
-    return `${YYYY}-${MM}-${DD}T${hh}:${mm}`;
-  }
-
-  onSubmit() {
-    if (!this.pickupTime) {
-      Swal.fire('Error', 'Selecciona una fecha y hora de recogida.', 'error');
+  onConfirm(): void {
+    if (!this.hora) {
+      Swal.fire('Error', 'Debes seleccionar una hora de recogida.', 'error');
       return;
     }
-    const dt = new Date(this.pickupTime);
-    this.cartSvc.setPickupTime(dt);
+    this.cartService.setPickupTime(this.hora);
     this.router.navigate(['/user/payment']);
-  }
-
-  onBack() {
-    this.router.navigate(['/user/personalize']);
   }
 }

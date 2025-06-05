@@ -1,33 +1,91 @@
-<div class="payment-confirmation">
-  <h2>Resumen y pago</h2>
+<!-- src/app/components/user/payment-confirmation/payment-confirmation.component.html -->
 
-  <ul class="summary">
-    <li><strong>Sabor:</strong> {{ cart.flavor?.name }}</li>
-    <li><strong>Toppings:</strong> {{ formatToppings() }}</li>
-    <li><strong>Tamaño:</strong> {{ cart.size?.name }}</li>
-    <li><strong>Recogida:</strong> {{ cart.pickupTime | date:'short' }}</li>
-    <li><strong>Subtotal:</strong> {{ subtotal | currency:'EUR' }}</li>
-    <li *ngIf="discount > 0"><strong>Descuento:</strong> -{{ discount | currency:'EUR' }}</li>
-    <li><strong>Total:</strong> {{ total | currency:'EUR' }}</li>
-  </ul>
+<div class="payment-confirmation-container">
+  <h1>Confirmación y Pago</h1>
 
-  <div class="points-redeem">
-    <label for="pts">Canjear puntos (saldo: {{ currentPoints }} pts):</label>
-    <input
-      id="pts"
-      type="number"
-      min="0"
-      [max]="currentPoints"
-      [(ngModel)]="pointsToRedeem"
-      (ngModelChange)="onRedeemChange()"
-      class="form-control"
-    />
+  <!-- Mensaje de error -->
+  <div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
+
+  <!-- Resumen de pedido -->
+  <div class="order-summary">
+    <h2>Tu Pedido</h2>
+
+    <ul class="summary-list">
+      <!-- Sabor -->
+      <li class="summary-item">
+        <span class="label">Sabor:</span>
+        <span class="value">
+          {{ flavor.nombre }} – €{{ flavor.precio.toFixed(2) }}
+        </span>
+      </li>
+
+      <!-- Tamaño -->
+      <li class="summary-item">
+        <span class="label">Tamaño:</span>
+        <span class="value">
+          {{ size.nombre }} – €{{ size.precio.toFixed(2) }}
+        </span>
+      </li>
+
+      <!-- Toppings -->
+      <li class="summary-item" *ngIf="toppings && toppings.length > 0">
+        <span class="label">Toppings:</span>
+        <span class="value">
+          {{ toppingNames }}
+        </span>
+      </li>
+
+      <!-- Hora de recogida -->
+      <li class="summary-item">
+        <span class="label">Hora de recogida:</span>
+        <span class="value">{{ pickupTime }}</span>
+      </li>
+
+      <!-- Subtotal -->
+      <li class="summary-item">
+        <span class="label">Subtotal:</span>
+        <span class="value">€{{ subtotal.toFixed(2) }}</span>
+      </li>
+
+      <!-- Puntos disponibles -->
+      <li class="summary-item">
+        <span class="label">Tienes:</span>
+        <span class="value">{{ puntosUsuario }} puntos</span>
+      </li>
+
+      <!-- Puntos a usar -->
+      <li class="summary-item">
+        <span class="label">Puntos a usar:</span>
+        <span class="value">
+          <input
+            type="number"
+            min="0"
+            [max]="puntosUsuario"
+            [(ngModel)]="puntosAUsar"
+            (ngModelChange)="calculateTotal()"
+          />
+        </span>
+      </li>
+
+      <!-- Descuento (si aplica) -->
+      <li class="summary-item" *ngIf="descuento > 0">
+        <span class="label">Descuento:</span>
+        <span class="value">€{{ descuento.toFixed(2) }}</span>
+      </li>
+
+      <!-- Total -->
+      <li class="summary-item total-line">
+        <span class="label">Total a pagar:</span>
+        <span class="value bold">€{{ total.toFixed(2) }}</span>
+      </li>
+    </ul>
   </div>
 
-  <div class="buttons">
-    <button class="btn-back" (click)="onBack()">Atrás</button>
-    <button class="btn-confirm" (click)="confirmPayment()">
-      Confirmar y pagar
-    </button>
-  </div>
+  <!-- Botón para SIMULAR compra (ahora sin mostrar modal de token inválido) -->
+  <button class="btn-primary" (click)="simulatePurchase()">
+    Simular Compra
+  </button>
+
+  <!-- Contenedor para el botón de PayPal -->
+  <div id="paypal-button-container"></div>
 </div>

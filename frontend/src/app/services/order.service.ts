@@ -1,75 +1,65 @@
-import { Injectable } from '@angular/core';
-import { CartService, Cart } from './cart.service';
-import { AuthService } from './auth.service';
-import { Flavor, Topping, SizeOption } from './product.service';
+// src/app/services/order.service.ts
 
-export interface Order {
-  id: string;
-  userEmail: string;
-  flavor: Flavor;
-  toppings: Topping[];
-  size: SizeOption;
-  pickupTime: Date;
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { AuthService } from './auth.service';
+
+export interface OrderHistoryItem {
+  id_pedido: number;
+  fecha_hora: string;
+  hora_recogida: string;
   total: number;
-  date: Date;
+  producto: string;
+  codigo_pedido?: string;
 }
 
-@Injectable({ providedIn: 'root' })
+export interface OrderProduct {
+  id_producto: number;
+  cantidad: number;
+}
+
+// Incluimos puntos_usados en la interfaz
+export interface CreateOrderRequest {
+  productos: OrderProduct[];
+  hora_recogida: string;
+  puntos_usados: number;
+}
+
+export interface CreateOrderResponse {
+  codigo_pedido: string;
+  puntos_ganados: number;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
 export class OrderService {
-  private orders: Order[] = [];
+  private apiUrl = 'http://localhost:3000/api/orders';
 
   constructor(
-    private cartSvc: CartService,
-    private auth: AuthService
-  ) {
-    const saved = localStorage.getItem('orders');
-    this.orders = saved ? JSON.parse(saved) : [];
+    private http: HttpClient,
+    private authService: AuthService
+  ) { }
+
+  private getAuthHeaders(): HttpHeaders {
+    return this.authService.getAuthHeaders();
   }
 
-  /**
-   * Genera un ID único basado en timestamp y aleatorio
-   */
-  private generateId(): string {
-    return (
-      Date.now().toString(36) +
-      Math.random().toString(36).substring(2, 8)
+  /** Crea un nuevo pedido (POST /api/orders) */
+  createOrder(body: CreateOrderRequest): Observable<CreateOrderResponse> {
+    return this.http.post<CreateOrderResponse>(
+      `${this.apiUrl}`,
+      body,
+      { headers: this.getAuthHeaders() }
     );
   }
 
-  /**
-   * Crea un nuevo pedido a partir del carrito y lo persiste en localStorage.
-   * @returns El objeto Order generado o null si faltan datos.
-   */
-  placeOrder(): Order | null {
-    const user = this.auth.getUser();
-    const cart = this.cartSvc.getCart();
-    if (!user || !cart.flavor || !cart.size || !cart.pickupTime) {
-      return null;
-    }
-
-    const order: Order = {
-      id: this.generateId(),
-      userEmail: user.email,
-      flavor: cart.flavor,
-      toppings: cart.toppings,
-      size: cart.size,
-      pickupTime: cart.pickupTime,
-      total: this.cartSvc.getTotal(),
-      date: new Date()
-    };
-
-    this.orders.push(order);
-    localStorage.setItem('orders', JSON.stringify(this.orders));
-    this.cartSvc.clear();
-    return order;
-  }
-
-  /**
-   * Devuelve todos los pedidos del usuario actualmente logueado.
-   */
-  getOrdersForCurrentUser(): Order[] {
-    const user = this.auth.getUser();
-    if (!user) return [];
-    return this.orders.filter(o => o.userEmail === user.email);
+  /** Obtiene el historial de pedidos (GET /api/orders/history) */
+  getOrderHistory(): Observable<{ history: OrderHistoryItem[] }> {
+    return this.http.get<{ history: OrderHistoryItem[] }>(
+      `${this.apiUrl}/history`,
+      { headers: this.getAuthHeaders() }
+    );
   }
 }
