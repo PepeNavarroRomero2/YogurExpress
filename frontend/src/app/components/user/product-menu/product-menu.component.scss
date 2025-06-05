@@ -1,154 +1,218 @@
-/* frontend/src/app/components/user/product-menu/product-menu.component.scss */
+/* src/app/components/user/product-menu/product-menu.component.scss */
 
-/* ==============================
-   CONTENEDOR GENERAL Y TARJETA
-   ============================== */
+/* ────────────────────────────────────────────────────────── */
+/* 1) Contenedor global (fondo gris y centrado)              */
+/* ────────────────────────────────────────────────────────── */
 .menu-wrapper {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding: 1rem;
-  background-color: #F5F7FA; /* Gris muy claro de fondo */
-  min-height: 100vh;
+  align-items: center;
+  background-color: #F5F7FA;   /* Gris muy claro de fondo */
+  min-height: 100vh;           /* Ocupa toda la pantalla */
+  padding: 1rem;               /* Evita scroll horizontal */
+  box-sizing: border-box;
 }
 
+/* ────────────────────────────────────────────────────────── */
+/* 2) Tarjeta blanca interna (bordes redondeados + sombra)   */
+/* ────────────────────────────────────────────────────────── */
 .menu-card {
   background-color: #FFFFFF;
-  border: 1px solid #E0E6ED;
-  border-radius: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   width: 100%;
-  max-width: 800px; /* Ajustable según tu diseño */
+  max-width: 800px;            /* Igual que la maqueta, para mostrar 2 cards por fila */
   padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
+  box-sizing: border-box;
+  transition: padding 0.2s ease-in-out;
 }
 
-/* ============
-   TÍTULO
-   ============ */
+/* ────────────────────────────────────────────────────────── */
+/* 3) Título “Menú de productos”                              */
+/* ────────────────────────────────────────────────────────── */
 .menu-title {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #1F2937; /* Gris oscuro casi negro */
-  margin-bottom: 1.5rem;
   text-align: center;
+  font-size: 2rem;            /* Más grande que en componentes más pequeños */
+  color: #1F2937;             /* Gris oscuro */
+  margin-bottom: 1.5rem;
 }
 
-/* ============
-   MENSAJE ERROR
-   ============ */
+/* ────────────────────────────────────────────────────────── */
+/* 4) Mensaje de error si falla la carga de sabores           */
+/* ────────────────────────────────────────────────────────── */
 .menu-error {
-  color: #DC2626; /* Rojo para error */
+  background-color: #FDECEA;  /* Rojo suave */
+  color: #D32F2F;             /* Rojo intenso */
+  border: 1px solid #F5C2C2;  /* Borde rojo claro */
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
   font-size: 1rem;
   text-align: center;
   margin-bottom: 1.5rem;
 }
 
-/* ============
-   GRID DE TARJETAS
-   ============ */
+/* ────────────────────────────────────────────────────────── */
+/* 5) Grilla de “cards” de sabores                             */
+/* ────────────────────────────────────────────────────────── */
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 1.2rem;
+  /* En desktop: 2 columnas de 1fr (mínimo 240px cada una), en tablet: 2 columnas, en móvil: 1 columna. */
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
   margin-bottom: 2rem;
 }
 
+/* Cada tarjeta de sabor */
 .card-item {
-  background-color: #F9FAFB;
-  border: 1px solid #E0E6ED;
-  border-radius: 12px;
-  padding: 1rem;
+  background-color: #F9FAFB;   /* Gris muy muy claro */
+  border-radius: 8px;
   text-align: center;
+  padding: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  transition:
+    background-color 0.2s ease-in-out,
+    transform 0.2s ease-in-out;
   cursor: pointer;
-  transition: box-shadow 0.2s ease-in-out, transform 0.1s ease-in-out;
 }
 
+/* Ahora el hover de cada tarjeta será un fondo azul suave */
 .card-item:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: #EFF6FF;   /* Azul muy claro para hover */
   transform: translateY(-2px);
 }
 
-.card-image {
-  width: 60px;
-  height: 60px;
-  margin: 0 auto 0.8rem auto;
+/* Imagen / icono de cada sabor */
+.card-icon {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  margin-bottom: 1rem;
 }
 
-.card-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
+/* Nombre del sabor */
+.card-name {
+  font-size: 1.25rem;
+  color: #1F2937;              /* Gris oscuro */
+  margin-bottom: 0.5rem;
+  word-break: break-word;      /* Evita nombres largos que desborden */
 }
 
-.card-text {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.card-title {
+/* Enlace “Información” */
+.info-link {
+  display: inline-block;
   font-size: 1rem;
-  font-weight: 600;
-  color: #1F2937;
-  margin-bottom: 0.4rem;
+  color: #3B82F6;              /* Azul primario */
+  text-decoration: none;
+  margin-top: 0.25rem;
+  transition: text-decoration 0.2s ease-in-out;
 }
 
-.card-info-link {
-  font-size: 0.9rem;
-  color: #3B82F6; /* Azul para enlaces */
+.info-link:hover {
   text-decoration: underline;
-  cursor: pointer;
 }
 
-/* ============
-   BOTONES INFERIORES
-   ============ */
-.menu-buttons {
-  margin-top: auto; /* Empuja los botones al final del contenedor flex */
+/* ────────────────────────────────────────────────────────── */
+/* 6) Botones inferiores (Historial / Mis Puntos / Cerrar)     */
+/* ────────────────────────────────────────────────────────── */
+.bottom-buttons {
   display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  gap: 0.8rem;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;            /* En pantallas muy estrechas se apilan */
+  margin-top: 1.5rem;
+  width: 100%;
+  max-width: 800px;
 }
 
+/* Ahora los .btn-secondary serán azules en lugar de grises */
 .btn-secondary {
-  background-color: #FFFFFF;
-  color: #3B82F6;
-  border: 2px solid #3B82F6;
-  border-radius: 8px;
-  padding: 0.6rem 1rem;
-  font-size: 0.95rem;
+  flex: 1 1 calc(33.333% - 1rem);
+  max-width: calc(33.333% - 1rem);
+  background-color: #3B82F6;   /* Azul primario */
+  color: #FFFFFF;              /* Texto blanco */
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 0;
+  font-size: 1rem;
   font-weight: 500;
+  text-align: center;
   cursor: pointer;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  transition:
+    background-color 0.2s ease-in-out,
+    color 0.2s ease-in-out;
 }
 
 .btn-secondary:hover {
-  background-color: #3B82F6;
+  background-color: #2563EB;   /* Azul más oscuro en hover */
   color: #FFFFFF;
 }
 
-/* ================
-   AJUSTES RESPONSIVOS
-   ================ */
-@media (max-width: 600px) {
+/* ────────────────────────────────────────────────────────── */
+/* 7) Media queries para dispositivos pequeños               */
+/* ────────────────────────────────────────────────────────── */
+
+/* En pantallas ≤ 800px (por ejemplo, tablets) */
+@media (max-width: 800px) {
+  .menu-card {
+    max-width: 600px;
+    padding: 1.5rem;
+  }
   .cards-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+  }
+  .card-item {
+    padding: 1.25rem;
+  }
+  .card-icon {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 0.75rem;
+  }
+  .card-name {
+    font-size: 1.15rem;
+  }
+  .info-link {
+    font-size: 0.95rem;
+  }
+  .btn-secondary {
+    font-size: 0.95rem;
+    padding: 0.65rem 0;
   }
 }
 
-@media (max-width: 480px) {
-  .cards-grid {
-    grid-template-columns: 1fr; /* Una sola columna en móvil */
-  }
+/* En pantallas ≤ 450px (móviles) */
+@media (max-width: 450px) {
   .menu-card {
-    padding: 1.5rem;
+    max-width: 100%;
+    padding: 1rem;
   }
-  .menu-buttons {
-    flex-direction: column;
-    gap: 1rem;
+  .menu-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .cards-grid {
+    grid-template-columns: 1fr; /* Una sola tarjeta por fila */
+    gap: 0.5rem;
+  }
+  .card-item {
+    padding: 1rem;
+  }
+  .card-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 0.5rem;
+  }
+  .card-name {
+    font-size: 1rem;
+  }
+  .info-link {
+    font-size: 0.9rem;
+  }
+  .btn-secondary {
+    flex: 1 1 100%;
+    max-width: 100%;
+    font-size: 0.9rem;
+    padding: 0.6rem 0;
   }
 }

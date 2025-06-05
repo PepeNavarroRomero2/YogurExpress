@@ -81,8 +81,11 @@
     </ul>
   </div>
 
-  <!-- Botón de confirmación -->
-  <button class="btn-primary" (click)="confirmPayment()">
-    Confirmar y pagar
+  <!-- Botón para SIMULAR compra (ahora sin mostrar modal de token inválido) -->
+  <button class="btn-primary" (click)="simulatePurchase()">
+    Simular Compra
   </button>
+
+  <!-- Contenedor para el botón de PayPal -->
+  <div id="paypal-button-container"></div>
 </div>

@@ -1,44 +1,61 @@
-<!-- frontend/src/app/components/user/customize-order/customize-order.component.html -->
+<!-- src/app/components/user/customize-order/customize-order.component.html -->
 <div class="co-wrapper">
   <div class="co-card">
-    <!-- Título con el nombre del sabor principal -->
-    <h1 class="co-title">{{ flavor.nombre }}</h1>
+    <!-- 1) Encabezado principal -->
+    <h2 class="co-page-title">Personalizar Pedido</h2>
 
-    <!-- Imagen del sabor base -->
-    <div class="co-flavor-image">
+    <!-- 2) Bloque “Sabor”: recuadro que muestra el sabor ya elegido -->
+    <div class="co-section-label">Sabor</div>
+    <div class="co-box">
+      <span class="co-box-text">{{ flavor.nombre }}</span>
       <img
+        class="co-box-icon"
         [src]="flavor.imagen_url || 'assets/default-flavor.png'"
         alt="{{ flavor.nombre }}"
       />
     </div>
 
-    <!-- Si hay error cargando toppings o tamaños -->
-    <div *ngIf="errorMsg" class="co-error">{{ errorMsg }}</div>
-
-    <!-- Sección de Toppings -->
-    <h2 class="co-section-title">Toppings</h2>
-    <div class="co-cards-grid">
-      <div
-        *ngFor="let t of toppings"
-        class="co-card-item"
-        [class.selected]="isToppingSelected(t)"
-        (click)="toggleTopping(t)"
+    <!-- 3) Bloque “Toppings”: recuadro con enlace para abrir selección -->
+    <div class="co-section-label">Toppings</div>
+    <div class="co-box co-box-link" (click)="selectToppings()">
+      <span class="co-box-text">
+        <!-- Si en tu TS guardas ya toppings seleccionados en selectedToppings,
+             podríamos hacer un condicional para mostrar “X toppings seleccionados”
+             en lugar de “Seleccionar”:
+             Ej: 
+             {{ selectedToppings.length > 0 
+                 ? (selectedToppings.length + ' toppings') 
+                 : 'Seleccionar toppings' 
+             }}
+         -->
+        {{ selectedToppings && selectedToppings.length
+            ? (selectedToppings.length + ' seleccionados')
+            : 'Seleccionar' }}
+      </span>
+      <!-- Icono de flecha para indicar “ir a” (puedes cambiar la ruta si necesitas otro SVG) -->
+      <svg
+        class="co-box-arrow"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
       >
-        <img
-          [src]="t.imagen_url || 'assets/default-topping.png'"
-          alt="{{ t.nombre }}"
-          class="co-card-img"
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 5l7 7-7 7"
         />
-        <span class="co-card-label">{{ t.nombre }}</span>
-      </div>
+      </svg>
     </div>
 
-    <!-- Sección de Tamaños -->
-    <h2 class="co-section-title">Tamaños</h2>
-    <div class="co-cards-grid">
+    <!-- 4) Bloque “Tamaños”: mostramos cards para cada tamaño disponible -->
+    <div class="co-section-label">Tamaño</div>
+    <div *ngIf="errorMsg" class="co-error">{{ errorMsg }}</div>
+    <div *ngIf="!errorMsg" class="co-sizes-grid">
       <div
-        *ngFor="let s of sizes"
         class="co-card-item"
+        *ngFor="let s of sizes"
         [class.selected]="isSizeSelected(s)"
         (click)="selectSize(s)"
       >
@@ -47,7 +64,7 @@
       </div>
     </div>
 
-    <!-- Botón para agregar al carrito -->
+    <!-- 5) Botón principal para agregar al carrito -->
     <button class="co-btn-primary" (click)="addToCart()">
       Agregar al pedido
     </button>

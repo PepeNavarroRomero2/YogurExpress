@@ -1,64 +1,60 @@
 <!-- src/app/components/user/login-register/login-register.component.html -->
-<div class="lr-wrapper">
-  <div class="lr-card">
-    <!-- Título dinámico según modo -->
-    <h1 class="lr-title">
+<div class="login-container">
+  <div class="login-card">
+    <!-- Título dinámico según el modo (Login vs Registro) -->
+    <h2 class="login-title">
       {{ isLoginMode ? 'Login / Registro' : 'Registro' }}
-    </h1>
+    </h2>
 
-    <form (ngSubmit)="onSubmit()" class="lr-form">
-      <!-- Si NO es login (es decir, estamos en modo ‘Registro’), mostramos campo Nombre -->
-      <div class="lr-form-group" *ngIf="!isLoginMode">
-        <label for="name" class="lr-label">Nombre:</label>
+    <form (ngSubmit)="onSubmit()">
+      <!-- Si NO es Login (es decir, estamos en modo “Registro”), mostramos el campo Nombre -->
+      <div *ngIf="!isLoginMode" class="form-group">
+        <label for="name">Nombre</label>
         <input
-          type="text"
           id="name"
           name="name"
-          class="lr-input"
+          type="text"
           [(ngModel)]="name"
           required
         />
       </div>
 
       <!-- Campo Email -->
-      <div class="lr-form-group">
-        <label for="email" class="lr-label">Correo electrónico:</label>
+      <div class="form-group">
+        <label for="email">Correo electrónico</label>
         <input
-          type="email"
           id="email"
           name="email"
-          class="lr-input"
+          type="email"
           [(ngModel)]="email"
           required
         />
       </div>
 
-      <!-- Campo Contraseña -->
-      <div class="lr-form-group">
-        <label for="password" class="lr-label">Contraseña:</label>
+      <!-- Campo Password -->
+      <div class="form-group">
+        <label for="password">Contraseña</label>
         <input
-          type="password"
           id="password"
           name="password"
-          class="lr-input"
+          type="password"
           [(ngModel)]="password"
           required
         />
       </div>
 
-      <!-- Botón principal: cambia el texto según modo -->
-      <button type="submit" class="lr-btn-primary">
-        {{ isLoginMode ? 'Entrar' : 'Registrarse' }}
+      <!-- Botón principal: “Continuar” si es Login, “Registrarse” si es Registro -->
+      <button class="btn-primary" type="submit">
+        {{ isLoginMode ? 'Continuar' : 'Registrarse' }}
       </button>
     </form>
 
     <!-- Link para alternar entre Login y Registro -->
-    <p class="lr-toggle-text">
+    <p class="toggle-text">
       <span *ngIf="isLoginMode">¿No tienes cuenta? </span>
       <span *ngIf="!isLoginMode">¿Ya tienes cuenta? </span>
       <a
         href="#"
-        class="lr-link-toggle"
         (click)="toggleMode(); $event.preventDefault();"
       >
         {{ isLoginMode ? 'Regístrate' : 'Inicia Sesión' }}

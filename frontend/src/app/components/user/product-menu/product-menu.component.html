@@ -1,40 +1,42 @@
-<!-- frontend/src/app/components/user/product-menu/product-menu.component.html -->
+<!-- src/app/components/user/product-menu/product-menu.component.html -->
 
 <div class="menu-wrapper">
   <div class="menu-card">
-    <!-- Título principal -->
-    <h1 class="menu-title">Menú de productos</h1>
+    <!-- 1) Título centrado -->
+    <h2 class="menu-title">Menú de productos</h2>
 
-    <!-- Mensaje de error si no se cargan sabores -->
-    <div *ngIf="errorMsg" class="menu-error">{{ errorMsg }}</div>
+    <!-- 2) Mensaje de error si no se cargan sabores -->
+    <div *ngIf="errorMsg" class="menu-error">
+      {{ errorMsg }}
+    </div>
 
-    <!-- GRID DE SABORES -->
+    <!-- 3) Grilla de tarjetas de “sabores” -->
     <div *ngIf="!errorMsg" class="cards-grid">
       <div
         class="card-item"
         *ngFor="let flavor of sabores"
         (click)="viewFlavorInfo(flavor)"
       >
-        <div class="card-image">
-          <img
-            [src]="flavor.imagen_url || 'assets/default-flavor.png'"
-            alt="{{ flavor.nombre }}"
-          />
-        </div>
-        <div class="card-text">
-          <h3 class="card-title">{{ flavor.nombre }}</h3>
-          <a
-            class="card-info-link"
-            (click)="viewFlavorInfo(flavor); $event.stopPropagation();"
-          >
-            Información
-          </a>
-        </div>
+        <img
+          class="card-icon"
+          [src]="
+            flavor.imagen_url
+              ? flavor.imagen_url
+              : 'assets/images/placeholder-item.png'
+          "
+          alt="{{ flavor.nombre }}"
+        />
+        <h3 class="card-name">{{ flavor.nombre }}</h3>
+        <a
+          class="info-link"
+          (click)="viewFlavorInfo(flavor); $event.stopPropagation()"
+          >Información</a
+        >
       </div>
     </div>
 
-    <!-- Botones inferiores: Historial, Puntos, Cerrar Sesión -->
-    <div class="menu-buttons">
+    <!-- 4) Botones inferiores: Historial / Mis Puntos / Cerrar Sesión -->
+    <div class="bottom-buttons">
       <button class="btn-secondary" (click)="goToHistory()">
         Historial
       </button>

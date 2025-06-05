@@ -87,22 +87,61 @@
     }
   }
 
+  /* Continuamos usando .btn-primary de Angular que ya tienes */
   .btn-primary {
     display: block;
     width: 100%;
     padding: 0.75rem;
-    background-color: #28a745;
+    background-color: #3b82f6; /* Azul primario consistente con otras vistas */
     color: #ffffff;
     font-size: 1rem;
     font-weight: 600;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
     text-align: center;
     transition: background-color 0.2s ease-in-out;
+    margin-bottom: 1rem; /* separación antes de PayPal */
   }
 
   .btn-primary:hover {
-    background-color: #218838;
+    background-color: #2563eb; /* Azul más oscuro en hover */
+  }
+
+  /* CONTENEDOR DEL BOTÓN PAYPAL: que ocupe el 100% */
+  #paypal-button-container {
+    width: 100%;
+    margin-top: 1rem;
+  }
+}
+
+/* Media queries para pantallas muy pequeñas */
+@media (max-width: 400px) {
+  .payment-confirmation-container {
+    padding: 1rem;
+    margin: 1rem auto;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .order-summary {
+    h2 {
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+    .summary-item {
+      padding: 0.4rem 0;
+    }
+    .summary-item .label,
+    .summary-item .value {
+      font-size: 0.95rem;
+    }
+    .total-line .label,
+    .total-line .value {
+      font-size: 1rem;
+    }
   }
 }
