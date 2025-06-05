@@ -1,62 +1,128 @@
-<div class="container">
-  <div class="header">
+<!-- src/app/components/admin/manage-products/manage-products.component.html -->
+
+<div class="products-wrapper">
+  <header class="products-header">
     <h1>Manage Products</h1>
-    <button class="btn btn-secondary" (click)="onCreate()">New Product</button>
+    <button class="btn-create" (click)="onCreate()">New Product</button>
+  </header>
+
+  <!-- Formulario de creación / edición -->
+  <div *ngIf="showForm">
+    <form #f="ngForm" (ngSubmit)="onSave(f)" class="product-form">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input
+          id="name"
+          name="name"
+          class="form-input"
+          required
+          [(ngModel)]="product.nombre"
+        />
+      </div>
+
+      <div class="form-group inline-group">
+        <div class="form-group--half">
+          <label for="type">Type</label>
+          <select
+            id="type"
+            name="type"
+            class="form-select"
+            required
+            [(ngModel)]="product.tipo"
+          >
+            <option value="sabor">Sabor</option>
+            <option value="topping">Topping</option>
+            <option value="tamanos">Tamaño</option>
+          </select>
+        </div>
+        <div class="form-group--half">
+          <label for="price">Price</label>
+          <input
+            id="price"
+            name="price"
+            class="form-input"
+            required
+            [(ngModel)]="product.precio"
+            type="number"
+            step="0.01"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="descripcion">Description</label>
+        <input
+          id="descripcion"
+          name="descripcion"
+          class="form-input"
+          [(ngModel)]="product.descripcion"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="alergenos">Allergens</label>
+        <input
+          id="alergenos"
+          name="alergenos"
+          class="form-input"
+          [(ngModel)]="product.alergenos"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="imagen">Image URL</label>
+        <input
+          id="imagen"
+          name="imagen"
+          class="form-input"
+          [(ngModel)]="product.imagen_url"
+        />
+      </div>
+
+      <div class="buttons-group">
+        <button type="submit" class="btn-save">
+          {{ isEditing ? 'Save Changes' : 'Create' }}
+        </button>
+        <button type="button" class="btn-cancel" (click)="onCancel()">Cancel</button>
+      </div>
+    </form>
   </div>
 
-  <!-- Formulario -->
-  <form *ngIf="showForm" #f="ngForm" (ngSubmit)="onSave(f)" class="form">
-    <div class="form-group">
-      <label>Name</label>
-      <input name="name" class="form-input" required [(ngModel)]="product.name">
-    </div>
-    <div class="form-group">
-      <label>Type</label>
-      <select name="type" class="form-select" required [(ngModel)]="product.type">
-        <option value="" disabled>Select</option>
-        <option *ngFor="let t of types" [value]="t">{{t}}</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Price</label>
-      <input name="price" type="number" min="0" class="form-input" required [(ngModel)]="product.price">
-    </div>
-    <div class="form-group">
-      <label>Image</label>
-      <label class="btn-upload">
-        Upload
-        <input type="file" hidden (change)="onFileChange($event)">
-      </label>
-      <img *ngIf="product.imagePreview" [src]="product.imagePreview" class="preview">
-    </div>
-    <div class="form-actions">
-      <button class="btn btn-primary" type="submit" [disabled]="f.invalid">
-        {{ editingId != null ? 'Update' : 'Save' }}
-      </button>
-      <button class="btn btn-secondary" type="button" (click)="onCancel(f)">
-        Cancel
-      </button>
-    </div>
-  </form>
-
   <!-- Tabla de productos -->
-  <table *ngIf="products.length" class="table">
-    <thead>
-      <tr><th>Name</th><th>Type</th><th>Price</th><th>Image</th><th>Actions</th></tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let p of products">
-        <td>{{p.name}}</td>
-        <td>{{p.type}}</td>
-        <td>{{p.price | currency}}</td>
-        <td>
-          <img *ngIf="p.imagePreview" [src]="p.imagePreview" class="thumb">
-        </td>
-        <td>
-          <button class="btn btn-sm" (click)="onEdit(p)">Edit</button>
-          <button class="btn btn-sm btn-danger" (click)="onDelete(p.id)">Del</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div *ngIf="!showForm" class="products-list-placeholder">
+    <div class="table-wrapper">
+      <table class="products-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Price</th>
+            <th>Description</th>
+            <th>Allergens</th>
+            <th>Image</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of products">
+            <td>{{ p.nombre }}</td>
+            <td>{{ p.tipo }}</td>
+            <td>{{ p.precio | currency:'EUR':'symbol' }}</td>
+            <td>{{ p.descripcion }}</td>
+            <td>{{ p.alergenos }}</td>
+            <td>
+              <img *ngIf="p.imagen_url" [src]="p.imagen_url" class="thumb" />
+            </td>
+            <td class="actions-cell">
+              <button class="btn-edit" (click)="onEdit(p)">Edit</button>
+              <button class="btn-delete" (click)="onDelete(p.id_producto)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div *ngIf="!products.length" class="no-products">
+        No products yet.
+      </div>
+    </div>
+  </div>
 </div>

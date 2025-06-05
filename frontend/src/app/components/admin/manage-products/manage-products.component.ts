@@ -1,89 +1,170 @@
-import { Component }    from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule, NgForm }  from '@angular/forms';
-import Swal             from 'sweetalert2';
+// src/app/components/admin/manage-products/manage-products.component.ts
 
-interface Product {
-  id: number;
-  name: string;
-  type: string;
-  price: number;
-  image: File | null;
-  imagePreview: string | null;
-}
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule }  from '@angular/forms';
+import Swal from 'sweetalert2';
+
+import { ProductoService, Producto } from '../../../services/producto.service';
 
 @Component({
   selector: 'app-manage-products',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './manage-products.component.html',
-  styleUrls: ['./manage-products.component.scss']
+  styleUrls: ['./manage-products.component.scss'],
 })
-export class ManageProductsComponent {
-  products: Product[] = [];
-  nextId = 1;
+export class ManageProductsComponent implements OnInit {
+  products: Producto[] = [];
 
-  // Form state
-  showForm = false;
-  editingId: number | null = null;
-  product: Product = this.resetProduct();
+  showForm: boolean = false;
+  isEditing: boolean = false;
+  editingProductId: number | null = null;
 
-  types = ['Flavor','Topping','Other'];
+  // Modelo de formulario
+  product: {
+    nombre: string;
+    tipo: 'sabor' | 'topping' | 'tamanos';
+    precio: number;
+    descripcion?: string;
+    alergenos?: string;
+    imagen_url?: string;
+  } = {
+    nombre: '',
+    tipo: 'sabor',
+    precio: 0,
+    descripcion: '',
+    alergenos: '',
+    imagen_url: ''
+  };
 
-  private resetProduct(): Product {
-    return { id: 0, name:'', type:'', price:0, image:null, imagePreview:null };
+  constructor(private productoService: ProductoService) {}
+
+  ngOnInit(): void {
+    this.loadProducts();
   }
 
-  onFileChange(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (!input.files?.length) return;
-    const file = input.files[0];
-    this.product.image = file;
-    const reader = new FileReader();
-    reader.onload = () => this.product.imagePreview = reader.result as string;
-    reader.readAsDataURL(file);
+  /** 1. Carga todos los productos desde el backend */
+  loadProducts(): void {
+    this.productoService.getProductos().subscribe({
+      next: (data: Producto[]) => {
+        this.products = data;
+      },
+      error: (err) => {
+        console.error('Error cargando productos', err);
+        Swal.fire('Error', 'No se pudieron cargar los productos.', 'error');
+      },
+    });
   }
 
-  onCreate() {
-    this.editingId = null;
-    this.product = this.resetProduct();
+  /** 2. Abre el formulario en modo “crear”. */
+  onCreate(): void {
     this.showForm = true;
+    this.isEditing = false;
+    this.editingProductId = null;
+    this.product = {
+      nombre: '',
+      tipo: 'sabor',
+      precio: 0,
+      descripcion: '',
+      alergenos: '',
+      imagen_url: ''
+    };
   }
 
-  onEdit(p: Product) {
-    this.editingId = p.id;
-    this.product = { ...p };          // copia los datos
+  /** 3. Abre el formulario con datos para editar. */
+  onEdit(p: Producto): void {
     this.showForm = true;
+    this.isEditing = true;
+    this.editingProductId = p.id_producto;
+    this.product = {
+      nombre: p.nombre,
+      tipo: p.tipo,
+      precio: p.precio,
+      descripcion: p.descripcion || '',
+      alergenos: p.alergenos || '',
+      imagen_url: p.imagen_url || ''
+    };
   }
 
-  onDelete(id: number) {
-    if (!confirm('¿Eliminar este producto?')) return;
-    this.products = this.products.filter(p => p.id !== id);
-    Swal.fire('Eliminado','Producto borrado','info');
+  /** 4. Cancela creación/edición. */
+  onCancel(): void {
+    this.showForm = false;
+    this.isEditing = false;
+    this.editingProductId = null;
   }
 
-  onSave(form: NgForm) {
-    if (form.invalid) return;
-
-    if (this.editingId != null) {
-      // editar
-      this.products = this.products.map(p =>
-        p.id === this.editingId ? { ...this.product, id: p.id } : p
-      );
-      Swal.fire('Actualizado','Producto modificado','success');
-    } else {
-      // crear
-      const newProduct = { ...this.product, id: this.nextId++ };
-      this.products.push(newProduct);
-      Swal.fire('Guardado','Producto añadido','success');
+  /** 5. Guarda: crea o actualiza según el modo. */
+  onSave(form: any): void {
+    if (form.invalid) {
+      Swal.fire('Error', 'Por favor, rellena todos los campos obligatorios.', 'error');
+      return;
     }
 
-    form.resetForm(this.resetProduct());
-    this.showForm = false;
+    if (this.isEditing && this.editingProductId != null) {
+      // MODO EDICIÓN
+      this.productoService.updateProducto(this.editingProductId, {
+        nombre: this.product.nombre,
+        tipo: this.product.tipo,
+        precio: this.product.precio,
+        descripcion: this.product.descripcion,
+        alergenos: this.product.alergenos,
+        imagen_url: this.product.imagen_url
+      }).subscribe({
+        next: () => {
+          Swal.fire('Editado', 'Producto actualizado correctamente.', 'success');
+          this.loadProducts();
+          this.onCancel();
+        },
+        error: (err) => {
+          console.error('Error actualizando producto', err);
+          Swal.fire('Error', 'No se pudo actualizar el producto.', 'error');
+        }
+      });
+    } else {
+      // MODO CREACIÓN
+      this.productoService.createProducto({
+        nombre: this.product.nombre,
+        tipo: this.product.tipo,
+        precio: this.product.precio,
+        descripcion: this.product.descripcion,
+        alergenos: this.product.alergenos,
+        imagen_url: this.product.imagen_url
+      }).subscribe({
+        next: () => {
+          Swal.fire('Creado', 'Producto creado correctamente.', 'success');
+          this.loadProducts();
+          this.onCancel();
+        },
+        error: (err) => {
+          console.error('Error creando producto', err);
+          Swal.fire('Error', 'No se pudo crear el producto.', 'error');
+        }
+      });
+    }
   }
 
-  onCancel(form: NgForm) {
-    form.resetForm(this.resetProduct());
-    this.showForm = false;
+  /** 6. Elimina un producto. */
+  onDelete(id: number): void {
+    Swal.fire({
+      title: '¿Estás seguro de eliminar este producto?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.productoService.deleteProducto(id).subscribe({
+          next: () => {
+            Swal.fire('Eliminado', 'Producto eliminado.', 'success');
+            this.loadProducts();
+          },
+          error: (err) => {
+            console.error('Error eliminando producto', err);
+            Swal.fire('Error', 'No se pudo eliminar el producto.', 'error');
+          },
+        });
+      }
+    });
   }
 }

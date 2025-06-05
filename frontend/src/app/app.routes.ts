@@ -1,5 +1,8 @@
+// frontend/src/app/app.routes.ts
+
 import { Routes } from '@angular/router';
 
+// IMPORTANTE: agregamos "export" para que otros archivos puedan importarlo
 export const routes: Routes = [
   {
     path: 'admin',
