@@ -1,15 +1,21 @@
-<!-- frontend/src/app/components/user/points/points.component.html -->
+<!-- src/app/components/user/points/points.component.html -->
 
 <div class="points-container">
-  <h1>Mis Puntos</h1>
+  <h2>Mis Puntos</h2>
 
   <!-- Mensaje de error si falla la carga -->
-  <div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
+  <div *ngIf="errorMsg" class="error">
+    {{ errorMsg }}
+  </div>
 
   <!-- Mostrar puntos si no hay error -->
   <div *ngIf="!errorMsg" class="points-info">
-    <p><strong>Tienes:</strong> {{ puntos }} puntos</p>
-    <button class="btn-primary" (click)="router.navigate(['/user/menu'])">
+    <div class="points-balance">
+      <span class="points-number">{{ puntos }}</span>
+      <span class="points-label">Puntos acumulados</span>
+    </div>
+
+    <button class="btn-back" (click)="router.navigate(['/user/menu'])">
       Volver al Menú
     </button>
   </div>
