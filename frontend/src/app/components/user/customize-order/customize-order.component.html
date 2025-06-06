@@ -1,6 +1,10 @@
 <!-- src/app/components/user/customize-order/customize-order.component.html -->
+
 <div class="co-wrapper">
   <div class="co-card">
+    <!-- Botón Volver -->
+    <button class="co-btn-back" (click)="goBack()">← Volver</button>
+
     <!-- 1) Encabezado principal -->
     <h2 class="co-page-title">Personalizar Pedido</h2>
 
@@ -19,20 +23,12 @@
     <div class="co-section-label">Toppings</div>
     <div class="co-box co-box-link" (click)="selectToppings()">
       <span class="co-box-text">
-        <!-- Si en tu TS guardas ya toppings seleccionados en selectedToppings,
-             podríamos hacer un condicional para mostrar “X toppings seleccionados”
-             en lugar de “Seleccionar”:
-             Ej: 
-             {{ selectedToppings.length > 0 
-                 ? (selectedToppings.length + ' toppings') 
-                 : 'Seleccionar toppings' 
-             }}
-         -->
-        {{ selectedToppings && selectedToppings.length
-            ? (selectedToppings.length + ' seleccionados')
-            : 'Seleccionar' }}
+        {{
+          selectedToppings.length
+            ? selectedToppings.length + ' seleccionados'
+            : 'Seleccionar'
+        }}
       </span>
-      <!-- Icono de flecha para indicar “ir a” (puedes cambiar la ruta si necesitas otro SVG) -->
       <svg
         class="co-box-arrow"
         xmlns="http://www.w3.org/2000/svg"
@@ -57,16 +53,25 @@
         class="co-card-item"
         *ngFor="let s of sizes"
         [class.selected]="isSizeSelected(s)"
-        (click)="selectSize(s)"
+        [class.disabled]="s.cantidad_disponible === 0"
+        (click)="s.cantidad_disponible > 0 && selectSize(s)"
       >
         <span class="co-card-label">{{ s.nombre }}</span>
         <span class="co-card-price">€{{ s.precio.toFixed(2) }}</span>
+        <div *ngIf="s.cantidad_disponible === 0" class="co-out-of-stock">
+          Agotado
+        </div>
       </div>
     </div>
 
     <!-- 5) Botón principal para agregar al carrito -->
-    <button class="co-btn-primary" (click)="addToCart()">
-      Agregar al pedido
-    </button>
+    <button class="co-btn-primary" (click)="addToCart()">Agregar al pedido</button>
+
+    <!-- 6) Botones inferiores (Historial, Mis Puntos, Cerrar Sesión) -->
+    <div class="co-footer-buttons">
+      <button (click)="goToHistory()">Historial</button>
+      <button (click)="goToPoints()">Mis Puntos</button>
+      <button (click)="logout()">Cerrar Sesión</button>
+    </div>
   </div>
 </div>

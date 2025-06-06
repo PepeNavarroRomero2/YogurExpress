@@ -1,11 +1,14 @@
-// frontend/src/app/components/user/customize-order/customize-order.component.ts
+// src/app/components/user/customize-order/customize-order.component.ts
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { Location } from '@angular/common';
 import Swal from 'sweetalert2';
+
 import { Flavor, ProductService } from '../../../services/product.service';
 import { CartService } from '../../../services/cart.service';
+import { InventoryService, InventoryItem } from '../../../services/inventory.service';
 
 @Component({
   selector: 'app-customize-order',
@@ -18,61 +21,110 @@ import { CartService } from '../../../services/cart.service';
   styleUrls: ['./customize-order.component.scss']
 })
 export class CustomizeOrderComponent implements OnInit {
-  // El sabor base que llegó desde el menú
-  flavor!: Flavor;
-  // Arrays de toppings y tamaños (cargados desde la API)
-  toppings: Flavor[] = [];
-  sizes: Flavor[] = [];
+  // Flavor seleccionado previamente (sabor)
+  flavor!: Flavor & { cantidad_disponible: number };
 
-  // Lo que el usuario ha seleccionado
-  selectedToppings: Flavor[] = [];
-  selectedSize?: Flavor;
+  // Listas cargadas desde el backend + cantidad disponible
+  toppings: (Flavor & { cantidad_disponible: number })[] = [];
+  sizes: (Flavor & { cantidad_disponible: number })[] = [];
 
-  // Mensaje de error general (por si falla la carga de toppings o tamaños)
+  // Selecciones del usuario
+  selectedToppings: (Flavor & { cantidad_disponible: number })[] = [];
+  selectedSize?: Flavor & { cantidad_disponible: number };
+
+  // Mensaje de error si no carga toppings/tamaños
   errorMsg: string = '';
 
+  // Mapa temporal { id_producto → cantidad_disponible } para acceso rápido
+  private invMap = new Map<number, number>();
+
   constructor(
+    private location: Location,
     private productService: ProductService,
     private cartService: CartService,
+    private inventoryService: InventoryService,
     private router: Router
   ) { }
 
   ngOnInit(): void {
-    // Recuperamos el sabor guardado en el carrito; si no existe, volvemos al menú
+    // 1) recuperar el sabor base guardado en CartService
     const saved = this.cartService.getFlavor();
     if (!saved) {
+      // Si no hay sabor guardado, volvemos al menú de sabores
       this.router.navigate(['/user/menu']);
       return;
     }
-    this.flavor = saved;
+    // Asignamos el flavor con cantidad_disponible=0 (se actualizará luego)
+    this.flavor = { ...saved, cantidad_disponible: 0 };
 
-    // Cargamos toppings y tamaños desde el servicio
-    this.productService.getToppings().subscribe({
-      next: data => this.toppings = data,
-      error: () => this.errorMsg = 'No se pudieron cargar los toppings'
-    });
-    this.productService.getSizes().subscribe({
-      next: data => this.sizes = data,
-      error: () => this.errorMsg = 'No se pudieron cargar los tamaños'
+    // 2) cargamos todo el inventario
+    this.inventoryService.getInventory().subscribe({
+      next: (invList: InventoryItem[]) => {
+        invList.forEach(it => this.invMap.set(it.id_producto, it.cantidad_disponible));
+        // Ahora podemos asignar cantidad_disponible al flavor
+        const qty = this.invMap.get(this.flavor.id_producto) ?? 0;
+        this.flavor.cantidad_disponible = qty;
+
+        // 3) cargamos toppings y aplicamos cantidad_disponible
+        this.productService.getToppings().subscribe({
+          next: (tops: Flavor[]) => {
+            this.toppings = tops.map(t => ({
+              ...t,
+              cantidad_disponible: this.invMap.get(t.id_producto) ?? 0
+            }));
+          },
+          error: () => {
+            this.errorMsg = 'No se pudieron cargar los toppings.';
+            this.toppings = [];
+          }
+        });
+
+        // 4) cargamos tamaños y aplicamos cantidad_disponible
+        this.productService.getSizes().subscribe({
+          next: (sz: Flavor[]) => {
+            this.sizes = sz.map(s => ({
+              ...s,
+              cantidad_disponible: this.invMap.get(s.id_producto) ?? 0
+            }));
+            // Preseleccionar el primer tamaño disponible (si existe)
+            const primerDisp = this.sizes.find(s => s.cantidad_disponible > 0);
+            if (primerDisp) {
+              this.selectedSize = primerDisp;
+            }
+          },
+          error: () => {
+            this.errorMsg = 'No se pudieron cargar los tamaños.';
+            this.sizes = [];
+          }
+        });
+
+      },
+      error: (err) => {
+        console.error('Error cargando inventario:', err);
+        this.errorMsg = 'No se pudo cargar inventario.';
+        // Aunque falle inventario, intentamos cargar toppings y tamaños con qty=0
+        this.productService.getToppings().subscribe();
+        this.productService.getSizes().subscribe();
+      }
     });
   }
 
-  /**
-   * Abre un diálogo de SweetAlert2 con checkboxes generados
-   * dinámicamente para cada topping, de modo que se vean correctamente.
-   */
-  selectToppings() {
-    // Generamos un bloque HTML con checkbox por cada topping
-    let htmlCheckboxes = '<div style="text-align:left;">';
+  /** Navegar a la vista anterior */
+  goBack(): void {
+    this.location.back();
+  }
+
+  /** Abre un SweetAlert2 para seleccionar toppings con checkboxes */
+  selectToppings(): void {
+    let html = '<div style="text-align:left;">';
     this.toppings.forEach(t => {
-      // Cada checkbox lleva un id único: topping-<id_producto>
-      htmlCheckboxes += `
+      html += `
         <div style="margin-bottom: 0.5rem;">
           <input type="checkbox"
                  id="topping-${t.id_producto}"
                  name="topping"
                  value="${t.id_producto}"
-                 style="margin-right: 0.5rem;" 
+                 style="margin-right: 0.5rem;"
                  ${this.isToppingSelected(t) ? 'checked' : ''} />
           <label for="topping-${t.id_producto}" style="cursor: pointer;">
             ${t.nombre}
@@ -80,71 +132,131 @@ export class CustomizeOrderComponent implements OnInit {
         </div>
       `;
     });
-    htmlCheckboxes += '</div>';
+    html += '</div>';
 
     Swal.fire({
       title: 'Seleccionar Toppings',
-      html: htmlCheckboxes,
+      html: html,
       showCancelButton: true,
       confirmButtonText: 'Aceptar',
       cancelButtonText: 'Cancelar',
       focusConfirm: false,
       preConfirm: () => {
-        // Recogemos todos los checkboxes marcados y devolvemos sus IDs
         const checkedBoxes = Array.from(
           document.querySelectorAll('input[name="topping"]:checked')
         ) as HTMLInputElement[];
-        const selectedIds = checkedBoxes.map(cb => Number(cb.value));
-        return selectedIds;
+        return checkedBoxes.map(cb => Number(cb.value));
       }
     }).then(result => {
       if (result.isConfirmed && Array.isArray(result.value)) {
         const selectedIds: number[] = result.value as number[];
-        // Filtramos el array this.toppings para obtener los objetos seleccionados
         this.selectedToppings = this.toppings.filter(t => selectedIds.includes(t.id_producto));
       }
     });
   }
 
-  /** Marca un tamaño como seleccionado (solo uno) */
-  selectSize(s: Flavor) {
-    this.selectedSize = s;
+  /** Selecciona un tamaño (solo si hay stock) */
+  selectSize(s: Flavor & { cantidad_disponible: number }): void {
+    if (s.cantidad_disponible > 0) {
+      this.selectedSize = s;
+    }
   }
 
-  /** Devuelve true si ese topping ya está en selectedToppings */
-  isToppingSelected(t: Flavor): boolean {
+  /** Alterna la selección de un topping (solo si hay stock) */
+  toggleToppingSelection(t: Flavor & { cantidad_disponible: number }): void {
+    if (t.cantidad_disponible <= 0) {
+      return;
+    }
+    const idx = this.selectedToppings.findIndex(x => x.id_producto === t.id_producto);
+    if (idx >= 0) {
+      this.selectedToppings.splice(idx, 1);
+    } else {
+      this.selectedToppings.push(t);
+    }
+  }
+
+  /** Indica si un topping ya está en selectedToppings */
+  isToppingSelected(t: Flavor & { cantidad_disponible: number }): boolean {
     return this.selectedToppings.some(x => x.id_producto === t.id_producto);
   }
 
-  /** Devuelve true si ese tamaño coincide con selectedSize */
-  isSizeSelected(s: Flavor): boolean {
+  /** Indica si ese tamaño es el seleccionado */
+  isSizeSelected(s: Flavor & { cantidad_disponible: number }): boolean {
     return this.selectedSize?.id_producto === s.id_producto;
   }
 
-  /** Al hacer clic en “Agregar al pedido” */
-  addToCart() {
-    if (!this.selectedSize) {
-      Swal.fire('Error', 'Debes seleccionar un tamaño antes de continuar.', 'error');
+  /**
+   * Al hacer clic en "Agregar al pedido":
+   *  - Verifica stock de flavor, tamaño y toppings seleccionados.
+   *  - Guarda en CartService (sabores, toppings, tamaño).
+   *  - Redirige a /user/pickup
+   */
+  addToCart(): void {
+    // 1) verificar flavor (sabor)
+    if (!this.flavor || this.flavor.cantidad_disponible <= 0) {
+      Swal.fire('Error', 'El sabor seleccionado está agotado.', 'error');
       return;
     }
-    // Guardamos en el CartService lo seleccionado
-    this.cartService.setFlavor(this.flavor);
-    this.cartService.setToppings(this.selectedToppings);
-    this.cartService.setSize(this.selectedSize);
-    // Navegamos a la siguiente pantalla (Pickup / Select Time)
+
+    // 2) verificar size (tamaño)
+    if (!this.selectedSize || this.selectedSize.cantidad_disponible <= 0) {
+      Swal.fire('Error', 'Debes seleccionar un tamaño disponible.', 'error');
+      return;
+    }
+
+    // 3) verificar toppings seleccionados
+    for (const top of this.selectedToppings) {
+      if (top.cantidad_disponible <= 0) {
+        Swal.fire('Error', `El topping "${top.nombre}" está agotado.`, 'error');
+        return;
+      }
+    }
+
+    // 4) todo ok, guardamos en CartService
+    this.cartService.setFlavor({ 
+      id_producto: this.flavor.id_producto,
+      nombre: this.flavor.nombre,
+      tipo: this.flavor.tipo,
+      precio: this.flavor.precio,
+      descripcion: this.flavor.descripcion,
+      alergenos: this.flavor.alergenos,
+      imagen_url: this.flavor.imagen_url
+    });
+    // toppings (incluye tipo)
+    this.cartService.setToppings(this.selectedToppings.map(t => ({
+      id_producto: t.id_producto,
+      nombre: t.nombre,
+      tipo: t.tipo,
+      precio: t.precio,
+      descripcion: t.descripcion,
+      alergenos: t.alergenos,
+      imagen_url: t.imagen_url
+    })));
+    // tamaño (incluye tipo)
+    this.cartService.setSize({ 
+      id_producto: this.selectedSize.id_producto,
+      nombre: this.selectedSize.nombre,
+      tipo: this.selectedSize.tipo,
+      precio: this.selectedSize.precio,
+      descripcion: this.selectedSize.descripcion,
+      alergenos: this.selectedSize.alergenos,
+      imagen_url: this.selectedSize.imagen_url
+    });
+
+    // 5) navegamos a pantalla de recogida (pickup)
     this.router.navigate(['/user/pickup']);
   }
 
-  /** Botones inferiores: mantienen su funcionalidad original */
-  goToHistory() {
+  /** Redirecciones de botones inferiores (Historial, Mis Puntos, Cerrar Sesión) */
+  goToHistory(): void {
     this.router.navigate(['/user/history']);
   }
 
-  goToPoints() {
+  goToPoints(): void {
     this.router.navigate(['/user/points']);
   }
 
-  logout() {
+  logout(): void {
     Swal.fire({
       title: '¿Cerrar sesión?',
       text: 'Se borrará tu sesión actual.',
