@@ -2,7 +2,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule }  from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import Swal from 'sweetalert2';
 
 import { ProductoService, Producto } from '../../../services/producto.service';
@@ -21,7 +21,7 @@ export class ManageProductsComponent implements OnInit {
   isEditing: boolean = false;
   editingProductId: number | null = null;
 
-  // Modelo de formulario
+  // Modelo de formulario (incluye cantidad_disponible para inventario)
   product: {
     nombre: string;
     tipo: 'sabor' | 'topping' | 'tamanos';
@@ -29,13 +29,15 @@ export class ManageProductsComponent implements OnInit {
     descripcion?: string;
     alergenos?: string;
     imagen_url?: string;
+    cantidad_disponible: number;
   } = {
     nombre: '',
     tipo: 'sabor',
     precio: 0,
     descripcion: '',
     alergenos: '',
-    imagen_url: ''
+    imagen_url: '',
+    cantidad_disponible: 0
   };
 
   constructor(private productoService: ProductoService) {}
@@ -68,7 +70,8 @@ export class ManageProductsComponent implements OnInit {
       precio: 0,
       descripcion: '',
       alergenos: '',
-      imagen_url: ''
+      imagen_url: '',
+      cantidad_disponible: 0
     };
   }
 
@@ -83,7 +86,8 @@ export class ManageProductsComponent implements OnInit {
       precio: p.precio,
       descripcion: p.descripcion || '',
       alergenos: p.alergenos || '',
-      imagen_url: p.imagen_url || ''
+      imagen_url: p.imagen_url || '',
+      cantidad_disponible: 0 // al editar, no mostramos inventario, se mantiene en backend
     };
   }
 
@@ -95,22 +99,25 @@ export class ManageProductsComponent implements OnInit {
   }
 
   /** 5. Guarda: crea o actualiza según el modo. */
-  onSave(form: any): void {
+  onSave(form: NgForm): void {
     if (form.invalid) {
       Swal.fire('Error', 'Por favor, rellena todos los campos obligatorios.', 'error');
       return;
     }
 
     if (this.isEditing && this.editingProductId != null) {
-      // MODO EDICIÓN
-      this.productoService.updateProducto(this.editingProductId, {
+      // MODO EDICIÓN: construimos un objeto con los campos que deben actualizarse
+      const payload: any = {
         nombre: this.product.nombre,
         tipo: this.product.tipo,
         precio: this.product.precio,
         descripcion: this.product.descripcion,
         alergenos: this.product.alergenos,
         imagen_url: this.product.imagen_url
-      }).subscribe({
+        // Si quisieras permitir editar el inventario aquí, descomenta:
+        // cantidad_disponible: this.product.cantidad_disponible
+      };
+      this.productoService.updateProducto(this.editingProductId, payload).subscribe({
         next: () => {
           Swal.fire('Editado', 'Producto actualizado correctamente.', 'success');
           this.loadProducts();
@@ -122,15 +129,17 @@ export class ManageProductsComponent implements OnInit {
         }
       });
     } else {
-      // MODO CREACIÓN
-      this.productoService.createProducto({
+      // MODO CREACIÓN: construimos el payload con inventario incluido
+      const payload: any = {
         nombre: this.product.nombre,
         tipo: this.product.tipo,
         precio: this.product.precio,
         descripcion: this.product.descripcion,
         alergenos: this.product.alergenos,
-        imagen_url: this.product.imagen_url
-      }).subscribe({
+        imagen_url: this.product.imagen_url,
+        cantidad_disponible: this.product.cantidad_disponible
+      };
+      this.productoService.createProducto(payload).subscribe({
         next: () => {
           Swal.fire('Creado', 'Producto creado correctamente.', 'success');
           this.loadProducts();

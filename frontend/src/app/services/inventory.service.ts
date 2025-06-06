@@ -1,43 +1,46 @@
-// frontend/src/app/services/inventory.service.ts
-
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
-// Definimos la misma interfaz que usa el componente de Inventario
+/**
+ * Ahora InventoryItem refleja lo que el backend devuelve:
+ *   - id_producto: number
+ *   - productName: string
+ *   - cantidad_disponible: number
+ */
 export interface InventoryItem {
-  id: number;
+  id_producto: number;
   productName: string;
-  quantity: number;
+  cantidad_disponible: number;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class InventoryService {
-  // Datos de ejemplo para que el componente muestre algo
-  private data: InventoryItem[] = [
-    { id: 1, productName: 'Strawberry Yogurt', quantity: 40 },
-    { id: 2, productName: 'Granola',        quantity: 15 },
-    { id: 3, productName: 'Chocolate Chips', quantity: 35 },
-  ];
+  private API_URL = 'http://localhost:3000/api';
 
-  constructor() {}
+  constructor(private http: HttpClient) {}
 
-  /** Devuelve el inventario completo (para filtrar en el frontend) */
+  /**
+   * GET /api/inventory
+   * Devuelve array de InventoryItem con { id_producto, productName, cantidad_disponible }
+   */
   getInventory(): Observable<InventoryItem[]> {
-    // Hacemos un clon para que el componente no modifique este array directo
-    return of(this.data.map(item => ({ ...item })));
+    return this.http.get<InventoryItem[]>(`${this.API_URL}/inventory`);
   }
 
   /**
-   * Actualiza la cantidad de un ítem del inventario.
-   * Como no hay backend, simplemente modificamos el array local y devolvemos un Observable vacío.
+   * PUT /api/inventory/:id_producto
+   * Actualiza cantidad_disponible de un producto.
    */
-  updateInventory(id: number, quantity: number): Observable<void> {
-    const item = this.data.find(i => i.id === id);
-    if (item) {
-      item.quantity = quantity;
-    }
-    return of(void 0);
+  updateInventory(
+    id_producto: number,
+    cantidad_disponible: number
+  ): Observable<void> {
+    return this.http.put<void>(
+      `${this.API_URL}/inventory/${id_producto}`,
+      { cantidad_disponible }
+    );
   }
 }

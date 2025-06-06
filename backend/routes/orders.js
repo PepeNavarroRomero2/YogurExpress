@@ -8,7 +8,7 @@ const router = express.Router();
 
 /**
  * POST /api/orders
- * Crea un nuevo pedido, guarda los detalles y suma puntos al usuario.
+ * Crea un nuevo pedido, valida inventario, guarda los detalles y suma puntos al usuario.
  *
  * Body esperado:
  *   {
@@ -19,30 +19,73 @@ const router = express.Router();
  *     hora_recogida: string    // por ejemplo "20:21:00"
  *   }
  *
- * Respuesta:
+ * Respuesta éxitos:
  *   {
  *     codigo_pedido: string,
  *     puntos_ganados: number
  *   }
+ *
+ * Errores posibles:
+ *   400 Bad Request → formato inválido / sin stock.
+ *   500 Internal Server Error → fallo interno.
  */
 router.post('/', authenticateToken, async (req, res) => {
   try {
     const { productos, hora_recogida } = req.body;
     const id_usuario = req.user.id_usuario;
 
-    // 1) Validaciones
+    // 1) Validaciones básicas de formato
     if (!Array.isArray(productos) || productos.length === 0) {
       return res.status(400).json({ error: 'Debe enviar al menos un producto.' });
     }
     if (typeof hora_recogida !== 'string' || !hora_recogida.trim()) {
       return res.status(400).json({ error: 'Debe enviar hora_recogida válida.' });
     }
+    for (const prod of productos) {
+      if (
+        typeof prod.id_producto !== 'number' ||
+        typeof prod.cantidad !== 'number' ||
+        prod.cantidad <= 0
+      ) {
+        return res.status(400).json({ error: 'Formato inválido en productos.' });
+      }
+    }
 
-    // 2) Generar un código de pedido único (aquí usamos timestamp)
+    // 2) ► PRE‐CHECK DE INVENTARIO: verificar que cada id_producto tenga stock suficiente
+    //    Construimos un Map para guardar cantidades actuales de inventario y evitar SELECTs repetidos.
+    const invMap = new Map(); // id_producto → cantidad_disponible
+
+    for (const { id_producto, cantidad } of productos) {
+      const { data: invRow, error: invError } = await supabase
+        .from('inventario')
+        .select('cantidad_disponible')
+        .eq('id_producto', id_producto)
+        .single();
+
+      if (invError) {
+        console.error(
+          `[Supabase] Error leyendo inventario de producto ${id_producto}:`,
+          invError
+        );
+        return res
+          .status(500)
+          .json({ error: 'Error interno verificando stock.' });
+      }
+
+      if (!invRow || invRow.cantidad_disponible < cantidad) {
+        return res.status(400).json({
+          error: `No hay stock suficiente para el producto ${id_producto}.`
+        });
+      }
+
+      invMap.set(id_producto, invRow.cantidad_disponible);
+    }
+
+    // 3) ► INSERTAR EL PEDIDO en la tabla "pedidos"
+    // Generar un código de pedido único (usamos timestamp como string)
     const codigoPedido = `${Date.now()}`;
-
-    // 3) Insertar en "pedidos" (todos los campos NOT NULL)
     const fechaActual = new Date().toISOString();
+
     const { data: insertedPedido, error: insertError } = await supabase
       .from('pedidos')
       .insert([
@@ -51,7 +94,7 @@ router.post('/', authenticateToken, async (req, res) => {
           fecha_hora: fechaActual,
           hora_recogida: hora_recogida,
           estado: 'pendiente',
-          total: 0,            // se actualizará después
+          total: 0, // lo actualizaremos después
           codigo_pedido: codigoPedido
         }
       ])
@@ -66,14 +109,12 @@ router.post('/', authenticateToken, async (req, res) => {
     const idPedido = insertedPedido.id_pedido;
     let montoAcumulado = 0;
 
-    // 4) Recorrer cada producto para poblar "detalle_pedido" y calcular subtotal
-    for (const prod of productos) {
-      const { id_producto, cantidad } = prod;
-      if (typeof id_producto !== 'number' || typeof cantidad !== 'number' || cantidad <= 0) {
-        return res.status(400).json({ error: 'Formato inválido en productos.' });
-      }
-
-      // 4.a) Obtener precio unitario de la tabla "productos"
+    // 4) ► RECORRER CADA PRODUCTO para:
+    //    a) Obtener precio unitario → calcular subtotal
+    //    b) Insertar en "detalle_pedido"
+    //    c) Descontar stock en "inventario"
+    for (const { id_producto, cantidad } of productos) {
+      // 4.a) Obtener precio unitario
       const { data: prodInfo, error: prodInfoError } = await supabase
         .from('productos')
         .select('precio')
@@ -85,19 +126,23 @@ router.post('/', authenticateToken, async (req, res) => {
           `[Supabase] Error obteniendo precio de producto ${id_producto}:`,
           prodInfoError
         );
-        return res.status(500).json({ error: 'Error al verificar precio de producto.' });
+        return res
+          .status(500)
+          .json({ error: 'Error al verificar precio de producto.' });
       }
+
       const precioUnitario = Number(prodInfo.precio) || 0;
       montoAcumulado += precioUnitario * cantidad;
 
-      // 4.b) Insertar en "detalle_pedido" sin precio_unitario
+      // 4.b) Insertar en "detalle_pedido"
       const { error: detalleError } = await supabase
         .from('detalle_pedido')
         .insert([
           {
             id_pedido: idPedido,
             id_producto: id_producto,
-            cantidad: cantidad
+            cantidad: cantidad,
+            precio_unitario: precioUnitario
           }
         ]);
 
@@ -106,11 +151,35 @@ router.post('/', authenticateToken, async (req, res) => {
           `[Supabase] Error insertando en detalle_pedido para pedido ${idPedido}:`,
           detalleError
         );
-        return res.status(500).json({ error: 'Error al registrar detalle de pedido.' });
+        return res
+          .status(500)
+          .json({ error: 'Error al registrar detalle de pedido.' });
       }
+
+      // 4.c) Descontar stock en inventario
+      const cantidadDisponActual = invMap.get(id_producto);
+      const nuevaCantidad = cantidadDisponActual - cantidad;
+
+      const { error: updInvErr } = await supabase
+        .from('inventario')
+        .update({ cantidad_disponible: nuevaCantidad })
+        .eq('id_producto', id_producto);
+
+      if (updInvErr) {
+        console.error(
+          `[Supabase] Error actualizando inventario para ${id_producto}:`,
+          updInvErr
+        );
+        return res
+          .status(500)
+          .json({ error: 'Error al actualizar stock en inventario.' });
+      }
+
+      // Actualizamos el Map por si queremos usarlo más adelante (no estrictamente necesario)
+      invMap.set(id_producto, nuevaCantidad);
     }
 
-    // 5) Actualizar el campo "total" en la tabla "pedidos"
+    // 5) ► ACTUALIZAR EL TOTAL en la tabla "pedidos"
     const totalFinal = montoAcumulado;
     const { error: updateError } = await supabase
       .from('pedidos')
@@ -125,9 +194,7 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(500).json({ error: 'Error al actualizar total del pedido.' });
     }
 
-    // 6) Sumar puntos al usuario: 1 punto por cada euro entero gastado
-
-    // 6.a) Leer los puntos actuales del usuario
+    // 6) ► SUMAR PUNTOS AL USUARIO: 1 punto por cada euro entero gastado
     const { data: userRow, error: userSelectError } = await supabase
       .from('usuarios')
       .select('puntos')
@@ -157,15 +224,14 @@ router.post('/', authenticateToken, async (req, res) => {
         `[Supabase] Error leyendo puntos actuales del usuario ${id_usuario}:`,
         userSelectError
       );
-      // Incluso si falla la lectura, no abortamos el pedido; puntosGanados queda en 0
+      // Incluso si falla la lectura, no abortamos; puntosGanados queda en 0
     }
 
-    // 7) Devolver el código de pedido y puntos ganados
+    // 7) ► Devolver código de pedido y puntos ganados
     return res.status(201).json({
       codigo_pedido: codigoPedido,
       puntos_ganados: puntosGanados
     });
-
   } catch (err) {
     console.error('Error general en POST /api/orders:', err);
     return res.status(500).json({ error: 'Error interno al crear pedido.' });
@@ -194,7 +260,7 @@ router.get('/history', authenticateToken, async (req, res) => {
 
     const historyResult = [];
 
-    // 2) Para cada pedido, obtener un solo detalle y luego nombre de producto
+    // 2) Para cada pedido, obtener un sólo detalle y luego nombre de producto
     for (const ped of pedidos) {
       const { data: dets, error: detError } = await supabase
         .from('detalle_pedido')

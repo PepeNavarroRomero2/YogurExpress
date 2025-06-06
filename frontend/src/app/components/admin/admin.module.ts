@@ -2,9 +2,9 @@
 
 import { NgModule }           from '@angular/core';
 import { CommonModule }       from '@angular/common';
+import { FormsModule }        from '@angular/forms';       // ← AÑADIDO
 import { AdminRoutingModule } from './admin-routing.module';
 
-// Importamos los cuatro componentes standalone que usaremos en /admin/...
 import { DashboardComponent }         from './dashboard/dashboard.component';
 import { ManageInventoryComponent }   from './manage-inventory/manage-inventory.component';
 import { ManageProductsComponent }    from './manage-products/manage-products.component';
@@ -13,9 +13,10 @@ import { ManagePromotionsComponent }  from './manage-promotions/manage-promotion
 @NgModule({
   imports: [
     CommonModule,
+    FormsModule,            // ← AÑADIDO para habilitar [(ngModel)]
     AdminRoutingModule,
 
-    // Aquí es donde “registramos” los componentes standalone
+    // Registramos los componentes standalone
     DashboardComponent,
     ManageInventoryComponent,
     ManageProductsComponent,

@@ -1,155 +1,175 @@
-/* frontend/src/app/components/admin/manage-inventory/manage-inventory.component.scss */
+/* src/app/components/admin/manage-inventory/manage-inventory.component.scss */
 
-.inventory-wrapper {
-  max-width: 480px;
-  margin: 2rem auto;
-  padding: 1.5rem;
-  background: #ffffff;
+/* ───────────────────────────────────────────────────────────────────── */
+/* 1) Contenedor principal y tarjeta                                       */
+/* ───────────────────────────────────────────────────────────────────── */
+.mi-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  background-color: #f5f7fa; /* Gris muy claro */
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.mi-container h2 {
+  font-size: 2rem;
+  color: #1f2937; /* Gris oscuro */
+  margin-bottom: 1.5rem;
+}
+
+.mi-container .mi-card {
+  background-color: #ffffff;
   border-radius: 8px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 900px;
+  padding: 2rem;
+  box-sizing: border-box;
+}
 
-  .inventory-header {
-    display: flex;
+/* ───────────────────────────────────────────────────────────────────── */
+/* 2) Caja de búsqueda                                                     */
+/* ───────────────────────────────────────────────────────────────────── */
+.mi-search {
+  width: 100%;
+  max-width: 900px;
+  margin-bottom: 1rem;
+}
+
+.mi-search input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #d1d5db; /* Gris claro */
+  border-radius: 6px;
+  background-color: #f9fafb; /* Gris muy muy claro */
+  color: #1f2937; /* Gris oscuro */
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.mi-search input:focus {
+  outline: none;
+  border-color: #3b82f6; /* Azul primario */
+  background-color: #ffffff;
+}
+
+/* ───────────────────────────────────────────────────────────────────── */
+/* 3) Tabla de inventario                                                  */
+/* ───────────────────────────────────────────────────────────────────── */
+.mi-table-wrapper {
+  width: 100%;
+  max-width: 900px;
+  overflow-x: auto;
+}
+
+.mi-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.mi-table th,
+.mi-table td {
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  color: #1f2937; /* Gris oscuro */
+  border-bottom: 1px solid #e5e7eb; /* Gris muy claro */
+  text-align: left;
+}
+
+.mi-table th {
+  background-color: #f9fafb; /* Gris muy muy claro */
+  font-weight: 600;
+  color: #374151; /* Gris medio */
+}
+
+/* Celdas de cantidad editable */
+.mi-input-quantity {
+  width: 80px;
+  padding: 0.5rem;
+  font-size: 0.95rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #f9fafb;
+  color: #1f2937;
+  text-align: center;
+}
+
+.mi-input-quantity:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background-color: #ffffff;
+}
+
+/* Botones de acción (Editar, Guardar, Cancelar) */
+.mi-btn {
+  background-color: transparent;
+  border: 1px solid #3b82f6;
+  color: #3b82f6;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.mi-btn:hover {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+.mi-btn-save {
+  border-color: #10b981; /* Verde */
+  color: #10b981;
+}
+
+.mi-btn-save:hover {
+  background-color: #10b981;
+  color: #ffffff;
+}
+
+.mi-btn-cancel {
+  border-color: #ef4444; /* Rojo */
+  color: #ef4444;
+}
+
+.mi-btn-cancel:hover {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+/* ───────────────────────────────────────────────────────────────────── */
+/* 4) Altura mínima y espaciado en filas                                   */
+/* ───────────────────────────────────────────────────────────────────── */
+.mi-table tbody tr {
+  min-height: 48px;
+}
+
+/* ───────────────────────────────────────────────────────────────────── */
+/* 5) Responsive                                                           */
+/* ───────────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .inline-group,
+  .buttons-group {
     flex-direction: column;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-
-    h1 {
-      margin: 0;
-      font-size: 1.75rem;
-      color: #333;
-      text-align: center;
-    }
-
-    .search-alert-container {
-      display: flex;
-      gap: 0.5rem;
-      justify-content: space-between;
-
-      .search-input {
-        flex: 1;
-        padding: 0.5rem 0.75rem;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        background: #F3F7FF;
-        font-size: 1rem;
-      }
-
-      .btn-alert {
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-        padding: 0.5rem 1rem;
-        background: #F5F7FA;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.95rem;
-        color: #444;
-        transition: background-color 0.2s;
-
-        .alert-icon {
-          font-size: 1.1rem;
-        }
-
-        &:hover {
-          background: #EFF6FF;
-        }
-      }
-    }
   }
-
-  .inventory-table-wrapper {
-    overflow-x: auto;
-    .inventory-table {
-      width: 100%;
-      border-collapse: collapse;
-
-      thead {
-        background: #F5F7FA;
-
-        th {
-          text-align: left;
-          padding: 0.75rem;
-          color: #555;
-          font-size: 1rem;
-        }
-      }
-
-      tbody {
-        tr {
-          border-bottom: 1px solid #e0e0e0;
-
-          &:last-child {
-            border-bottom: none;
-          }
-
-          td {
-            padding: 0.75rem;
-            color: #222;
-          }
-
-          .quantity-input {
-            width: 4rem;
-            padding: 0.25rem 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 1rem;
-          }
-
-          .actions-cell {
-            display: flex;
-            gap: 0.5rem;
-
-            .btn-edit,
-            .btn-save,
-            .btn-cancel {
-              padding: 0.25rem 0.5rem;
-              border: none;
-              border-radius: 4px;
-              font-size: 0.9rem;
-              cursor: pointer;
-              transition: background-color 0.2s;
-            }
-
-            .btn-edit {
-              background: #3B82F6;
-              color: #fff;
-              &:hover { background: #2563EB; }
-            }
-            .btn-save {
-              background: #10B981;
-              color: #fff;
-              &:hover { background: #059669; }
-            }
-            .btn-cancel {
-              background: #EF4444;
-              color: #fff;
-              &:hover { background: #DC2626; }
-            }
-          }
-        }
-      }
-    }
+  .form-group--half {
+    width: 100%;
   }
 }
 
-@media (max-width: 400px) {
-  .inventory-wrapper {
-    padding: 1rem;
-    margin: 1rem auto;
+@media (max-width: 480px) {
+  .products-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
 
-    .inventory-header h1 {
-      font-size: 1.5rem;
-    }
-
-    .search-alert-container {
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .inventory-table {
-      font-size: 0.9rem;
-    }
+  .btn-create {
+    width: 100%;
   }
 }

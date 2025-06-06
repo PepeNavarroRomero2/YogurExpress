@@ -1,8 +1,8 @@
 /* src/app/components/user/customize-order/customize-order.component.scss */
 
-/* ────────────────────────────────────────────────────────── */
-/* 1) Contenedor global: fondo gris y centrado vertical/horiz. */
-/* ────────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────────────── */
+/* 1) Contenedor global: fondo gris y centrado vertical/horiz.           */
+/* ───────────────────────────────────────────────────────────────────── */
 .co-wrapper {
   display: flex;
   justify-content: center;
@@ -13,9 +13,9 @@
   box-sizing: border-box;
 }
 
-/* ────────────────────────────────────────────────────────── */
-/* 2) Tarjeta blanca interna (bordes redondeados + sombra)   */
-/* ────────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────────────── */
+/* 2) Tarjeta blanca interna (bordes redondeados + sombra)               */
+/* ───────────────────────────────────────────────────────────────────── */
 .co-card {
   background-color: #FFFFFF;
   border-radius: 8px;
@@ -27,9 +27,27 @@
   transition: padding 0.2s ease-in-out;
 }
 
-/* ────────────────────────────────────────────────────────── */
-/* 3) Título de la página                                     */
-/* ────────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────────────── */
+/* 3) Botón “Volver” justo encima del título                              */
+/* ───────────────────────────────────────────────────────────────────── */
+.co-btn-back {
+  background-color: transparent;
+  border: none;
+  color: #3B82F6;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.co-btn-back:hover {
+  text-decoration: underline;
+}
+
+/* ───────────────────────────────────────────────────────────────────── */
+/* 4) Título de la página                                                */
+/* ───────────────────────────────────────────────────────────────────── */
 .co-page-title {
   text-align: center;
   font-size: 2rem;             /* Tamaño destacado */
@@ -37,9 +55,9 @@
   margin-bottom: 1.5rem;       /* Espacio debajo del título */
 }
 
-/* ────────────────────────────────────────────────────────── */
-/* 4) Etiqueta de sección (Sabor, Toppings, Tamaño)           */
-/* ────────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────────────── */
+/* 5) Etiqueta de sección (Sabor, Toppings, Tamaño)                      */
+/* ───────────────────────────────────────────────────────────────────── */
 .co-section-label {
   font-size: 1rem;
   font-weight: 500;
@@ -47,9 +65,9 @@
   margin-bottom: 0.5rem;
 }
 
-/* ────────────────────────────────────────────────────────── */
-/* 5) “Box” para Sabor y para Toppings (cajas con fondo claro) */
-/* ────────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────────────── */
+/* 6) “Box” para Sabor y para Toppings (cajas con fondo claro)           */
+/* ───────────────────────────────────────────────────────────────────── */
 .co-box {
   display: flex;
   align-items: center;
@@ -91,9 +109,9 @@
   color: #3B82F6;              /* Azul primario */
 }
 
-/* ────────────────────────────────────────────────────────── */
-/* 6) Mensaje de error si falla al cargar toppings o tamaños  */
-/* ────────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────────────── */
+/* 7) Mensaje de error si falla al cargar toppings o tamaños            */
+/* ───────────────────────────────────────────────────────────────────── */
 .co-error {
   background-color: #FDECEA;   /* Rojo suave */
   color: #D32F2F;              /* Rojo intenso */
@@ -105,9 +123,9 @@
   margin-bottom: 1.5rem;
 }
 
-/* ────────────────────────────────────────────────────────── */
-/* 7) Grilla de “cards” para tamaños                           */
-/* ────────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────────────── */
+/* 8) Grilla de “cards” para tamaños                                    */
+/* ───────────────────────────────────────────────────────────────────── */
 .co-sizes-grid {
   display: grid;
   /* En desktop: 3 columnas (mínimo 160px c/u), en tablet: 2, en móvil: 1 */
@@ -116,7 +134,6 @@
   margin-bottom: 1.5rem;
 }
 
-/* Cada tarjeta de tamaño */
 .co-card-item {
   background-color: #F9FAFB;   /* Gris muy muy claro */
   border-radius: 8px;
@@ -139,7 +156,11 @@
   background-color: #EFF6FF;   /* Fondo azul muy claro para resaltar */
 }
 
-/* Etiqueta de cada tamaño */
+.co-card-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .co-card-label {
   display: block;
   font-size: 1rem;
@@ -147,16 +168,24 @@
   margin-bottom: 0.5rem;
 }
 
-/* Precio dentro de cada tarjeta */
 .co-card-price {
   display: block;
   font-size: 0.95rem;
   color: #374151;              /* Gris medio */
 }
 
-/* ────────────────────────────────────────────────────────── */
-/* 8) Botón principal “Agregar al pedido”                     */
-/* ────────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────────────── */
+/* 9) Indicador “Agotado”                                                 */
+/* ───────────────────────────────────────────────────────────────────── */
+.co-out-of-stock {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #EF4444;             /* Rojo suave */
+}
+
+/* ───────────────────────────────────────────────────────────────────── */
+/* 10) Botón principal “Agregar al pedido”                                 */
+/* ───────────────────────────────────────────────────────────────────── */
 .co-btn-primary {
   display: block;
   width: 100%;
@@ -176,11 +205,31 @@
   background-color: #2563EB;   /* Azul más oscuro en hover */
 }
 
-/* ────────────────────────────────────────────────────────── */
-/* 9) Media queries para dispositivos pequeños               */
-/* ────────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────────────── */
+/* 11) Botones inferiores (Historial, Mis Puntos, Cerrar Sesión)         */
+/* ───────────────────────────────────────────────────────────────────── */
+.co-footer-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
 
-/* En pantallas ≤ 768px (tablet) */
+.co-footer-buttons button {
+  background-color: transparent;
+  border: none;
+  color: #3B82F6;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.co-footer-buttons button:hover {
+  text-decoration: underline;
+}
+
+/* ───────────────────────────────────────────────────────────────────── */
+/* 12) Media queries para dispositivos pequeños                          */
+/* ───────────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .co-card {
     max-width: 100%;
@@ -213,9 +262,12 @@
     padding: 0.65rem 0;
     font-size: 0.95rem;
   }
+  .co-footer-buttons {
+    flex-direction: column;
+    gap: 1rem;
+  }
 }
 
-/* En pantallas ≤ 480px (móvil) */
 @media (max-width: 480px) {
   .co-sizes-grid {
     grid-template-columns: 1fr; /* Una sola tarjeta por fila */
