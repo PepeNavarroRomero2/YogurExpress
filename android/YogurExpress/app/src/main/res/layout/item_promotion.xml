@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="3dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tvPromoCode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="CÓDIGO"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#1F2937"/>
+
+        <TextView
+            android:id="@+id/tvPromoDesc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Descripción de la promoción"
+            android:textColor="#4B5563"
+            android:layout_marginTop="4dp"/>
+
+        <TextView
+            android:id="@+id/tvPromoDiscount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="10% de descuento"
+            android:textColor="#2563EB"
+            android:textStyle="bold"
+            android:layout_marginTop="6dp"/>
+
+        <TextView
+            android:id="@+id/tvPromoConditions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Condiciones aplicables"
+            android:textColor="#6B7280"
+            android:layout_marginTop="4dp"/>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
