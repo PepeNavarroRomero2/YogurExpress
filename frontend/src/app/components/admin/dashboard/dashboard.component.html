@@ -4,44 +4,50 @@
   <header class="dashboard-header">
     <div class="logo-area">LOGO</div>
     <h1>Admin Dashboard</h1>
-    <!-- Botón Cerrar Sesión al final del header -->
     <button class="btn-logout" (click)="onLogout()">Cerrar Sesión</button>
   </header>
 
-  <section class="stats-cards">
-    <div class="stat-card">
-      <div class="stat-card-header"><h3>Today's Orders</h3></div>
-      <div class="stat-card-body"><p>{{ todaysOrders }}</p></div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-card-header"><h3>Revenue (Today)</h3></div>
-      <div class="stat-card-body"><p>{{ todaysRevenue | currency:'USD':'symbol' }}</p></div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-card-header"><h3>Top Product</h3></div>
-      <div class="stat-card-body"><p>{{ topProduct }}</p></div>
-    </div>
-  </section>
-
-  <nav class="tabs-container">
-    <button [class.active]="activeTab==='products'" (click)="setTab('products')">
-      Manage Products
-    </button>
-    <button [class.active]="activeTab==='inventory'" (click)="setTab('inventory')">
-      Inventory
-    </button>
-    <button [class.active]="activeTab==='promotions'" (click)="setTab('promotions')">
-      Promotions
-    </button>
+  <!-- Menú de pestañas, sin "Todos los pedidos" -->
+  <nav class="dashboard-nav">
+    <button (click)="setTab('stats')"     [class.active]="activeTab==='stats'">Pendientes</button>
+    <button (click)="setTab('products')"  [class.active]="activeTab==='products'">Productos</button>
+    <button (click)="setTab('inventory')" [class.active]="activeTab==='inventory'">Inventario</button>
+    <button (click)="setTab('promotions')" [class.active]="activeTab==='promotions'">Promociones</button>
   </nav>
 
+  <!-- Paneles -->
   <section class="tab-content">
+    <!-- Pedidos pendientes -->
+    <div *ngIf="activeTab==='stats'" class="tab-panel">
+      <div class="mi-container">
+        <h2>Pedidos Pendientes</h2>
+        <ul class="mi-list">
+          <li *ngFor="let o of pendingOrders" class="mi-item">
+            <div class="mi-info">
+              <strong>{{ o.codigo_pedido }}</strong>
+              <span>({{ o.total | currency:'EUR' }})</span>
+              <small>Recogida: {{ o.hora_recogida }}</small>
+            </div>
+            <button (click)="markDelivered(o)" class="mi-btn-complete">Completado</button>
+          </li>
+        </ul>
+        <p *ngIf="pendingOrders.length === 0" class="empty">
+          No hay pedidos pendientes.
+        </p>
+      </div>
+    </div>
+
+    <!-- Products -->
     <div *ngIf="activeTab==='products'" class="tab-panel">
       <app-manage-products></app-manage-products>
     </div>
+
+    <!-- Inventory -->
     <div *ngIf="activeTab==='inventory'" class="tab-panel">
       <app-manage-inventory></app-manage-inventory>
     </div>
+
+    <!-- Promotions -->
     <div *ngIf="activeTab==='promotions'" class="tab-panel">
       <app-manage-promotions></app-manage-promotions>
     </div>

@@ -1,46 +1,38 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+// src/app/services/inventory.service.ts
 
-/**
- * Ahora InventoryItem refleja lo que el backend devuelve:
- *   - id_producto: number
- *   - productName: string
- *   - cantidad_disponible: number
- */
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { AuthService } from './auth.service';
+
 export interface InventoryItem {
   id_producto: number;
   productName: string;
   cantidad_disponible: number;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class InventoryService {
-  private API_URL = 'http://localhost:3000/api';
+  private apiUrl = 'http://localhost:3000/api/inventory';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
 
-  /**
-   * GET /api/inventory
-   * Devuelve array de InventoryItem con { id_producto, productName, cantidad_disponible }
-   */
+  /** GET no necesita headers especiales, solo devuelve la lista */
   getInventory(): Observable<InventoryItem[]> {
-    return this.http.get<InventoryItem[]>(`${this.API_URL}/inventory`);
+    return this.http.get<InventoryItem[]>(this.apiUrl);
   }
 
-  /**
-   * PUT /api/inventory/:id_producto
-   * Actualiza cantidad_disponible de un producto.
-   */
-  updateInventory(
-    id_producto: number,
-    cantidad_disponible: number
-  ): Observable<void> {
-    return this.http.put<void>(
-      `${this.API_URL}/inventory/${id_producto}`,
-      { cantidad_disponible }
+  /** PUT sí envía token para actualizar stock */
+  updateInventory(id: number, cantidad: number): Observable<InventoryItem> {
+    const headers = this.authService.getAuthHeaders()
+      .set('Content-Type', 'application/json');
+    return this.http.put<InventoryItem>(
+      `${this.apiUrl}/${id}`,
+      { cantidad_disponible: cantidad },
+      { headers }
     );
   }
 }

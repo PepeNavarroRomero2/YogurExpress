@@ -8,307 +8,260 @@ const router = express.Router();
 
 /**
  * POST /api/orders
- * Crea un nuevo pedido, valida inventario, guarda los detalles y suma puntos al usuario.
- *
- * Body esperado:
- *   {
- *     productos: [
- *       { id_producto: number, cantidad: number },
- *       ...
- *     ],
- *     hora_recogida: string    // por ejemplo "20:21:00"
- *   }
- *
- * Respuesta éxitos:
- *   {
- *     codigo_pedido: string,
- *     puntos_ganados: number
- *   }
- *
- * Errores posibles:
- *   400 Bad Request → formato inválido / sin stock.
- *   500 Internal Server Error → fallo interno.
+ * Crea un nuevo pedido, verifica stock, aplica promoción, guarda detalles y suma puntos.
  */
 router.post('/', authenticateToken, async (req, res) => {
   try {
-    const { productos, hora_recogida } = req.body;
+    const { productos, hora_recogida, codigo_promocional } = req.body;
     const id_usuario = req.user.id_usuario;
 
-    // 1) Validaciones básicas de formato
+    // 1) Validaciones básicas
     if (!Array.isArray(productos) || productos.length === 0) {
       return res.status(400).json({ error: 'Debe enviar al menos un producto.' });
     }
     if (typeof hora_recogida !== 'string' || !hora_recogida.trim()) {
       return res.status(400).json({ error: 'Debe enviar hora_recogida válida.' });
     }
-    for (const prod of productos) {
-      if (
-        typeof prod.id_producto !== 'number' ||
-        typeof prod.cantidad !== 'number' ||
-        prod.cantidad <= 0
-      ) {
+    for (const { id_producto, cantidad } of productos) {
+      if (typeof id_producto !== 'number' || typeof cantidad !== 'number' || cantidad <= 0) {
         return res.status(400).json({ error: 'Formato inválido en productos.' });
       }
     }
 
-    // 2) ► PRE‐CHECK DE INVENTARIO: verificar que cada id_producto tenga stock suficiente
-    //    Construimos un Map para guardar cantidades actuales de inventario y evitar SELECTs repetidos.
-    const invMap = new Map(); // id_producto → cantidad_disponible
+    // 2) Cálculo de descuento
+    let descuento = 0;
+    if (codigo_promocional) {
+      const { data: promo, error: promoError } = await supabase
+        .from('promociones')
+        .select('descuento')
+        .eq('codigo', codigo_promocional.trim())
+        .maybeSingle();
+      if (promoError) {
+        console.error('Error al validar promoción:', promoError);
+        return res.status(500).json({ error: 'Error al validar promoción.' });
+      }
+      if (promo) descuento = Number(promo.descuento) || 0;
+    }
 
+    // 3) Verificar stock
+    const invMap = new Map();
     for (const { id_producto, cantidad } of productos) {
       const { data: invRow, error: invError } = await supabase
         .from('inventario')
         .select('cantidad_disponible')
         .eq('id_producto', id_producto)
         .single();
-
       if (invError) {
-        console.error(
-          `[Supabase] Error leyendo inventario de producto ${id_producto}:`,
-          invError
-        );
-        return res
-          .status(500)
-          .json({ error: 'Error interno verificando stock.' });
+        console.error(`Error leyendo inventario ${id_producto}:`, invError);
+        return res.status(500).json({ error: 'Error interno verificando stock.' });
       }
-
       if (!invRow || invRow.cantidad_disponible < cantidad) {
-        return res.status(400).json({
-          error: `No hay stock suficiente para el producto ${id_producto}.`
-        });
+        return res
+          .status(400)
+          .json({ error: `No hay stock suficiente para el producto ${id_producto}.` });
       }
-
       invMap.set(id_producto, invRow.cantidad_disponible);
     }
 
-    // 3) ► INSERTAR EL PEDIDO en la tabla "pedidos"
-    // Generar un código de pedido único (usamos timestamp como string)
-    const codigoPedido = `${Date.now()}`;
-    const fechaActual = new Date().toISOString();
-
-    const { data: insertedPedido, error: insertError } = await supabase
+    // 4) Insertar pedido con total = 0
+    const codigoPedido = Date.now().toString();
+    const fechaActual  = new Date().toISOString();
+    const { data: ins, error: insErr } = await supabase
       .from('pedidos')
       .insert([
         {
-          id_usuario: id_usuario,
-          fecha_hora: fechaActual,
-          hora_recogida: hora_recogida,
-          estado: 'pendiente',
-          total: 0, // lo actualizaremos después
+          id_usuario,
+          fecha_hora:    fechaActual,
+          hora_recogida,
+          estado:        'pendiente',
+          total:         0,
           codigo_pedido: codigoPedido
         }
       ])
       .select('id_pedido')
       .single();
-
-    if (insertError) {
-      console.error('[Supabase] Error insertando en pedidos:', insertError);
+    if (insErr || !ins?.id_pedido) {
+      console.error('Error insertando pedido:', insErr);
       return res.status(500).json({ error: 'Error al crear el pedido.' });
     }
-
-    const idPedido = insertedPedido.id_pedido;
+    const idPedido = ins.id_pedido;
     let montoAcumulado = 0;
 
-    // 4) ► RECORRER CADA PRODUCTO para:
-    //    a) Obtener precio unitario → calcular subtotal
-    //    b) Insertar en "detalle_pedido"
-    //    c) Descontar stock en "inventario"
+    // 5) Recorrer productos: insertar detalle y actualizar stock
     for (const { id_producto, cantidad } of productos) {
-      // 4.a) Obtener precio unitario
-      const { data: prodInfo, error: prodInfoError } = await supabase
+      // 5.a) Obtener precio
+      const { data: prod, error: prodErr } = await supabase
         .from('productos')
         .select('precio')
         .eq('id_producto', id_producto)
         .single();
-
-      if (prodInfoError) {
-        console.error(
-          `[Supabase] Error obteniendo precio de producto ${id_producto}:`,
-          prodInfoError
-        );
-        return res
-          .status(500)
-          .json({ error: 'Error al verificar precio de producto.' });
+      if (prodErr) {
+        console.error(`Error precio producto ${id_producto}:`, prodErr);
+        return res.status(500).json({ error: 'Error al verificar precio de producto.' });
       }
-
-      const precioUnitario = Number(prodInfo.precio) || 0;
+      const precioUnitario = Number(prod.precio) || 0;
       montoAcumulado += precioUnitario * cantidad;
 
-      // 4.b) Insertar en "detalle_pedido"
-      const { error: detalleError } = await supabase
+      // 5.b) Insertar detalle_pedido (sin precio_unitario)
+      const { error: detErr } = await supabase
         .from('detalle_pedido')
         .insert([
           {
-            id_pedido: idPedido,
-            id_producto: id_producto,
-            cantidad: cantidad,
-            precio_unitario: precioUnitario
+            id_pedido:   idPedido,
+            id_producto,
+            cantidad
           }
         ]);
-
-      if (detalleError) {
-        console.error(
-          `[Supabase] Error insertando en detalle_pedido para pedido ${idPedido}:`,
-          detalleError
-        );
-        return res
-          .status(500)
-          .json({ error: 'Error al registrar detalle de pedido.' });
+      if (detErr) {
+        console.error(`Error insertando detalle para pedido ${idPedido}:`, detErr);
+        return res.status(500).json({ error: 'Error al registrar detalle de pedido.' });
       }
 
-      // 4.c) Descontar stock en inventario
-      const cantidadDisponActual = invMap.get(id_producto);
-      const nuevaCantidad = cantidadDisponActual - cantidad;
-
-      const { error: updInvErr } = await supabase
+      // 5.c) Actualizar inventario
+      const nuevaCant = invMap.get(id_producto) - cantidad;
+      const { error: updErr } = await supabase
         .from('inventario')
-        .update({ cantidad_disponible: nuevaCantidad })
+        .update({ cantidad_disponible: nuevaCant })
         .eq('id_producto', id_producto);
-
-      if (updInvErr) {
-        console.error(
-          `[Supabase] Error actualizando inventario para ${id_producto}:`,
-          updInvErr
-        );
-        return res
-          .status(500)
-          .json({ error: 'Error al actualizar stock en inventario.' });
+      if (updErr) {
+        console.error(`Error actualizando stock ${id_producto}:`, updErr);
+        return res.status(500).json({ error: 'Error al actualizar stock.' });
       }
-
-      // Actualizamos el Map por si queremos usarlo más adelante (no estrictamente necesario)
-      invMap.set(id_producto, nuevaCantidad);
+      invMap.set(id_producto, nuevaCant);
     }
 
-    // 5) ► ACTUALIZAR EL TOTAL en la tabla "pedidos"
-    const totalFinal = montoAcumulado;
-    const { error: updateError } = await supabase
-      .from('pedidos')
-      .update({ total: totalFinal })
-      .eq('id_pedido', idPedido);
+    // 6) Aplicar descuento
+    if (descuento > 0) {
+      montoAcumulado = Number((montoAcumulado * (1 - descuento)).toFixed(2));
+    }
 
-    if (updateError) {
-      console.error(
-        `[Supabase] Error actualizando total en pedido ${idPedido}:`,
-        updateError
-      );
+    // 7) Actualizar total
+    const { error: totErr } = await supabase
+      .from('pedidos')
+      .update({ total: montoAcumulado })
+      .eq('id_pedido', idPedido);
+    if (totErr) {
+      console.error(`Error actualizando total pedido ${idPedido}:`, totErr);
       return res.status(500).json({ error: 'Error al actualizar total del pedido.' });
     }
 
-    // 6) ► SUMAR PUNTOS AL USUARIO: 1 punto por cada euro entero gastado
-    const { data: userRow, error: userSelectError } = await supabase
-      .from('usuarios')
-      .select('puntos')
-      .eq('id_usuario', id_usuario)
-      .single();
-
-    let puntosGanados = 0;
-    if (!userSelectError && userRow && typeof userRow.puntos === 'number') {
-      puntosGanados = Math.floor(totalFinal);
-      if (puntosGanados > 0) {
-        const nuevosPuntos = userRow.puntos + puntosGanados;
-        const { error: userUpdateError } = await supabase
+    // 8) Sumar puntos al usuario
+    const puntosGanados = Math.floor(montoAcumulado);
+    if (puntosGanados > 0) {
+      const { data: usr, error: usrErr } = await supabase
+        .from('usuarios')
+        .select('puntos')
+        .eq('id_usuario', id_usuario)
+        .single();
+      if (!usrErr && usr) {
+        const { error: addErr } = await supabase
           .from('usuarios')
-          .update({ puntos: nuevosPuntos })
+          .update({ puntos: usr.puntos + puntosGanados })
           .eq('id_usuario', id_usuario);
-
-        if (userUpdateError) {
-          console.error(
-            `[Supabase] Error actualizando puntos al usuario ${id_usuario}:`,
-            userUpdateError
-          );
-          // No abortamos el pedido; solo registramos el error
-        }
+        if (addErr) console.error('Error actualizando puntos:', addErr);
       }
-    } else {
-      console.error(
-        `[Supabase] Error leyendo puntos actuales del usuario ${id_usuario}:`,
-        userSelectError
-      );
-      // Incluso si falla la lectura, no abortamos; puntosGanados queda en 0
     }
 
-    // 7) ► Devolver código de pedido y puntos ganados
+    // 9) Responder
     return res.status(201).json({
-      codigo_pedido: codigoPedido,
+      id_pedido:      idPedido,
+      codigo_pedido:  codigoPedido,
+      total:          montoAcumulado,
       puntos_ganados: puntosGanados
     });
+
   } catch (err) {
-    console.error('Error general en POST /api/orders:', err);
-    return res.status(500).json({ error: 'Error interno al crear pedido.' });
+    console.error('Error en POST /api/orders:', err);
+    return res.status(500).json({ error: err.message || 'Error interno al crear pedido.' });
   }
 });
 
 /**
  * GET /api/orders/history
- * Devuelve el historial de pedidos del usuario autenticado.
+ * Historial de pedidos con detalles para el usuario.
  */
 router.get('/history', authenticateToken, async (req, res) => {
   try {
     const id_usuario = req.user.id_usuario;
-
-    // 1) Obtener todos los pedidos de este usuario
-    const { data: pedidos, error: pedidosError } = await supabase
+    const { data: pedidos, error: pedErr } = await supabase
       .from('pedidos')
-      .select('id_pedido, fecha_hora, hora_recogida, total, codigo_pedido')
+      .select('id_pedido, fecha_hora, hora_recogida, total, codigo_pedido, estado')
       .eq('id_usuario', id_usuario)
       .order('fecha_hora', { ascending: false });
+    if (pedErr) throw pedErr;
 
-    if (pedidosError) {
-      console.error('[Supabase] Error obteniendo pedidos:', pedidosError);
-      return res.status(500).json({ error: 'No se pudo obtener historial.' });
-    }
-
-    const historyResult = [];
-
-    // 2) Para cada pedido, obtener un sólo detalle y luego nombre de producto
-    for (const ped of pedidos) {
-      const { data: dets, error: detError } = await supabase
+    const history = await Promise.all(pedidos.map(async ped => {
+      const { data: detalles, error: detErr } = await supabase
         .from('detalle_pedido')
-        .select('id_producto')
-        .eq('id_pedido', ped.id_pedido)
-        .limit(1);
+        .select('id_producto, cantidad')
+        .eq('id_pedido', ped.id_pedido);
+      if (detErr) throw detErr;
 
-      if (detError) {
-        console.error(
-          `[Supabase] Error obteniendo detalle_pedido para pedido ${ped.id_pedido}:`,
-          detError
-        );
-        return res.status(500).json({ error: 'Error al leer detalle de pedido.' });
-      }
-
-      let nombreProducto = '—';
-      if (dets && dets.length > 0) {
-        const idProd = dets[0].id_producto;
-        const { data: prod, error: prodError } = await supabase
+      const productos = await Promise.all(detalles.map(async d => {
+        const { data: prod, error: prodErr } = await supabase
           .from('productos')
-          .select('nombre')
-          .eq('id_producto', idProd)
+          .select('nombre, precio')
+          .eq('id_producto', d.id_producto)
           .single();
+        return {
+          id_producto:     d.id_producto,
+          nombre:          prodErr ? null : prod.nombre,
+          cantidad:        d.cantidad,
+          precio_unitario: prodErr ? null : Number(prod.precio)
+        };
+      }));
 
-        if (prodError) {
-          console.error(
-            `[Supabase] Error obteniendo producto ${idProd}:`,
-            prodError
-          );
-          return res.status(500).json({ error: 'Error al leer nombre de producto.' });
-        }
-        nombreProducto = prod.nombre;
-      }
+      return { ...ped, productos };
+    }));
 
-      historyResult.push({
-        id_pedido:     ped.id_pedido,
-        fecha_hora:    ped.fecha_hora,
-        hora_recogida: ped.hora_recogida,
-        total:         Number(ped.total),
-        producto:      nombreProducto,
-        codigo_pedido: ped.codigo_pedido
-      });
-    }
-
-    return res.json({ history: historyResult });
+    return res.json({ history });
   } catch (err) {
-    console.error('Error general en GET /api/orders/history:', err);
-    return res.status(500).json({ error: 'Error interno del servidor.' });
+    console.error('Error en GET /api/orders/history:', err);
+    return res.status(500).json({ error: 'Error interno al obtener historial.' });
+  }
+});
+
+/**
+ * GET /api/orders
+ * Lista todos los pedidos (uso interno/admin).
+ */
+router.get('/', async (_req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('pedidos')
+      .select('*')
+      .order('fecha_hora', { ascending: false });
+    if (error) throw error;
+    return res.json(data || []);
+  } catch (err) {
+    console.error('Error en GET /api/orders:', err);
+    return res.status(500).json({ error: 'Error interno al listar pedidos.' });
+  }
+});
+
+/**
+ * PATCH /api/orders/:id/status
+ * Actualiza el estado de un pedido.
+ */
+router.patch('/:id/status', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  const validStates = ['pendiente', 'en preparación', 'entregado'];
+  if (!validStates.includes(status)) {
+    return res.status(400).json({ error: 'Estado no válido.' });
+  }
+  try {
+    const { data, error } = await supabase
+      .from('pedidos')
+      .update({ estado: status })
+      .eq('id_pedido', id)
+      .select()
+      .single();
+    if (error) throw error;
+    return res.json(data);
+  } catch (err) {
+    console.error('Error en PATCH /api/orders/:id/status:', err);
+    return res.status(500).json({ error: 'Error interno al actualizar estado.' });
   }
 });
 

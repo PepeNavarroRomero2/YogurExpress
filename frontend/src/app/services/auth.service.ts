@@ -119,4 +119,11 @@ export class AuthService {
     const raw = localStorage.getItem(this.userKey);
     return raw ? JSON.parse(raw) as User : null;
   }
+
+  getProfile(): Observable<User> {
+  const token = localStorage.getItem('token');
+  const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+  return this.http.get<User>('http://localhost:3000/api/users/profile', { headers });
+}
+
 }

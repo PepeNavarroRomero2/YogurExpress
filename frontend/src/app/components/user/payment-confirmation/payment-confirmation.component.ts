@@ -1,5 +1,3 @@
-// src/app/components/user/payment-confirmation/payment-confirmation.component.ts
-
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -9,6 +7,7 @@ import { AuthService, User } from '../../../services/auth.service';
 import { UserService } from '../../../services/user.service';
 import { CartService } from '../../../services/cart.service';
 import { Flavor } from '../../../services/product.service';
+import { PromotionService } from '../../../services/promotion.service';
 import {
   OrderService,
   OrderProduct,
@@ -35,11 +34,15 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
   puntosUsuario = 0;
   puntosAUsar = 0;
 
+  codigoPromocional: string = '';
+  descuentoAplicado: number = 0;
+  errorPromo: string = '';
   errorMsg = '';
 
   constructor(
     private cartService: CartService,
     private authService: AuthService,
+    private promoService: PromotionService,
     private userService: UserService,
     private orderService: OrderService,
     private router: Router
@@ -51,7 +54,6 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    // 1) Recuperar datos del carrito
     this.flavor = this.cartService.getFlavor() as Flavor;
     this.toppings = this.cartService.getToppings() as Flavor[];
     this.size = this.cartService.getSize() as Flavor;
@@ -62,7 +64,6 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    // 2) Calcular subtotal (sabor + tamaño + toppings)
     this.subtotal = 0;
     if (this.flavor.precio) this.subtotal += Number(this.flavor.precio);
     if (this.size.precio) this.subtotal += Number(this.size.precio);
@@ -70,7 +71,6 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
       if (t.precio) this.subtotal += Number(t.precio);
     });
 
-    // 3) Obtener puntos de usuario
     this.userService.getProfile().subscribe({
       next: (user: User) => {
         this.puntosUsuario = user.puntos;
@@ -83,13 +83,9 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
     });
   }
 
-  /** AfterViewInit: empaqueta e inyecta el botón de PayPal en el contenedor */
   ngAfterViewInit(): void {
-    // Esperamos un tick para asegurarnos de que window.paypal está cargado
     setTimeout(() => {
-      // @ts-ignore
       if ((window as any).paypal) {
-        // @ts-ignore
         (window as any).paypal.Buttons({
           style: {
             layout: 'vertical',
@@ -110,11 +106,11 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
             });
           },
           onApprove: (data: any, actions: any) => {
-            return actions.order.capture().then((details: any) => {
+            return actions.order.capture().then(() => {
               this.createOrderOnBackend();
             });
           },
-          onCancel: (data: any) => {
+          onCancel: () => {
             Swal.fire('Pago cancelado', 'Has cancelado el pago.', 'info');
           },
           onError: (err: any) => {
@@ -122,66 +118,45 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
             Swal.fire('Error', 'Ocurrió un problema con PayPal.', 'error');
           }
         }).render('#paypal-button-container');
-      } else {
-        console.error('SDK de PayPal no está cargado.');
       }
     }, 0);
   }
 
-  /** Devuelve los nombres de los toppings separados por comas */
   get toppingNames(): string {
-    if (!this.toppings || this.toppings.length === 0) {
-      return '';
-    }
     return this.toppings.map(t => t.nombre).join(', ');
   }
 
-  /** Recalcula descuento y total cuando cambian los puntos a usar */
   calculateTotal(): void {
-    this.descuento = this.puntosAUsar / 10;
+    const descuentoPuntos = this.puntosAUsar / 10;
+    const descuentoPromo = this.subtotal * (this.descuentoAplicado / 100);
+    this.descuento = descuentoPuntos + descuentoPromo;
     this.total = Math.max(0, this.subtotal - this.descuento);
   }
 
-  /** Simula la compra (para pruebas sin PayPal) */
   simulatePurchase(): void {
     this.errorMsg = '';
-
     if (this.puntosAUsar > this.puntosUsuario) {
       Swal.fire('Error', 'No tienes suficientes puntos.', 'error');
       return;
     }
-
     this.createOrderOnBackend();
   }
 
-  /** Crea la orden en el backend con la misma lógica usada tras PayPal */
   private createOrderOnBackend(): void {
-    const productosParaApi: OrderProduct[] = [];
-
-    // Insertar el sabor
-    productosParaApi.push({
-      id_producto: this.flavor.id_producto,
-      cantidad: 1
-    });
-
-    // Insertar los toppings
-    this.toppings.forEach(t => {
-      productosParaApi.push({
+    const productosParaApi: OrderProduct[] = [
+      { id_producto: this.flavor.id_producto, cantidad: 1 },
+      ...this.toppings.map(t => ({
         id_producto: t.id_producto,
         cantidad: 1
-      });
-    });
-
-    // Insertar el tamaño
-    productosParaApi.push({
-      id_producto: this.size.id_producto,
-      cantidad: 1
-    });
+      })),
+      { id_producto: this.size.id_producto, cantidad: 1 }
+    ];
 
     const body: CreateOrderRequest = {
       productos: productosParaApi,
       hora_recogida: this.pickupTime,
-      puntos_usados: this.puntosAUsar
+      puntos_usados: this.puntosAUsar,
+      codigo_promocional: this.codigoPromocional
     };
 
     this.orderService.createOrder(body).subscribe({
@@ -205,6 +180,26 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
       error: err => {
         const msg = err.error?.error || 'Error al crear el pedido.';
         Swal.fire('Error', msg, 'error');
+      }
+    });
+  }
+
+  validarCodigoPromo(): void {
+    this.errorPromo = '';
+    if (!this.codigoPromocional) return;
+
+    this.promoService.validateCode(this.codigoPromocional.trim().toLowerCase())
+.subscribe({
+      next: (promo) => {
+        this.descuentoAplicado = promo.descuento;
+        Swal.fire('¡Promoción aplicada!', `Se ha aplicado un ${promo.descuento}% de descuento`, 'success');
+        this.calculateTotal();
+      },
+      error: () => {
+        this.descuentoAplicado = 0;
+        this.errorPromo = 'Código no válido';
+        Swal.fire('Código inválido', 'No se encontró la promoción', 'error');
+        this.calculateTotal();
       }
     });
   }

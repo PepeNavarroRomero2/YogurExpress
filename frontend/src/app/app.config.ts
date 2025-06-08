@@ -8,7 +8,6 @@ export const appConfig = {
   providers: [
     provideRouter(routes),
     provideHttpClient(withInterceptorsFromDi()),
-    // Si necesitas más providers globales, añádelos aquí:
-    // importProvidersFrom(SomeModule)
+    // importProvidersFrom(SomeModule), si hace falta
   ]
 };

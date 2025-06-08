@@ -2,105 +2,74 @@
 
 import express from 'express';
 import { supabase } from '../lib/supabaseClient.js';
+import { authenticateToken } from './authMiddleware.js';
 
 const router = express.Router();
 
 /**
  * GET /api/inventory
- * Devuelve la lista completa de inventario, uniendo productos con su cantidad.
- *
- * Cada objeto será:
- *   {
- *     id_producto: number,
- *     cantidad_disponible: number,
- *     nombre: string
- *   }
+ * Devuelve lista de inventario con nombre de producto.
+ * (público, sin auth)
  */
-router.get('/', async (req, res) => {
+router.get('/', async (_req, res) => {
   try {
-    // 1) Leemos todas las filas de inventario
-    const { data: invRows, error: invError } = await supabase
+    const { data, error } = await supabase
       .from('inventario')
-      .select('*')
-      .order('id_producto', { ascending: true });
+      .select(`
+        id_producto,
+        cantidad_disponible,
+        productos (
+          nombre
+        )
+      `);
 
-    if (invError) {
-      console.error('[Supabase] Error leyendo inventario:', invError);
-      return res.status(500).json({ error: 'No se pudo cargar inventario.' });
+    if (error) {
+      console.error('Error fetching inventory:', error);
+      return res.status(500).json({ error: 'Error al obtener inventario.' });
     }
 
-    // 2) Cada fila, le agregamos el nombre del producto (JOIN manual)
-    const enriched = await Promise.all(
-      (invRows || []).map(async (inv) => {
-        const { data: prodData, error: prodError } = await supabase
-          .from('productos')
-          .select('nombre')
-          .eq('id_producto', inv.id_producto)
-          .single();
+    const inventory = data.map(item => ({
+      id_producto: item.id_producto,
+      cantidad_disponible: item.cantidad_disponible,
+      productName: item.productos?.nombre || '—'
+    }));
 
-        if (prodError) {
-          console.error(
-            `[Supabase] No se pudo encontrar producto ${inv.id_producto}:`,
-            prodError
-          );
-          return {
-            id_producto: inv.id_producto,
-            cantidad_disponible: inv.cantidad_disponible,
-            nombre: '—'
-          };
-        }
-
-        return {
-          id_producto: inv.id_producto,
-          cantidad_disponible: inv.cantidad_disponible,
-          nombre: prodData.nombre
-        };
-      })
-    );
-
-    return res.json(enriched);
+    return res.json(inventory);
   } catch (err) {
-    console.error('Error general en GET /api/inventory:', err);
-    return res.status(500).json({ error: 'Error interno del servidor.' });
+    console.error('Error en GET /api/inventory:', err);
+    return res.status(500).json({ error: 'Error interno al listar inventario.' });
   }
 });
 
 /**
- * PUT /api/inventory/:id
- * Si ya existe inventario.id_producto = :id, lo actualiza.
- * Si NO existe, lo crea (INSERT).
- *
- * Body esperado:
- * {
- *   cantidad_disponible: number
- * }
+ * PUT /api/inventory/:id_producto
+ * Actualiza la cantidad disponible de un producto.
+ * (requiere auth)
  */
-router.put('/:id', async (req, res) => {
-  const idProducto = parseInt(req.params.id, 10);
+router.put('/:id_producto', authenticateToken, async (req, res) => {
+  const id = parseInt(req.params.id_producto, 10);
   const { cantidad_disponible } = req.body;
 
-  // Validación básica de parámetros
-  if (isNaN(idProducto) || cantidad_disponible == null) {
-    return res.status(400).json({ error: 'Parámetros inválidos.' });
+  if (typeof cantidad_disponible !== 'number' || cantidad_disponible < 0) {
+    return res.status(400).json({ error: 'cantidad_disponible inválida.' });
   }
 
   try {
-    // Usamos UPSERT para que inserte o actualice en un solo paso
-    const { data: upsertData, error: upsertError } = await supabase
+    const { data, error } = await supabase
       .from('inventario')
-      .upsert(
-        { id_producto: idProducto, cantidad_disponible },
-        { onConflict: 'id_producto' }
-      );
+      .update({ cantidad_disponible })
+      .eq('id_producto', id)
+      .select()
+      .single();
 
-    if (upsertError) {
-      console.error(`[Supabase] Error en upsert inventario ${idProducto}:`, upsertError);
-      return res.status(500).json({ error: 'No se pudo actualizar/crear el registro de inventario.' });
+    if (error) {
+      console.error(`Error actualizando inventario ${id}:`, error);
+      return res.status(500).json({ error: 'Error al actualizar inventario.' });
     }
 
-    return res.json({ message: 'Inventario actualizado o creado correctamente.' });
+    return res.json(data);
   } catch (err) {
-    console.error('Error general en PUT /api/inventory/:id:', err);
+    console.error('Error en PUT /api/inventory/:id_producto:', err);
     return res.status(500).json({ error: 'Error interno al actualizar inventario.' });
   }
 });
