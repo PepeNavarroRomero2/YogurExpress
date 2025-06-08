@@ -31,10 +31,25 @@ const router = express.Router();
  */
 router.post('/', authenticateToken, async (req, res) => {
   try {
-    const { productos, hora_recogida } = req.body;
+    const { productos, hora_recogida, codigo_promocional } = req.body;
     const id_usuario = req.user.id_usuario;
 
     // 1) Validaciones básicas de formato
+    let descuento = 0;
+    if (codigo_promocional) {
+      const { data: promo, error: promoError } = await supabase
+        .from('promociones')
+        .select('*')
+        .eq('codigo', codigo_promocional)
+        .maybeSingle();
+
+      if (promoError) {
+        console.error('Error validando promoción:', promoError.message);
+      } else if (promo) {
+        descuento = promo.descuento || 0;
+      }
+    }
+
     if (!Array.isArray(productos) || productos.length === 0) {
       return res.status(400).json({ error: 'Debe enviar al menos un producto.' });
     }

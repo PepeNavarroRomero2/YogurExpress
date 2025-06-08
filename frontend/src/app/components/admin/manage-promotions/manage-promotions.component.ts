@@ -2,7 +2,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { PromotionService, Promotion } from '../../../services/promotion.service';
 import Swal from 'sweetalert2';
 
@@ -15,13 +15,14 @@ import Swal from 'sweetalert2';
 })
 export class ManagePromotionsComponent implements OnInit {
   promotions: Promotion[] = [];
-  showForm: boolean = false;
-  isEditing: boolean = false;
+  showForm = false;
+  isEditing = false;
   editingPromotionId: number | null = null;
 
-  // Modelo temporal para el formulario
-  promotion: { codigo: string; descuento: number } = {
+  // Modelo del formulario
+  promoModel: { codigo: string; descripcion: string; descuento: number } = {
     codigo: '',
+    descripcion: '',
     descuento: 0,
   };
 
@@ -31,99 +32,87 @@ export class ManagePromotionsComponent implements OnInit {
     this.loadPromotions();
   }
 
-  /** Carga todas las promociones */
   loadPromotions(): void {
     this.promotionService.getPromotions().subscribe({
-      next: (data: Promotion[]) => {
-        this.promotions = data;
-      },
-      error: (err) => {
+      next: (data: Promotion[]) => this.promotions = data,
+      error: (err: any) => {
         console.error('Error cargando promociones', err);
-        Swal.fire('Error', 'No se pudieron cargar las promociones.', 'error');
+        Swal.fire('Error', 'No se pudieron cargar las promociones', 'error');
       },
     });
   }
 
-  /** Mostrar formulario en modo “crear” */
   onCreate(): void {
     this.showForm = true;
     this.isEditing = false;
     this.editingPromotionId = null;
-    this.promotion = { codigo: '', descuento: 0 };
+    this.promoModel = { codigo: '', descripcion: '', descuento: 0 };
   }
 
-  /** Mostrar formulario en modo “editar” */
   onEdit(p: Promotion): void {
     this.showForm = true;
     this.isEditing = true;
     this.editingPromotionId = p.id_promocion;
-    this.promotion = { codigo: p.codigo, descuento: p.descuento };
+    this.promoModel = {
+      codigo: p.codigo,
+      descripcion: p.descripcion || '',
+      descuento: p.descuento,
+    };
   }
 
-  /** Cancelar creación/edición */
-  onCancel(): void {
-    this.showForm = false;
-    this.isEditing = false;
-    this.editingPromotionId = null;
-  }
-
-  /** Guardar (crear o actualizar) */
-  onSave(form: any): void {
-    if (form.invalid) {
-      Swal.fire('Error', 'Rellena todos los campos.', 'error');
-      return;
-    }
+  onSave(form: NgForm): void {
+    if (form.invalid) return;
 
     if (this.isEditing && this.editingPromotionId != null) {
-      // Editar promoción
-      this.promotionService.updatePromotion(this.editingPromotionId, this.promotion).subscribe({
+      this.promotionService.updatePromotion(this.editingPromotionId, this.promoModel).subscribe({
         next: () => {
-          Swal.fire('Editado', 'Promoción actualizada.', 'success');
-          this.loadPromotions();
+          Swal.fire('Actualizado', 'Promoción actualizada', 'success');
           this.onCancel();
+          this.loadPromotions();
         },
-        error: (err) => {
-          console.error('Error actualizando promoción', err);
-          Swal.fire('Error', 'No se pudo actualizar la promoción.', 'error');
+        error: () => {
+          Swal.fire('Error', 'No se pudo actualizar la promoción', 'error');
         },
       });
     } else {
-      // Crear nueva promoción
-      this.promotionService.createPromotion(this.promotion).subscribe({
+      this.promotionService.createPromotion(this.promoModel).subscribe({
         next: () => {
-          Swal.fire('Creado', 'Promoción creada.', 'success');
-          this.loadPromotions();
+          Swal.fire('Éxito', 'Promoción creada', 'success');
           this.onCancel();
+          this.loadPromotions();
         },
-        error: (err) => {
-          console.error('Error creando promoción', err);
-          Swal.fire('Error', 'No se pudo crear la promoción.', 'error');
+        error: () => {
+          Swal.fire('Error', 'No se pudo crear la promoción', 'error');
         },
       });
     }
   }
 
-  /** Eliminar una promoción */
   onDelete(id: number): void {
     Swal.fire({
-      title: '¿Eliminar promoción?',
+      title: '¿Eliminar esta promoción?',
+      text: 'Esta acción no se puede deshacer',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
-    }).then((result) => {
-      if (result.isConfirmed) {
+    }).then((res) => {
+      if (res.isConfirmed) {
         this.promotionService.deletePromotion(id).subscribe({
           next: () => {
-            Swal.fire('Eliminado', 'Promoción eliminada.', 'success');
+            Swal.fire('Eliminado', 'Promoción eliminada', 'success');
             this.loadPromotions();
           },
-          error: (err) => {
+          error: (err: any) => {
             console.error('Error eliminando promoción', err);
-            Swal.fire('Error', 'No se pudo eliminar la promoción.', 'error');
+            Swal.fire('Error', 'No se pudo eliminar la promoción', 'error');
           },
         });
       }
     });
+  }
+
+  onCancel(): void {
+    this.showForm = false;
+    this.isEditing = false;
+    this.editingPromotionId = null;
   }
 }

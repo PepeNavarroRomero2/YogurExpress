@@ -24,6 +24,7 @@ export interface CreateOrderRequest {
   productos: OrderProduct[];
   hora_recogida: string;
   puntos_usados: number;
+  codigo_promocional?: string;
 }
 
 export interface CreateOrderResponse {
