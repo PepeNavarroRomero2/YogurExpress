@@ -7,7 +7,6 @@
   <!-- Resumen de pedido -->
   <div class="order-summary">
     <h2>Tu Pedido</h2>
-
     <ul class="summary-list">
       <!-- Sabor -->
       <li class="summary-item">
@@ -28,9 +27,7 @@
       <!-- Toppings -->
       <li class="summary-item" *ngIf="toppings && toppings.length > 0">
         <span class="label">Toppings:</span>
-        <span class="value">
-          {{ toppingNames }}
-        </span>
+        <span class="value">{{ toppingNames }}</span>
       </li>
 
       <!-- Hora de recogida -->
@@ -66,29 +63,28 @@
       </li>
 
       <!-- Código promocional -->
-<li class="summary-item promo-line">
-  <span class="label">Código promocional:</span>
-  <span class="value promo-input-container">
-    <input
-      type="text"
-      [(ngModel)]="codigoPromocional"
-      placeholder="Introduce tu código"
-      class="promo-input"
-    />
-    <button
-      type="button"
-      (click)="validarCodigoPromo()"
-      class="promo-btn"
-    >
-      Validar
-    </button>
-  </span>
-</li>
-<li class="summary-item" *ngIf="errorPromo">
-  <span class="label text-red-600">Error:</span>
-  <span class="value text-red-600">{{ errorPromo }}</span>
-</li>
-
+      <li class="summary-item promo-line">
+        <span class="label">Código promocional:</span>
+        <span class="value promo-input-container">
+          <input
+            type="text"
+            [(ngModel)]="codigoPromocional"
+            placeholder="Introduce tu código"
+            class="promo-input"
+          />
+          <button
+            type="button"
+            (click)="validarCodigoPromo()"
+            class="promo-btn"
+          >
+            Validar
+          </button>
+        </span>
+      </li>
+      <li class="summary-item" *ngIf="errorPromo">
+        <span class="label text-red-600">Error:</span>
+        <span class="value text-red-600">{{ errorPromo }}</span>
+      </li>
 
       <!-- Descuento (si aplica) -->
       <li class="summary-item" *ngIf="descuento > 0">
@@ -104,11 +100,11 @@
     </ul>
   </div>
 
-  <!-- Botón para SIMULAR compra (ahora sin mostrar modal de token inválido) -->
+  <!-- Botón para SIMULAR compra -->
   <button class="btn-primary" (click)="simulatePurchase()">
     Simular Compra
   </button>
 
-  <!-- Contenedor para el botón de PayPal -->
-  <div id="paypal-button-container"></div>
+  <!-- Aquí añadimos PayPal -->
+  <div id="paypal-button-container" class="mt-4"></div>
 </div>
