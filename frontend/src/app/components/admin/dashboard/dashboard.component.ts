@@ -2,11 +2,14 @@
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../../services/auth.service'; // Ajusta la ruta si es distinto
+import Swal from 'sweetalert2';
 
+import { AuthService } from '../../../services/auth.service';
 import { ManageProductsComponent } from '../manage-products/manage-products.component';
 import { ManageInventoryComponent } from '../manage-inventory/manage-inventory.component';
 import { ManagePromotionsComponent } from '../manage-promotions/manage-promotions.component';
+
+import { OrderService, Order } from '../../../services/order.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -21,25 +24,55 @@ import { ManagePromotionsComponent } from '../manage-promotions/manage-promotion
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
-  todaysOrders: number = 0;
-  todaysRevenue: number = 0;
-  topProduct: string = '';
-  activeTab: 'products' | 'inventory' | 'promotions' = 'products';
+  activeTab: 'stats' | 'products' | 'inventory' | 'promotions' | 'orders' = 'stats';
+  orders: Order[] = [];
+  pendingOrders: Order[] = [];
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private orderService: OrderService
+  ) {}
 
   ngOnInit(): void {
-    this.todaysOrders = 12;
-    this.todaysRevenue = 230;
-    this.topProduct = 'Strawberry Yogurt';
+    this.loadOrders();
   }
 
-  setTab(tab: 'products' | 'inventory' | 'promotions'): void {
+  /** Carga todos los pedidos y filtra los pendientes */
+  private loadOrders(): void {
+    this.orderService.getAllOrders().subscribe({
+      next: (data: Order[]) => {
+        this.orders = data;
+        this.pendingOrders = this.orders.filter(o => o.estado === 'pendiente');
+      },
+      error: err => {
+        console.error('Error cargando pedidos', err);
+        Swal.fire('Error', 'No se pudieron cargar los pedidos.', 'error');
+      }
+    });
+  }
+
+  setTab(tab: 'stats' | 'products' | 'inventory' | 'promotions' | 'orders'): void {
     this.activeTab = tab;
+    if (tab === 'stats' || tab === 'orders') {
+      this.loadOrders();
+    }
   }
 
-  /** Invocado al pulsar “Cerrar sesión” */
   onLogout(): void {
     this.authService.logout();
+  }
+
+  /** Marca un pedido pendiente como entregado */
+  markDelivered(order: Order): void {
+    this.orderService.updateOrderStatus(order.id_pedido, 'entregado').subscribe({
+      next: () => {
+        this.pendingOrders = this.pendingOrders.filter(o => o.id_pedido !== order.id_pedido);
+        Swal.fire('¡Listo!', `Pedido ${order.codigo_pedido} completado.`, 'success');
+      },
+      error: err => {
+        console.error('Error actualizando estado', err);
+        Swal.fire('Error', 'No se pudo actualizar el estado del pedido.', 'error');
+      }
+    });
   }
 }

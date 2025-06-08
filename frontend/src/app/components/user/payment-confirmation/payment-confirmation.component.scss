@@ -87,6 +87,39 @@
     }
   }
 
+  .promo-line {
+  align-items: center;
+}
+
+.promo-input-container {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.promo-input {
+  flex: 1 1 auto;
+  min-width: 160px;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.promo-btn {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.promo-btn:hover {
+  background-color: #1e40af;
+}
+
   /* Continuamos usando .btn-primary de Angular que ya tienes */
   .btn-primary {
     display: block;
