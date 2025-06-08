@@ -1,139 +1,166 @@
-/* src/app/components/admin/dashboard/dashboard.component.scss */
-
 .dashboard-wrapper {
-  max-width: 600px;
+  max-width: 900px;
   margin: 2rem auto;
-  background: #ffffff;
+  padding: 1rem;
+  background: #fff;
   border-radius: 8px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.1);
-  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
 
-  .dashboard-header {
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+
+  .logo-area { font-weight: bold; font-size: 1.2rem; }
+  h1 { margin: 0; }
+  .btn-logout {
+    background: #e53e3e;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+}
+
+.pending-orders {
+  background: #f7fafc;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+
+  h2 { margin-top: 0; }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  li {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid #e0e0e0;
-    padding-bottom: 1rem;
-    margin-bottom: 1rem;
-
-    .logo-area {
-      height: 40px;
-      /* Aquí podrías agregar tu logo si lo tienes */
-    }
-
-    h1 {
-      font-size: 1.75rem;
-      color: #333;
-      margin: 0;
-    }
-
-    .btn-logout {
-      background: #EF4444; /* Rojo para resaltar */
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 0.5rem 1rem;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: background-color 0.2s;
-
-      &:hover {
-        background: #DC2626;
-      }
-    }
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e2e8f0;
   }
-
-  .stats-cards {
+  .order-info {
     display: flex;
-    gap: 0.75rem;
-    justify-content: space-between;
-    margin-bottom: 1.5rem;
-
-    .stat-card {
-      flex: 1;
-      background: #ffffff;
-      border-radius: 8px;
-      box-shadow: 0 0 6px rgba(0,0,0,0.05);
-      display: flex;
-      flex-direction: column;
-
-      .stat-card-header {
-        background: #F5F7FA;
-        border-top-left-radius: 8px;
-        border-top-right-radius: 8px;
-        text-align: center;
-        padding: 0.5rem 0;
-
-        h3 {
-          margin: 0;
-          font-size: 1rem;
-          color: #555;
-        }
-      }
-
-      .stat-card-body {
-        padding: 1rem 0;
-        text-align: center;
-
-        p {
-          font-size: 1.5rem;
-          color: #222;
-          margin: 0;
-          font-weight: 600;
-        }
-      }
-    }
+    align-items: baseline;
+    gap: 0.5rem;
   }
-
-  .tabs-container {
-    display: flex;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 1rem;
-
-    button {
-      flex: 1;
-      background: #F5F7FA;
-      border: none;
-      padding: 0.75rem 1rem;
-      font-size: 1rem;
-      color: #333;
-      cursor: pointer;
-      transition: background-color 0.2s;
-
-      &.active {
-        background: #3B82F6;
-        color: #fff;
-      }
-
-      &:not(.active):hover {
-        background: #EFF6FF;
-      }
-    }
+  .btn-complete {
+    background: #3182ce;
+    color: white;
+    border: none;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
   }
+  .btn-complete:hover { background: #2b6cb0; }
 
-  .tab-content {
-    .tab-panel {
-      border: 2px dashed #CCCCCC;
-      border-radius: 8px;
-      padding: 1rem;
-      min-height: 200px;
-    }
+  .empty { color: #718096; text-align: center; }
+}
+
+.dashboard-nav {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  button {
+    background: transparent;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    font-size: 1rem;
+  }
+  button.active {
+    border-color: #3182ce;
+    font-weight: bold;
   }
 }
 
-@media (max-width: 480px) {
-  .dashboard-wrapper {
-    padding: 1rem;
-
-    .stats-cards {
-      flex-direction: column;
-      gap: 0.5rem;
-
-      .stat-card {
-        width: 100%;
-      }
-    }
-  }
+.tab-content {
+  min-height: 300px;
 }
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+
+  th, td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  th {
+    background: #edf2f7;
+    text-align: left;
+  }
+  tbody tr:hover { background: #f7fafc; }
+}
+/* Quita viñetas y márgenes por defecto */
+.mi-list {
+  list-style: none;
+  margin: 1rem 0;
+  padding: 0;
+  max-width: 900px;
+}
+
+/* Cada ítem como tarjeta flex */
+.mi-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  margin-bottom: 0.5rem;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Información del pedido */
+.mi-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.mi-info strong {
+  font-size: 1.1rem;
+  color: #374151;
+}
+
+.mi-info span {
+  margin-top: 0.25rem;
+  color: #6b7280;
+}
+
+.mi-info small {
+  color: #9ca3af;
+  margin-top: 0.25rem;
+}
+
+/* Botón de completado */
+.mi-btn-complete {
+  border: none;
+  background-color: #10b981;
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.mi-btn-complete:hover {
+  background-color: #059669;
+}
+
+/* Mensaje “no hay pendientes” centrado */
+.mi-container > .empty {
+  text-align: center;
+  color: #6b7280;
+  margin-top: 2rem;
+}
+

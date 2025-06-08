@@ -1,5 +1,3 @@
-// backend/index.js
-
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -16,18 +14,31 @@ import promotionsRouter from './routes/promotions.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Origen permitido para CORS (por defecto http://localhost:4200 en desarrollo)
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
+// ─── CORS ────────────────────────────────────────────────────────────────
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'http://localhost:4200'
+];
 
-app.use(cors({
-  origin: FRONTEND_URL,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error(`CORS policy: origen ${origin} no permitido.`));
+  },
+  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization'],
   credentials: true
-}));
+};
 
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
+// ─── JSON parser ────────────────────────────────────────────────────────
 app.use(express.json());
 
-// Rutas de la API
+// ─── Rutas ───────────────────────────────────────────────────────────────
 app.use('/api/auth', authRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/orders', ordersRouter);
@@ -35,12 +46,12 @@ app.use('/api/users', usersRouter);
 app.use('/api/inventory', inventoryRouter);
 app.use('/api/promotions', promotionsRouter);
 
-// Ruta raíz
-app.get('/', (req, res) => {
+// ─── Sanity check ────────────────────────────────────────────────────────
+app.get('/', (_req, res) => {
   res.json({ message: 'YogurExpress Backend funcionando' });
 });
 
-// Arranque del servidor
+// ─── Levantamos servidor ─────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

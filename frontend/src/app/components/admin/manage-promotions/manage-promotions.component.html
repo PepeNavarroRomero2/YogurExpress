@@ -31,15 +31,15 @@
         <input name="codigo" [(ngModel)]="promoModel.codigo" required />
       </label>
       <label>
-        Descuento:
+        Descuento (%):
         <input
           name="descuento"
           type="number"
           [(ngModel)]="promoModel.descuento"
           required
           min="0"
-          max="1"
-          step="0.01"
+          max="100"
+          step="1"
         />
       </label>
       <label>

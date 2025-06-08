@@ -19,7 +19,7 @@ export class ManagePromotionsComponent implements OnInit {
   isEditing = false;
   editingPromotionId: number | null = null;
 
-  // Modelo del formulario
+  // Modelo del formulario (aquí descuento en porcentaje, no en fracción)
   promoModel: { codigo: string; descripcion: string; descuento: number } = {
     codigo: '',
     descripcion: '',
@@ -34,7 +34,7 @@ export class ManagePromotionsComponent implements OnInit {
 
   loadPromotions(): void {
     this.promotionService.getPromotions().subscribe({
-      next: (data: Promotion[]) => this.promotions = data,
+      next: (data: Promotion[]) => (this.promotions = data),
       error: (err: any) => {
         console.error('Error cargando promociones', err);
         Swal.fire('Error', 'No se pudieron cargar las promociones', 'error');
@@ -53,18 +53,30 @@ export class ManagePromotionsComponent implements OnInit {
     this.showForm = true;
     this.isEditing = true;
     this.editingPromotionId = p.id_promocion;
+    // Convertimos la fracción a porcentaje para el formulario
     this.promoModel = {
       codigo: p.codigo,
       descripcion: p.descripcion || '',
-      descuento: p.descuento,
+      descuento: Math.round(p.descuento * 100),
+    };
+  }
+
+  /** Crea el objeto que el backend espera, con 'descuento' como fracción */
+  private toDto() {
+    return {
+      codigo: this.promoModel.codigo.trim(),
+      descripcion: this.promoModel.descripcion.trim(),
+      descuento: this.promoModel.descuento / 100,
     };
   }
 
   onSave(form: NgForm): void {
     if (form.invalid) return;
 
+    const dto = this.toDto();
+
     if (this.isEditing && this.editingPromotionId != null) {
-      this.promotionService.updatePromotion(this.editingPromotionId, this.promoModel).subscribe({
+      this.promotionService.updatePromotion(this.editingPromotionId, dto).subscribe({
         next: () => {
           Swal.fire('Actualizado', 'Promoción actualizada', 'success');
           this.onCancel();
@@ -75,7 +87,7 @@ export class ManagePromotionsComponent implements OnInit {
         },
       });
     } else {
-      this.promotionService.createPromotion(this.promoModel).subscribe({
+      this.promotionService.createPromotion(dto).subscribe({
         next: () => {
           Swal.fire('Éxito', 'Promoción creada', 'success');
           this.onCancel();
