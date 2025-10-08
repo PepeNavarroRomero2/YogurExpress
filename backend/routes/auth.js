@@ -1,102 +1,134 @@
-// backend/routes/auth.js
-
 import express from 'express';
-import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { supabase } from '../lib/supabaseClient.js';
-import dotenv from 'dotenv';
-dotenv.config();
 
 const router = express.Router();
 
-// REGISTRO
+function signToken(user) {
+  return jwt.sign(
+    { id_usuario: user.id_usuario, email: user.email, rol: user.rol },
+    process.env.JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+}
+
+/**
+ * POST /api/auth/register
+ * Body: { nombre, email, contraseña | contrasena | password }
+ * Crea usuario con contraseña hasheada en la columna "contraseña_hash".
+ */
 router.post('/register', async (req, res) => {
-  const { nombre, email, contraseña } = req.body;
-  if (!nombre || !email || !contraseña) {
-    return res.status(400).json({ error: 'Faltan campos obligatorios.' });
-  }
-
   try {
-    // Hashear la contraseña antes de guardar
-    const hashedPassword = await bcrypt.hash(contraseña, 10);
+    const nombre = String(req.body?.nombre || '').trim();
+    const email = String(req.body?.email || '').toLowerCase().trim();
 
-    // Insertar usuario nuevo
-    const { data: newUser, error: userError } = await supabase
+    // Aceptamos varias claves por comodidad:
+    const plain =
+      req.body?.contraseña ??
+      req.body?.contrasena ??
+      req.body?.password ??
+      '';
+
+    if (!nombre || !email || !plain) {
+      return res.status(400).json({ error: 'nombre, email y contraseña son obligatorios' });
+    }
+
+    // ¿Existe ya ese email?
+    {
+      const { data: existing, error: exErr } = await supabase
+        .from('usuarios')
+        .select('id_usuario')
+        .eq('email', email)
+        .maybeSingle();
+      if (exErr) {
+        console.error('[Supabase] Error comprobando email:', exErr);
+        return res.status(500).json({ error: 'Error interno comprobando email' });
+      }
+      if (existing) {
+        return res.status(409).json({ error: 'El email ya está registrado' });
+      }
+    }
+
+    const passwordHash = await bcrypt.hash(String(plain), 10);
+
+    // IMPORTANTE: guardamos en "contraseña_hash" (con eñe)
+    const insertPayload = {
+      nombre,
+      email,
+      rol: 'cliente',
+      puntos: 0,
+      // clave con eñe => hay que usar notación de string/brackets
+      ['contraseña_hash']: passwordHash
+    };
+
+    const { data: created, error: insErr } = await supabase
       .from('usuarios')
-      .insert([{
-        nombre,
-        email,
-        contraseña: hashedPassword,
-        rol: 'user',
-        puntos: 0
-      }])
+      .insert([insertPayload])
       .select('id_usuario, nombre, email, rol, puntos')
       .single();
 
-    if (userError) {
-      console.error('[Supabase] Error insertando usuario:', userError);
-      return res.status(500).json({ error: 'Error al registrar usuario.' });
+    if (insErr) {
+      console.error('[Supabase] Error insertando usuario:', insErr);
+      return res.status(500).json({ error: 'No se pudo crear el usuario' });
     }
 
-    const tokenPayload = {
-      id_usuario: newUser.id_usuario,
-      email: newUser.email,
-      role: newUser.rol
-    };
-
-    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '3h' });
-
-    return res.status(201).json({ user: newUser, token });
-  } catch (err) {
-    console.error('Error en POST /api/auth/register:', err);
-    return res.status(500).json({ error: 'Error interno en registro.' });
+    const token = signToken(created);
+    return res.status(201).json({ user: created, token });
+  } catch (e) {
+    console.error('[Auth] Error general en register:', e);
+    return res.status(500).json({ error: 'Error interno en registro' });
   }
 });
 
-// LOGIN
+/**
+ * POST /api/auth/login
+ * Body: { email, contraseña | contrasena | password }
+ * Valida contra "contraseña_hash".
+ */
 router.post('/login', async (req, res) => {
-  const { email, contraseña } = req.body;
-  if (!email || !contraseña) {
-    return res.status(400).json({ error: 'Faltan campos obligatorios.' });
-  }
-
   try {
-    // Buscar usuario por email
-    const { data: user, error: fetchError } = await supabase
+    const email = String(req.body?.email || '').toLowerCase().trim();
+    const plain =
+      req.body?.contraseña ??
+      req.body?.contrasena ??
+      req.body?.password ??
+      '';
+
+    if (!email || !plain) {
+      return res.status(400).json({ error: 'email y contraseña son obligatorios' });
+    }
+
+    // Necesitamos leer también la columna de hash (con eñe)
+    const { data: user, error: selErr } = await supabase
       .from('usuarios')
-      .select('id_usuario, nombre, email, rol, puntos, contraseña')
+      .select('id_usuario, nombre, email, rol, puntos, "contraseña_hash"')
       .eq('email', email)
       .single();
 
-    if (fetchError) {
-      console.error('[Supabase] Error buscando usuario:', fetchError);
-      return res.status(500).json({ error: 'Error al iniciar sesión.' });
+    if (selErr || !user) {
+      return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
-    if (!user) {
-      return res.status(400).json({ error: 'Credenciales inválidas.' });
+    const ok = await bcrypt.compare(String(plain), user['contraseña_hash']);
+    if (!ok) {
+      return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
-    const validPassword = await bcrypt.compare(contraseña, user.contraseña);
-    if (!validPassword) {
-      return res.status(400).json({ error: 'Credenciales inválidas.' });
-    }
-
-    const tokenPayload = {
+    // No devolvemos la columna del hash
+    const safeUser = {
       id_usuario: user.id_usuario,
+      nombre: user.nombre,
       email: user.email,
-      role: user.rol
+      rol: user.rol,
+      puntos: user.puntos
     };
 
-    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '3h' });
-
-    // Eliminar contraseña antes de devolver el usuario
-    delete user.contraseña;
-
-    return res.json({ user, token });
-  } catch (err) {
-    console.error('Error en POST /api/auth/login:', err);
-    return res.status(500).json({ error: 'Error interno en login.' });
+    const token = signToken(safeUser);
+    return res.json({ user: safeUser, token });
+  } catch (e) {
+    console.error('[Auth] Error general en login:', e);
+    return res.status(500).json({ error: 'Error interno en login' });
   }
 });
 
