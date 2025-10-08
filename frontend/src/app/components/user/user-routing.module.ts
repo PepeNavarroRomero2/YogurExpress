@@ -9,14 +9,15 @@ import { PaymentConfirmationComponent }   from './payment-confirmation/payment-c
 import { OrderHistoryComponent }          from './order-history/order-history.component';
 import { PointsComponent }                from './points/points.component';
 import { authGuard }                      from '../../guards/auth.guard';
+import { loginRedirectGuard }             from '../../guards/login-redirect.guard';
 
 const routes: Routes = [
   { path: '',            redirectTo: 'login', pathMatch: 'full' },
-  { path: 'login',       component: LoginRegisterComponent },
+  { path: 'login',       component: LoginRegisterComponent, canActivate: [loginRedirectGuard] },
   { path: 'menu',        component: ProductMenuComponent },
   { path: 'personalize', component: CustomizeOrderComponent },
   { path: 'pickup',      component: SelectTimeComponent },
-  // Estas requieren login:
+  // Requieren login:
   { path: 'payment',     component: PaymentConfirmationComponent, canActivate: [authGuard] },
   { path: 'history',     component: OrderHistoryComponent,        canActivate: [authGuard] },
   { path: 'points',      component: PointsComponent,              canActivate: [authGuard] },
@@ -26,4 +27,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class UserRoutingModule { }
+export class UserRoutingModule {}

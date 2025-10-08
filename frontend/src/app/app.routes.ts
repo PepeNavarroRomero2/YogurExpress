@@ -15,6 +15,6 @@ export const routes: Routes = [
       import('./components/user/user.module')
         .then(m => m.UserModule)
   },
-  { path: '', redirectTo: '/user', pathMatch: 'full' },
-  { path: '**', redirectTo: '/user' }
+  { path: '',  redirectTo: '/user',       pathMatch: 'full' },
+  { path: '**', redirectTo: '/user/menu' }
 ];
