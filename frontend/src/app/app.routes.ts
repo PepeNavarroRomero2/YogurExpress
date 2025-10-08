@@ -5,16 +5,12 @@ export const routes: Routes = [
   {
     path: 'admin',
     canActivate: [adminGuard],
-    loadComponent: () =>
-      import('./components/admin/dashboard/dashboard.component')
-        .then(m => m.DashboardComponent)
+    loadChildren: () => import('./components/admin/admin.module').then(m => m.AdminModule)
   },
   {
     path: 'user',
-    loadChildren: () =>
-      import('./components/user/user.module')
-        .then(m => m.UserModule)
+    loadChildren: () => import('./components/user/user.module').then(m => m.UserModule)
   },
-  { path: '',  redirectTo: '/user',       pathMatch: 'full' },
-  { path: '**', redirectTo: '/user/menu' }
+  { path: '',    redirectTo: '/user/login', pathMatch: 'full' },
+  { path: '**',  redirectTo: '/user/login' }
 ];

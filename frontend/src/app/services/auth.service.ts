@@ -8,7 +8,7 @@ export interface User {
   id_usuario: number;
   nombre: string;
   email: string;
-  rol: string;      // 'admin' | 'cliente'
+  rol: 'admin' | 'cliente';
   puntos: number;
 }
 
@@ -21,7 +21,7 @@ export interface AuthResponse {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   /** APIs */
-  private AUTH_API = 'http://localhost:3000/api/auth';
+  private AUTH_API  = 'http://localhost:3000/api/auth';
   private USERS_API = 'http://localhost:3000/api/users';
 
   /** Storage keys */
@@ -38,20 +38,14 @@ export class AuthService {
   register(nombre: string, email: string, contraseña: string): Observable<AuthResponse> {
     const body = { nombre, email, contraseña };
     return this.http.post<AuthResponse>(`${this.AUTH_API}/register`, body).pipe(
-      tap(res => {
-        this.setToken(res.token);
-        this.setUser(res.user);
-      })
+      tap(res => { this.setToken(res.token); this.setUser(res.user); })
     );
   }
 
   login(email: string, contraseña: string): Observable<AuthResponse> {
     const body = { email, contraseña };
     return this.http.post<AuthResponse>(`${this.AUTH_API}/login`, body).pipe(
-      tap(res => {
-        this.setToken(res.token);
-        this.setUser(res.user);
-      })
+      tap(res => { this.setToken(res.token); this.setUser(res.user); })
     );
   }
 
@@ -75,18 +69,38 @@ export class AuthService {
   }
   getCurrentUser(): User | null {
     const raw = localStorage.getItem(this.USER_KEY);
-    return raw ? JSON.parse(raw) as User : null;
+    return raw ? (JSON.parse(raw) as User) : null;
   }
 
-  /** True si hay token */
   isLoggedIn(): boolean {
     return !!this.getToken();
   }
 
-  /** True si el usuario actual es admin (según storage) */
   isAdmin(): boolean {
     const u = this.getCurrentUser();
     return !!u && u.rol === 'admin';
+  }
+
+  /** Decodifica el payload del JWT (best-effort) */
+  private getTokenPayload(): any | null {
+    const t = this.getToken();
+    if (!t) return null;
+    try {
+      const base64 = t.split('.')[1];
+      if (!base64) return null;
+      const json = atob(base64);
+      return JSON.parse(json);
+    } catch {
+      return null;
+    }
+  }
+
+  /** Devuelve true si el token no existe o está expirado/corrupto */
+  isTokenExpired(): boolean {
+    const p = this.getTokenPayload();
+    if (!p || !p.exp) return true; // si no podemos leer exp, tratamos como inválido
+    const expiresAtMs = p.exp * 1000;
+    return Date.now() >= expiresAtMs;
   }
 
   /** Cabeceras con Authorization (Bearer <token>) */
