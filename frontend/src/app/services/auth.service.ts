@@ -1,109 +1,95 @@
-// src/app/services/auth.service.ts
-
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 
-/**
- * Interfaz que representa los datos del usuario que recibimos del backend.
- */
+/** Datos del usuario según backend */
 export interface User {
   id_usuario: number;
   nombre: string;
   email: string;
-  rol: string;
+  rol: string;      // 'admin' | 'cliente'
   puntos: number;
 }
 
-/**
- * Interfaz para la respuesta del login/register: viene con el token y el User.
- */
+/** Respuesta de login/register */
 export interface AuthResponse {
   user: User;
   token: string;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  // URL base de tu API de autenticación
-  private API_URL = 'http://localhost:3000/api/auth';
-  // Clave en localStorage donde guardamos el objeto User (stringificado)
-  private userKey = 'current_user';
+  /** APIs */
+  private AUTH_API = 'http://localhost:3000/api/auth';
+  private USERS_API = 'http://localhost:3000/api/users';
+
+  /** Storage keys */
+  private TOKEN_KEY = 'auth_token';
+  private USER_KEY  = 'current_user';
 
   constructor(
     private http: HttpClient,
     private router: Router
   ) {}
 
-  /**
-   * Registra un nuevo usuario. Al registrarse, guardamos token y usuario en localStorage.
-   */
+  // ─────────── Auth calls ───────────
+
   register(nombre: string, email: string, contraseña: string): Observable<AuthResponse> {
     const body = { nombre, email, contraseña };
-    return this.http.post<AuthResponse>(`${this.API_URL}/register`, body).pipe(
+    return this.http.post<AuthResponse>(`${this.AUTH_API}/register`, body).pipe(
       tap(res => {
         this.setToken(res.token);
-        this.setUserInStorage(res.user);
+        this.setUser(res.user);
       })
     );
   }
 
-  /**
-   * Hace login: al autenticar correctamente, guardamos token y usuario en localStorage.
-   */
   login(email: string, contraseña: string): Observable<AuthResponse> {
     const body = { email, contraseña };
-    return this.http.post<AuthResponse>(`${this.API_URL}/login`, body).pipe(
+    return this.http.post<AuthResponse>(`${this.AUTH_API}/login`, body).pipe(
       tap(res => {
         this.setToken(res.token);
-        this.setUserInStorage(res.user);
+        this.setUser(res.user);
       })
     );
   }
 
-  /**
-   * Almacenamos el token JWT en localStorage.
-   */
-  private setToken(token: string) {
-    localStorage.setItem('auth_token', token);
+  logout(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.USER_KEY);
+    this.router.navigate(['/user/login']);
   }
 
-  /**
-   * Guardamos el objeto User (stringificado) en localStorage.
-   */
-  private setUserInStorage(user: User) {
-    localStorage.setItem(this.userKey, JSON.stringify(user));
-  }
+  // ─────────── Token & User helpers ───────────
 
-  /**
-   * Devuelve el token (o null si no existe).
-   */
+  private setToken(token: string): void {
+    localStorage.setItem(this.TOKEN_KEY, token);
+  }
   getToken(): string | null {
-    return localStorage.getItem('auth_token');
+    return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  /**
-   * Indica si el usuario está autenticado (si existe token en localStorage).
-   */
+  private setUser(user: User): void {
+    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+  }
+  getCurrentUser(): User | null {
+    const raw = localStorage.getItem(this.USER_KEY);
+    return raw ? JSON.parse(raw) as User : null;
+  }
+
+  /** True si hay token */
   isLoggedIn(): boolean {
     return !!this.getToken();
   }
 
-  /**
-   * Hace logout: borramos token y user, y redirigimos a la ruta de login.
-   */
-  logout(): void {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem(this.userKey);
-    this.router.navigate(['/user/login']);
+  /** True si el usuario actual es admin */
+  isAdmin(): boolean {
+    const u = this.getCurrentUser();
+    return !!u && u.rol === 'admin';
   }
 
-  /**
-   * Devuelve cabeceras con Authorization para peticiones privadas.
-   */
+  /** Cabeceras con Authorization */
   getAuthHeaders(): HttpHeaders {
     const token = this.getToken() || '';
     return new HttpHeaders({
@@ -112,18 +98,9 @@ export class AuthService {
     });
   }
 
-  /**
-   * Devuelve el objeto User si está en localStorage, o null si no.
-   */
-  getCurrentUser(): User | null {
-    const raw = localStorage.getItem(this.userKey);
-    return raw ? JSON.parse(raw) as User : null;
+  /** Refresca perfil desde el backend y actualiza storage */
+  fetchProfile(): Observable<User> {
+    return this.http.get<User>(`${this.USERS_API}/profile`, { headers: this.getAuthHeaders() })
+      .pipe(tap(user => this.setUser(user)));
   }
-
-  getProfile(): Observable<User> {
-  const token = localStorage.getItem('token');
-  const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-  return this.http.get<User>('http://localhost:3000/api/users/profile', { headers });
-}
-
 }

@@ -2,11 +2,12 @@
 
 import express from 'express';
 import { supabase } from '../lib/supabaseClient.js';
+import { authenticateToken, isAdmin } from './authMiddleware.js';
 
 const router = express.Router();
 
-// 1) GET /api/products → Todos los productos
-router.get('/', async (req, res) => {
+// 1) GET /api/products → público
+router.get('/', async (_req, res) => {
   try {
     const { data, error } = await supabase
       .from('productos')
@@ -20,8 +21,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 2) GET /api/products/sabores → Solo tipo = 'sabor'
-router.get('/sabores', async (req, res) => {
+// 2) GET /api/products/sabores → público
+router.get('/sabores', async (_req, res) => {
   try {
     const { data, error } = await supabase
       .from('productos')
@@ -36,8 +37,8 @@ router.get('/sabores', async (req, res) => {
   }
 });
 
-// 3) GET /api/products/toppings → Solo tipo = 'topping'
-router.get('/toppings', async (req, res) => {
+// 3) GET /api/products/toppings → público
+router.get('/toppings', async (_req, res) => {
   try {
     const { data, error } = await supabase
       .from('productos')
@@ -52,13 +53,13 @@ router.get('/toppings', async (req, res) => {
   }
 });
 
-// 4) GET /api/products/tamanos → Solo tipo = 'tamanos'
-router.get('/tamanos', async (req, res) => {
+// 4) GET /api/products/tamanos → público
+router.get('/tamanos', async (_req, res) => {
   try {
     const { data, error } = await supabase
       .from('productos')
       .select('*')
-      .eq('tipo', 'tamanos')
+      .eq('tipo', 'tamano')
       .order('id_producto', { ascending: true });
     if (error) throw error;
     res.json(data);
@@ -68,7 +69,7 @@ router.get('/tamanos', async (req, res) => {
   }
 });
 
-// 5) GET /api/products/:id → Producto por ID
+// 5) GET /api/products/:id → público
 router.get('/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
@@ -78,7 +79,6 @@ router.get('/:id', async (req, res) => {
       .eq('id_producto', id)
       .single();
     if (error) throw error;
-    if (!data) return res.status(404).json({ error: 'Producto no encontrado.' });
     res.json(data);
   } catch (e) {
     console.error(`GET /products/${id} error:`, e);
@@ -86,138 +86,43 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// 6) POST /api/products → Crea cualquier producto y registra en inventario
-router.post('/', async (req, res) => {
+// 6) POST /api/products → ADMIN
+router.post('/', authenticateToken, isAdmin, async (req, res) => {
+  const { nombre, tipo, precio, descripcion, alergenos, imagen_url, cantidad_disponible } = req.body;
+
+  if (!nombre || !tipo || typeof precio !== 'number') {
+    return res.status(400).json({ error: 'Datos incompletos' });
+  }
+
   try {
-    const {
-      nombre,
-      tipo,
-      precio,
-      descripcion = '',
-      alergenos = '',
-      imagen_url = '',
-      cantidad_disponible = 0
-    } = req.body;
-
-    // Validaciones mínimas
-    if (!nombre || !tipo || precio == null) {
-      return res.status(400).json({ error: 'Faltan campos obligatorios.' });
-    }
-
-    // 1) Insertar en tabla "productos"
-    const { data: prodData, error: prodError } = await supabase
+    const { data: prod, error } = await supabase
       .from('productos')
       .insert([{ nombre, tipo, precio, descripcion, alergenos, imagen_url }])
       .select()
       .single();
+    if (error) throw error;
 
-    if (prodError) {
-      console.error('[Supabase] Error insertando producto:', prodError);
-      return res.status(500).json({ error: 'No se pudo crear el producto.' });
+    // si viene cantidad_disponible, inicializamos inventario
+    if (typeof cantidad_disponible === 'number') {
+      const { error: invErr } = await supabase
+        .from('inventario')
+        .insert([{ id_producto: prod.id_producto, cantidad_disponible }]);
+      if (invErr) console.error('Init inventario error:', invErr);
     }
 
-    const nuevoId = prodData.id_producto;
-
-    // 2) Insertar en tabla "inventario" con la cantidad dada (o 0)
-    const { error: invError } = await supabase
-      .from('inventario')
-      .insert([{ id_producto: nuevoId, cantidad_disponible }]);
-
-    if (invError) {
-      console.error(
-        `[Supabase] Error creando inventario para producto ${nuevoId}:`,
-        invError
-      );
-      // Si falla inventario, devolvemos 500. El producto ya está creado en "productos".
-      return res
-        .status(500)
-        .json({ error: 'Producto creado, pero falló la creación del inventario.' });
-    }
-
-    // 3) Devolver el producto recién creado
-    return res.status(201).json(prodData);
+    res.status(201).json(prod);
   } catch (e) {
     console.error('POST /products error:', e);
     res.status(500).json({ error: 'No se pudo crear el producto.' });
   }
 });
 
-// 7) POST /api/products/toppings → Atajo: crea con tipo = 'topping' y registra en inventario
-router.post('/toppings', async (req, res) => {
-  try {
-    const {
-      nombre,
-      precio,
-      descripcion = '',
-      alergenos = '',
-      imagen_url = '',
-      cantidad_disponible = 0
-    } = req.body;
-
-    if (!nombre || precio == null) {
-      return res.status(400).json({ error: 'Faltan campos obligatorios para el topping.' });
-    }
-
-    // 1) Insertar en tabla "productos" con tipo 'topping'
-    const { data: prodData, error: prodError } = await supabase
-      .from('productos')
-      .insert([{ nombre, tipo: 'topping', precio, descripcion, alergenos, imagen_url }])
-      .select()
-      .single();
-
-    if (prodError) {
-      console.error('[Supabase] Error insertando topping:', prodError);
-      return res.status(500).json({ error: 'No se pudo crear el topping.' });
-    }
-
-    const nuevoId = prodData.id_producto;
-
-    // 2) Insertar en tabla "inventario"
-    const { error: invError } = await supabase
-      .from('inventario')
-      .insert([{ id_producto: nuevoId, cantidad_disponible }]);
-
-    if (invError) {
-      console.error(
-        `[Supabase] Error creando inventario para topping ${nuevoId}:`,
-        invError
-      );
-      return res
-        .status(500)
-        .json({ error: 'Topping creado, pero falló la creación del inventario.' });
-    }
-
-    return res.status(201).json(prodData);
-  } catch (e) {
-    console.error('POST /products/toppings error:', e);
-    res.status(500).json({ error: 'No se pudo crear el topping.' });
-  }
-});
-
-// 8) PUT /api/products/:id → Actualiza un producto existente
-router.put('/:id', async (req, res) => {
+// 7) PUT /api/products/:id → ADMIN
+router.put('/:id', authenticateToken, isAdmin, async (req, res) => {
   const id = parseInt(req.params.id, 10);
+  const { nombre, tipo, precio, descripcion, alergenos, imagen_url, cantidad_disponible } = req.body;
+
   try {
-    const { data: existing, error: getError } = await supabase
-      .from('productos')
-      .select('*')
-      .eq('id_producto', id)
-      .single();
-
-    if (getError) throw getError;
-    if (!existing) return res.status(404).json({ error: 'Producto no encontrado.' });
-
-    const {
-      nombre,
-      tipo,
-      precio,
-      descripcion,
-      alergenos,
-      imagen_url,
-      cantidad_disponible
-    } = req.body;
-
-    // 1) Actualizar campos de "productos"
     const updates = {};
     if (nombre !== undefined) updates.nombre = nombre;
     if (tipo !== undefined) updates.tipo = tipo;
@@ -232,44 +137,31 @@ router.put('/:id', async (req, res) => {
       .eq('id_producto', id)
       .select()
       .single();
-
     if (updateError) throw updateError;
 
-    // 2) Si envían cantidad_disponible, actualizamos en "inventario"
     if (cantidad_disponible !== undefined) {
       const { error: invUpdateError } = await supabase
         .from('inventario')
         .update({ cantidad_disponible })
         .eq('id_producto', id);
-
-      if (invUpdateError) {
-        console.error(
-          `[Supabase] Error actualizando inventario para producto ${id}:`,
-          invUpdateError
-        );
-        // No abortamos la respuesta; solo informamos
-        return res
-          .status(500)
-          .json({ error: 'Producto actualizado, pero falló la actualización del inventario.' });
-      }
+      if (invUpdateError) console.error('Update inventario error:', invUpdateError);
     }
 
-    return res.json(updatedProd);
+    res.json(updatedProd);
   } catch (e) {
     console.error(`PUT /products/${id} error:`, e);
     res.status(500).json({ error: 'No se pudo actualizar el producto.' });
   }
 });
 
-// 9) DELETE /api/products/:id → Elimina un producto (y en cascada su inventario)
-router.delete('/:id', async (req, res) => {
+// 8) DELETE /api/products/:id → ADMIN
+router.delete('/:id', authenticateToken, isAdmin, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
     const { error } = await supabase
       .from('productos')
       .delete()
       .eq('id_producto', id);
-
     if (error) throw error;
     res.json({ message: 'Producto eliminado correctamente.' });
   } catch (e) {

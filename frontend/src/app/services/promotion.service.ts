@@ -1,8 +1,7 @@
-// frontend/src/app/services/promotion.service.ts
-
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { AuthService } from './auth.service';
 
 export interface Promotion {
   id_promocion: number;
@@ -11,41 +10,33 @@ export interface Promotion {
   descripcion?: string;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class PromotionService {
   private API_URL = 'http://localhost:3000/api/promotions';
+  constructor(private http: HttpClient, private auth: AuthService) {}
 
-  constructor(private http: HttpClient) {}
-
+  // Públicas
   getPromotions(): Observable<Promotion[]> {
     return this.http.get<Promotion[]>(this.API_URL);
   }
 
-  createPromotion(promo: { codigo: string; descuento: number; descripcion?: string }): Observable<Promotion> {
-    const token = localStorage.getItem('token') || '';
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-    return this.http.post<Promotion>(this.API_URL, promo, { headers });
+  /** Backend expone /check?code=XXXX */
+  validateCode(code: string): Observable<{ id_promocion: number; codigo: string; descuento: number; descripcion?: string }> {
+    return this.http.get<{ id_promocion: number; codigo: string; descuento: number; descripcion?: string }>(
+      `${this.API_URL}/check?code=${encodeURIComponent(code)}`
+    );
   }
 
-  updatePromotion(
-    id: number,
-    promo: { codigo: string; descuento: number; descripcion?: string }
-  ): Observable<Promotion> {
-    const token = localStorage.getItem('token') || '';
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-    return this.http.put<Promotion>(`${this.API_URL}/${id}`, promo, { headers });
+  // Admin-only (añadimos Authorization)
+  createPromotion(promo: Omit<Promotion,'id_promocion'>): Observable<Promotion> {
+    return this.http.post<Promotion>(this.API_URL, promo, { headers: this.auth.getAuthHeaders() });
+  }
+
+  updatePromotion(id: number, promo: Partial<Promotion>): Observable<Promotion> {
+    return this.http.put<Promotion>(`${this.API_URL}/${id}`, promo, { headers: this.auth.getAuthHeaders() });
   }
 
   deletePromotion(id: number): Observable<void> {
-    const token = localStorage.getItem('token') || '';
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-    return this.http.delete<void>(`${this.API_URL}/${id}`, { headers });
-  }
-
-  // Para validar código promocional desde payment-confirmation
-  validateCode(code: string): Observable<{ valid: boolean; descuento: number }> {
-    return this.http.get<{ valid: boolean; descuento: number }>(`${this.API_URL}/validate/${code}`);
+    return this.http.delete<void>(`${this.API_URL}/${id}`, { headers: this.auth.getAuthHeaders() });
   }
 }

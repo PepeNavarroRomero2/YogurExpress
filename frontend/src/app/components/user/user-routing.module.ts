@@ -8,6 +8,7 @@ import { SelectTimeComponent }            from './select-time/select-time.compon
 import { PaymentConfirmationComponent }   from './payment-confirmation/payment-confirmation.component';
 import { OrderHistoryComponent }          from './order-history/order-history.component';
 import { PointsComponent }                from './points/points.component';
+import { authGuard }                      from '../../guards/auth.guard';
 
 const routes: Routes = [
   { path: '',            redirectTo: 'login', pathMatch: 'full' },
@@ -15,9 +16,10 @@ const routes: Routes = [
   { path: 'menu',        component: ProductMenuComponent },
   { path: 'personalize', component: CustomizeOrderComponent },
   { path: 'pickup',      component: SelectTimeComponent },
-  { path: 'payment',     component: PaymentConfirmationComponent },
-  { path: 'history',     component: OrderHistoryComponent },
-  { path: 'points',      component: PointsComponent },
+  // Estas requieren login:
+  { path: 'payment',     component: PaymentConfirmationComponent, canActivate: [authGuard] },
+  { path: 'history',     component: OrderHistoryComponent,        canActivate: [authGuard] },
+  { path: 'points',      component: PointsComponent,              canActivate: [authGuard] },
 ];
 
 @NgModule({

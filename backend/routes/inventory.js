@@ -2,33 +2,23 @@
 
 import express from 'express';
 import { supabase } from '../lib/supabaseClient.js';
-import { authenticateToken } from './authMiddleware.js';
+import { authenticateToken, isAdmin } from './authMiddleware.js';
 
 const router = express.Router();
 
-/**
- * GET /api/inventory
- * Devuelve lista de inventario con nombre de producto.
- * (público, sin auth)
- */
+// Público: listado
 router.get('/', async (_req, res) => {
   try {
     const { data, error } = await supabase
       .from('inventario')
-      .select(`
-        id_producto,
-        cantidad_disponible,
-        productos (
-          nombre
-        )
-      `);
-
+      .select('id_producto, cantidad_disponible, productos(nombre)')
+      .order('id_producto', { ascending: true });
     if (error) {
-      console.error('Error fetching inventory:', error);
+      console.error('Error inventario:', error);
       return res.status(500).json({ error: 'Error al obtener inventario.' });
     }
 
-    const inventory = data.map(item => ({
+    const inventory = (data || []).map(item => ({
       id_producto: item.id_producto,
       cantidad_disponible: item.cantidad_disponible,
       productName: item.productos?.nombre || '—'
@@ -41,12 +31,8 @@ router.get('/', async (_req, res) => {
   }
 });
 
-/**
- * PUT /api/inventory/:id_producto
- * Actualiza la cantidad disponible de un producto.
- * (requiere auth)
- */
-router.put('/:id_producto', authenticateToken, async (req, res) => {
+// Admin: actualizar stock
+router.put('/:id_producto', authenticateToken, isAdmin, async (req, res) => {
   const id = parseInt(req.params.id_producto, 10);
   const { cantidad_disponible } = req.body;
 
