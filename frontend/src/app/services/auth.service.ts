@@ -83,13 +83,13 @@ export class AuthService {
     return !!this.getToken();
   }
 
-  /** True si el usuario actual es admin */
+  /** True si el usuario actual es admin (según storage) */
   isAdmin(): boolean {
     const u = this.getCurrentUser();
     return !!u && u.rol === 'admin';
   }
 
-  /** Cabeceras con Authorization */
+  /** Cabeceras con Authorization (Bearer <token>) */
   getAuthHeaders(): HttpHeaders {
     const token = this.getToken() || '';
     return new HttpHeaders({
@@ -98,9 +98,10 @@ export class AuthService {
     });
   }
 
-  /** Refresca perfil desde el backend y actualiza storage */
+  /** Refresca perfil desde backend y actualiza storage */
   fetchProfile(): Observable<User> {
-    return this.http.get<User>(`${this.USERS_API}/profile`, { headers: this.getAuthHeaders() })
+    return this.http
+      .get<User>(`${this.USERS_API}/profile`, { headers: this.getAuthHeaders() })
       .pipe(tap(user => this.setUser(user)));
   }
 }
