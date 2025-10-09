@@ -116,6 +116,13 @@
   background-color: #2563EB; /* Azul más oscuro en hover */
 }
 
+.st-head { display: flex; align-items: center; gap: 12px; }
+.st-head .st-title { flex: 1; margin: 0; }
+.st-btn-secondary {
+  padding: 6px 10px; border-radius: 8px; border: 1px solid #333; background: #1c1c1c; color: #eee; cursor: pointer;
+}
+
+
 /* ──────────────────────────────────────────────────────── */
 /* 6) Media queries para dispositivos pequeños               */
 /* ──────────────────────────────────────────────────────── */

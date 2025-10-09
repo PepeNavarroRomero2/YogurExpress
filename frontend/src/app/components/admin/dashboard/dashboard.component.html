@@ -1,55 +1,67 @@
-<!-- src/app/components/admin/dashboard/dashboard.component.html -->
-
 <div class="dashboard-wrapper">
   <header class="dashboard-header">
     <div class="logo-area">LOGO</div>
     <h1>Admin Dashboard</h1>
-    <button class="btn-logout" (click)="onLogout()">Cerrar Sesión</button>
+
+    <div class="header-actions">
+      <button class="btn" (click)="showScheduleDialog = true" aria-label="Ajustar horario">
+        ⚙ Ajustar horario
+      </button>
+      <button class="btn-logout" (click)="onLogout()">Cerrar Sesión</button>
+    </div>
   </header>
 
-  <!-- Menú de pestañas, sin "Todos los pedidos" -->
   <nav class="dashboard-nav">
-    <button (click)="setTab('stats')"     [class.active]="activeTab==='stats'">Pendientes</button>
-    <button (click)="setTab('products')"  [class.active]="activeTab==='products'">Productos</button>
-    <button (click)="setTab('inventory')" [class.active]="activeTab==='inventory'">Inventario</button>
+    <button (click)="setTab('stats')"      [class.active]="activeTab==='stats'">Pendientes</button>
+    <button (click)="setTab('products')"   [class.active]="activeTab==='products'">Productos</button>
+    <button (click)="setTab('inventory')"  [class.active]="activeTab==='inventory'">Inventario</button>
     <button (click)="setTab('promotions')" [class.active]="activeTab==='promotions'">Promociones</button>
   </nav>
 
-  <!-- Paneles -->
   <section class="tab-content">
-    <!-- Pedidos pendientes -->
+    <!-- Pendientes -->
     <div *ngIf="activeTab==='stats'" class="tab-panel">
       <div class="mi-container">
         <h2>Pedidos Pendientes</h2>
-        <ul class="mi-list">
+
+        <ul class="mi-list" *ngIf="pendingOrders.length; else noPendientes">
           <li *ngFor="let o of pendingOrders" class="mi-item">
             <div class="mi-info">
-              <strong>{{ o.codigo_pedido }}</strong>
-              <span>({{ o.total | currency:'EUR' }})</span>
-              <small>Recogida: {{ o.hora_recogida }}</small>
+              <strong>{{ o.codigo_unico || o.id_pedido }}</strong>
+              <span>Total: {{ o.total | number:'1.2-2' }} €</span>
+              <span>Estado: {{ o.estado }}</span>
             </div>
-            <button (click)="markDelivered(o)" class="mi-btn-complete">Completado</button>
+            <div class="mi-actions">
+              <button class="btn" (click)="markReady(o)">Marcar listo</button>
+              <button class="btn primary" (click)="markDelivered(o)">Completar</button>
+            </div>
           </li>
         </ul>
-        <p *ngIf="pendingOrders.length === 0" class="empty">
-          No hay pedidos pendientes.
-        </p>
+
+        <ng-template #noPendientes>
+          <div class="empty">No hay pedidos pendientes.</div>
+        </ng-template>
       </div>
     </div>
 
-    <!-- Products -->
+    <!-- Productos -->
     <div *ngIf="activeTab==='products'" class="tab-panel">
       <app-manage-products></app-manage-products>
     </div>
 
-    <!-- Inventory -->
+    <!-- Inventario -->
     <div *ngIf="activeTab==='inventory'" class="tab-panel">
       <app-manage-inventory></app-manage-inventory>
     </div>
 
-    <!-- Promotions -->
+    <!-- Promociones -->
     <div *ngIf="activeTab==='promotions'" class="tab-panel">
       <app-manage-promotions></app-manage-promotions>
     </div>
   </section>
 </div>
+
+<app-schedule-settings-dialog
+  *ngIf="showScheduleDialog"
+  (closed)="showScheduleDialog = false">
+</app-schedule-settings-dialog>

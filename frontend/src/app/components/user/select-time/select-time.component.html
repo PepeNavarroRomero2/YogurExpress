@@ -1,16 +1,15 @@
-<!-- frontend/src/app/components/user/select-time/select-time.component.html -->
 <div class="st-wrapper">
   <div class="st-card">
-    <!-- 1) Título y subtítulo centrados -->
     <h2 class="st-title">Selecciona hora de recogida</h2>
-    <p class="st-subtitle">Selecciona una hora para recoger tu pedido</p>
 
-    <!-- 2) Icono de reloj -->
+    <p class="st-subtitle">
+      Horario: {{ openHour }}:00–{{ closeHour }}:00 · Mínimo {{ minLeadMinutes }} min
+    </p>
+
     <div class="st-icon-wrapper">
       <img src="assets/clock-icon.png" alt="Icono de reloj" class="st-icon" />
     </div>
 
-    <!-- 3) Formulario con campo de tipo time -->
     <form (ngSubmit)="onConfirm()" class="st-form">
       <label for="pickupTime" class="st-label">Hora</label>
       <input
@@ -19,10 +18,10 @@
         name="pickupTime"
         class="st-input"
         [(ngModel)]="hora"
+        [attr.min]="minAttr"
+        [attr.max]="maxAttr"
         required
       />
-
-      <!-- 4) Botón “Confirmar” -->
       <button type="submit" class="st-btn-primary">Confirmar</button>
     </form>
   </div>

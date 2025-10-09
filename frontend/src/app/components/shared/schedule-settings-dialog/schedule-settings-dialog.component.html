@@ -1,0 +1,31 @@
+<div class="dlg-backdrop" (click)="cancel()"></div>
+
+<div class="dlg">
+  <h3 class="dlg-title">Ajustes de horario</h3>
+
+  <form (ngSubmit)="save()" class="dlg-form">
+    <div class="row">
+      <label for="openHour">Apertura (0–23)</label>
+      <input id="openHour" type="number" [(ngModel)]="model.openHour" name="openHour" min="0" max="23" required />
+    </div>
+
+    <div class="row">
+      <label for="closeHour">Cierre (1–24)</label>
+      <input id="closeHour" type="number" [(ngModel)]="model.closeHour" name="closeHour" min="1" max="24" required />
+    </div>
+
+    <div class="row">
+      <label for="lead">Antelación mínima (min)</label>
+      <input id="lead" type="number" [(ngModel)]="model.minLeadMinutes" name="lead" min="0" max="240" required />
+    </div>
+
+    <div class="hint">Debe cumplirse: <code>apertura &lt; cierre</code>.</div>
+
+    <div class="actions">
+      <button type="button" class="btn" (click)="resetDefaults()">Restaurar</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn" (click)="cancel()">Cancelar</button>
+      <button type="submit" class="btn primary" [disabled]="!valid">Guardar</button>
+    </div>
+  </form>
+</div>
