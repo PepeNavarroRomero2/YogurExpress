@@ -1,89 +1,71 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, combineLatest, interval, map, startWith } from 'rxjs';
-import { DEFAULT_SCHEDULE, type Schedule } from '../config/schedule.config';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject, combineLatest, interval, map, startWith, tap } from 'rxjs';
+
+export interface Schedule {
+  openHour: number;
+  closeHour: number;
+  minLeadMinutes: number;
+}
+
+const DEFAULT_SCHEDULE: Schedule = { openHour: 10, closeHour: 22, minLeadMinutes: 30 };
+const API_BASE = 'http://localhost:3000/api';
 
 @Injectable({ providedIn: 'root' })
 export class ScheduleService {
-  private readonly KEY = 'yogurexpress.schedule';
-  private readonly subj = new BehaviorSubject<Schedule>(this.loadInitial());
+  private readonly url = `${API_BASE}/settings/schedule`;
+  private readonly subj = new BehaviorSubject<Schedule>(DEFAULT_SCHEDULE);
   readonly schedule$ = this.subj.asObservable();
 
-  // Emite true/false según esté abierto ahora mismo (se actualiza cada 30s)
   readonly isOpen$ = combineLatest([
     this.schedule$,
     interval(30000).pipe(startWith(0))
-  ]).pipe(
-    map(([cfg]) => this.isOpenAt(new Date(), cfg))
-  );
+  ]).pipe(map(([cfg]) => this.isOpenAt(new Date(), cfg)));
+
+  constructor(private http: HttpClient) {
+    this.fetch();
+  }
 
   get value(): Schedule {
     return this.subj.value;
   }
 
-  set(schedule: Schedule): void {
-    const next = this.sanitize(schedule, true);
-    this.subj.next(next);
-    this.save(next);
+  fetch(): void {
+    this.http.get<Schedule>(this.url).subscribe({
+      next: (s) => this.subj.next(this.sanitize(s)),
+      error: () => {}
+    });
   }
 
-  update(partial: Partial<Schedule>): void {
-    const next = this.sanitize({ ...this.value, ...partial });
-    this.subj.next(next);
-    this.save(next);
+  saveAdmin(schedule: Schedule) {
+    const body = this.sanitize(schedule);
+    const token = localStorage.getItem('auth_token');
+    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
+    return this.http.put<Schedule>(this.url, body, { headers }).pipe(
+      tap(saved => this.subj.next(this.sanitize(saved)))
+    );
   }
 
-  reset(): void {
-    this.subj.next(DEFAULT_SCHEDULE);
-    this.save(DEFAULT_SCHEDULE);
-  }
-
-  // Helpers de estado
   isOpenNow(): boolean {
     return this.isOpenAt(new Date(), this.value);
   }
 
-  isOpenAt(date: Date, cfg: Schedule = this.value): boolean {
+  private isOpenAt(date: Date, cfg: Schedule): boolean {
     const d = new Date(date);
-    const open = new Date(d);  open.setHours(cfg.openHour, 0, 0, 0);
+    const open = new Date(d); open.setHours(cfg.openHour, 0, 0, 0);
     const close = new Date(d); close.setHours(cfg.closeHour, 0, 0, 0);
     return d >= open && d <= close;
   }
 
-  // Internos
-  private loadInitial(): Schedule {
-    try {
-      const raw = localStorage.getItem(this.KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        return this.sanitize(parsed, true);
-      }
-    } catch {}
-    return DEFAULT_SCHEDULE;
-  }
+  private sanitize(input: Partial<Schedule>): Schedule {
+    let open  = Number.isFinite(input.openHour as number) ? Number(input.openHour) : DEFAULT_SCHEDULE.openHour;
+    let close = Number.isFinite(input.closeHour as number) ? Number(input.closeHour) : DEFAULT_SCHEDULE.closeHour;
+    let lead  = Number.isFinite(input.minLeadMinutes as number) ? Math.floor(Number(input.minLeadMinutes as number)) : DEFAULT_SCHEDULE.minLeadMinutes;
 
-  private save(s: Schedule): void {
-    localStorage.setItem(this.KEY, JSON.stringify(s));
-  }
-
-  private sanitize(input: Partial<Schedule>, fillDefaults = false): Schedule {
-    const base = fillDefaults ? DEFAULT_SCHEDULE : this.value;
-
-    let open  = Number.isFinite(input.openHour as number) ? Number(input.openHour) : base.openHour;
-    let close = Number.isFinite(input.closeHour as number) ? Number(input.closeHour) : base.closeHour;
-    let lead  = Number.isFinite(input.minLeadMinutes as number) ? Math.floor(Number(input.minLeadMinutes)) : base.minLeadMinutes;
-
-    open  = Math.max(0,  Math.min(23, open));
-    close = Math.max(1,  Math.min(24, close));
-    lead  = Math.max(0,  Math.min(240, lead));
-
-    if (open >= close) {
-      if (fillDefaults) {
-        open = DEFAULT_SCHEDULE.openHour;
-        close = DEFAULT_SCHEDULE.closeHour;
-      } else {
-        close = Math.min(24, open + 1);
-      }
-    }
+    open  = Math.max(0, Math.min(23, open));
+    close = Math.max(1, Math.min(24, close));
+    lead  = Math.max(0, Math.min(240, lead));
+    if (open >= close) close = Math.min(24, open + 1);
 
     return { openHour: open, closeHour: close, minLeadMinutes: lead };
   }
