@@ -1,51 +1,34 @@
-<!-- src/app/components/user/product-menu/product-menu.component.html -->
-
-<div class="menu-wrapper">
+<div class="menu-wrapper" [class.closed]="!isOpen">
   <div class="menu-card">
-    <!-- 1) Título centrado -->
     <h2 class="menu-title">Menú de productos</h2>
 
-    <!-- 2) Mensaje de error si no se cargan sabores -->
-    <div *ngIf="errorMsg" class="menu-error">
-      {{ errorMsg }}
-    </div>
+    <div *ngIf="errorMsg" class="menu-error">{{ errorMsg }}</div>
 
-    <!-- 3) Grilla de tarjetas de “sabores” -->
-    <div *ngIf="!errorMsg" class="cards-grid">
-      <div
-        class="card-item"
-        *ngFor="let flavor of sabores"
-        (click)="viewFlavorInfo(flavor)"
-      >
-        <img
-          class="card-icon"
-          [src]="
-            flavor.imagen_url
-              ? flavor.imagen_url
-              : 'assets/images/placeholder-item.png'
-          "
-          alt="{{ flavor.nombre }}"
-        />
-        <h3 class="card-name">{{ flavor.nombre }}</h3>
-        <a
-          class="info-link"
-          (click)="viewFlavorInfo(flavor); $event.stopPropagation()"
-          >Información</a
+    <ng-container *ngIf="!errorMsg">
+      <div class="cards-grid">
+        <div
+          class="card-item"
+          *ngFor="let f of flavors"
+          (click)="onSelectFlavor(f)"
+          tabindex="0"
+          [attr.aria-disabled]="!isOpen"
         >
+          <div class="card-image" [style.backgroundImage]="'url(' + (f.imagen_url || 'assets/placeholder.png') + ')'"></div>
+          <div class="card-body">
+            <div class="card-name">{{ f.nombre }}</div>
+            <div class="card-price">{{ f.precio | number:'1.2-2' }} €</div>
+            <a class="info-link" (click)="$event.stopPropagation()">Más información</a>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <!-- 4) Botones inferiores: Historial / Mis Puntos / Cerrar Sesión -->
-    <div class="bottom-buttons">
-      <button class="btn-secondary" (click)="goToHistory()">
-        Historial
-      </button>
-      <button class="btn-secondary" (click)="goToPoints()">
-        Mis Puntos
-      </button>
-      <button class="btn-secondary" (click)="logout()">
-        Cerrar Sesión
-      </button>
-    </div>
+      <div class="bottom-buttons">
+        <button class="btn-secondary" (click)="goToHistory()">Historial</button>
+        <button class="btn-secondary" (click)="goToPoints()">Mis Puntos</button>
+        <button class="btn-secondary" (click)="logout()">Cerrar Sesión</button>
+      </div>
+    </ng-container>
   </div>
 </div>
+
+<app-store-closed-overlay *ngIf="!isOpen"></app-store-closed-overlay>

@@ -1,0 +1,13 @@
+<div class="closed-backdrop" aria-hidden="true"></div>
+
+<div class="closed-card" role="alert" aria-live="assertive">
+  <h3 class="title">Estamos cerrados actualmente</h3>
+  <p class="subtitle">
+    Nuestro horario es de {{ pad(schedule.value.openHour) }}:00 a {{ pad(schedule.value.closeHour) }}:00.
+  </p>
+  <p class="hint">Vuelve dentro del horario para poder realizar tu pedido.</p>
+
+  <div class="actions">
+    <button class="btn primary" (click)="logout()">Cerrar sesión</button>
+  </div>
+</div>
