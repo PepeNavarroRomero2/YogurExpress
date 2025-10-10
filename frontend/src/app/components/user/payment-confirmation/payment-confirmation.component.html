@@ -8,103 +8,66 @@
   <div class="order-summary">
     <h2>Tu Pedido</h2>
     <ul class="summary-list">
-      <!-- Sabor -->
       <li class="summary-item">
         <span class="label">Sabor:</span>
         <span class="value">
-          {{ flavor.nombre }} – €{{ flavor.precio.toFixed(2) }}
+          {{ flavor?.nombre }} – €{{ (flavor?.precio || 0) | number:'1.2-2' }}
         </span>
       </li>
 
-      <!-- Tamaño  -->
       <li class="summary-item">
         <span class="label">Tamaño:</span>
         <span class="value">
-          {{ size.nombre }} – €{{ size.precio.toFixed(2) }}
+          {{ size?.nombre }} – €{{ (size?.precio || 0) | number:'1.2-2' }}
         </span>
       </li>
 
-      <!-- Toppings -->
-      <li class="summary-item" *ngIf="toppings && toppings.length > 0">
-        <span class="label">Toppings:</span>
-        <span class="value">{{ toppingNames }}</span>
-      </li>
-
-      <!-- Hora de recogida -->
       <li class="summary-item">
         <span class="label">Hora de recogida:</span>
-        <span class="value">{{ pickupTime }}</span>
+        <span class="value">{{ pickupTimeLabel }}</span>
       </li>
 
-      <!-- Subtotal -->
       <li class="summary-item">
         <span class="label">Subtotal:</span>
         <span class="value">€{{ subtotal.toFixed(2) }}</span>
       </li>
 
-      <!-- Puntos disponibles -->
       <li class="summary-item">
         <span class="label">Tienes:</span>
         <span class="value">{{ puntosUsuario }} puntos</span>
       </li>
 
-      <!-- Puntos a usar -->
       <li class="summary-item">
         <span class="label">Puntos a usar:</span>
         <span class="value">
           <input
             type="number"
             min="0"
-            [max]="puntosUsuario"
+            [max]="maxRedeemable"
             [(ngModel)]="puntosAUsar"
             (ngModelChange)="calculateTotal()"
           />
+          <small class="hint">
+            ({{ loyalty.pointsPerEuro }} puntos = €1)
+          </small>
         </span>
       </li>
 
-      <!-- Código promocional -->
-      <li class="summary-item promo-line">
-        <span class="label">Código promocional:</span>
-        <span class="value promo-input-container">
-          <input
-            type="text"
-            [(ngModel)]="codigoPromocional"
-            placeholder="Introduce tu código"
-            class="promo-input"
-          />
-          <button
-            type="button"
-            (click)="validarCodigoPromo()"
-            class="promo-btn"
-          >
-            Validar
-          </button>
-        </span>
-      </li>
-      <li class="summary-item" *ngIf="errorPromo">
-        <span class="label text-red-600">Error:</span>
-        <span class="value text-red-600">{{ errorPromo }}</span>
-      </li>
-
-      <!-- Descuento (si aplica) -->
-      <li class="summary-item" *ngIf="descuento > 0">
-        <span class="label">Descuento:</span>
+      <li class="summary-item">
+        <span class="label">Descuento por puntos:</span>
         <span class="value">€{{ descuento.toFixed(2) }}</span>
       </li>
 
-      <!-- Total -->
-      <li class="summary-item total-line">
+      <li class="summary-item total">
         <span class="label">Total a pagar:</span>
         <span class="value bold">€{{ total.toFixed(2) }}</span>
       </li>
     </ul>
   </div>
 
-  <!-- Botón para SIMULAR compra -->
   <button class="btn-primary" (click)="simulatePurchase()">
     Simular Compra
   </button>
 
-  <!-- Aquí añadimos PayPal -->
   <div id="paypal-button-container" class="mt-4"></div>
 </div>

@@ -1,6 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, combineLatest, interval, map, startWith, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  interval,
+  map,
+  startWith,
+  tap,
+  switchMap,
+  Subscription,
+} from 'rxjs';
 
 export interface Schedule {
   openHour: number;
@@ -14,53 +23,90 @@ const API_BASE = 'http://localhost:3000/api';
 @Injectable({ providedIn: 'root' })
 export class ScheduleService {
   private readonly url = `${API_BASE}/settings/schedule`;
-  private readonly subj = new BehaviorSubject<Schedule>(DEFAULT_SCHEDULE);
+
+  private subj = new BehaviorSubject<Schedule>(DEFAULT_SCHEDULE);
+  /** Observable público del horario (los componentes se suscriben a esto) */
   readonly schedule$ = this.subj.asObservable();
 
+  /** Indica si AHORA mismo estamos dentro del horario (se recalcula cada minuto) */
   readonly isOpen$ = combineLatest([
-    this.schedule$,
-    interval(30000).pipe(startWith(0))
-  ]).pipe(map(([cfg]) => this.isOpenAt(new Date(), cfg)));
+    this.subj.asObservable(),
+    interval(60_000).pipe(startWith(0))
+  ]).pipe(
+    map(([s]) => this.isOpenNow(s))
+  );
 
-  constructor(private http: HttpClient) {
-    this.fetch();
-  }
+  private refreshSub?: Subscription;
 
+  constructor(private http: HttpClient) {}
+
+  /** Valor actual del horario en memoria */
   get value(): Schedule {
     return this.subj.value;
   }
 
+  /** Carga única del horario (por si quieres llamarla manualmente) */
   fetch(): void {
-    this.http.get<Schedule>(this.url).subscribe({
-      next: (s) => this.subj.next(this.sanitize(s)),
-      error: () => {}
+    this.http.get<Schedule>(this.url, { headers: this.getAuthHeaders() })
+      .subscribe({
+        next: (s) => this.setIfChanged(this.sanitize(s)),
+        error: () => { /* fallback: dejamos DEFAULT */ }
+      });
+  }
+
+  /**
+   * Arranca un auto-refresh que:
+   *  - Hace un GET inicial inmediatamente
+   *  - Repite cada `periodMs` (por defecto 60s)
+   *  - Solo emite si cambia realmente el horario (evita renders inútiles)
+   */
+  startAutoRefresh(periodMs = 60_000): void {
+    if (this.refreshSub) return; // ya está activo
+    this.refreshSub = interval(periodMs).pipe(
+      startWith(0),
+      switchMap(() => this.http.get<Schedule>(this.url, { headers: this.getAuthHeaders() }))
+    ).subscribe({
+      next: (s) => this.setIfChanged(this.sanitize(s)),
+      error: () => { /* silencio para no spamear consola del cliente */ }
     });
   }
 
-  saveAdmin(schedule: Schedule) {
-    const body = this.sanitize(schedule);
-    const token = localStorage.getItem('auth_token');
-    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
-    return this.http.put<Schedule>(this.url, body, { headers }).pipe(
-      tap(saved => this.subj.next(this.sanitize(saved)))
+  /** Para Admin: guardar y propagar a todos los clientes (subj.next) */
+  saveAdmin(next: Schedule) {
+    const body = this.sanitize(next);
+    return this.http.put<Schedule>(this.url, body, {
+      headers: this.getAuthHeaders().set('Content-Type', 'application/json')
+    }).pipe(
+      tap((s) => this.setIfChanged(this.sanitize(s)))
     );
   }
 
-  isOpenNow(): boolean {
-    return this.isOpenAt(new Date(), this.value);
+  /* ─────────── Helpers ─────────── */
+
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('auth_token') || '';
+    return new HttpHeaders({ Authorization: `Bearer ${token}` });
   }
 
-  private isOpenAt(date: Date, cfg: Schedule): boolean {
-    const d = new Date(date);
-    const open = new Date(d); open.setHours(cfg.openHour, 0, 0, 0);
-    const close = new Date(d); close.setHours(cfg.closeHour, 0, 0, 0);
-    return d >= open && d <= close;
+  private setIfChanged(next: Schedule): void {
+    const cur = this.subj.value;
+    if (cur.openHour !== next.openHour ||
+        cur.closeHour !== next.closeHour ||
+        cur.minLeadMinutes !== next.minLeadMinutes) {
+      this.subj.next(next);
+    }
+  }
+
+  private isOpenNow(s: Schedule): boolean {
+    const now = new Date();
+    const h = now.getHours() + now.getMinutes() / 60;
+    return h >= s.openHour && h < s.closeHour;
   }
 
   private sanitize(input: Partial<Schedule>): Schedule {
     let open  = Number.isFinite(input.openHour as number) ? Number(input.openHour) : DEFAULT_SCHEDULE.openHour;
     let close = Number.isFinite(input.closeHour as number) ? Number(input.closeHour) : DEFAULT_SCHEDULE.closeHour;
-    let lead  = Number.isFinite(input.minLeadMinutes as number) ? Math.floor(Number(input.minLeadMinutes as number)) : DEFAULT_SCHEDULE.minLeadMinutes;
+    let lead  = Number.isFinite(input.minLeadMinutes as number) ? Math.floor(Number(input.minLeadMinutes)) : DEFAULT_SCHEDULE.minLeadMinutes;
 
     open  = Math.max(0, Math.min(23, open));
     close = Math.max(1, Math.min(24, close));

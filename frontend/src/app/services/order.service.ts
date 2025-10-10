@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { AuthService } from './auth.service';
 
 export type PedidoEstado = 'pendiente' | 'listo' | 'completado' | 'rechazado';
 
@@ -12,18 +11,8 @@ export interface Order {
   hora_recogida: string | null;
   estado: PedidoEstado | string;
   total: number;
-  /** El back puede devolver 'codigo_unico'; mantenemos ambos para no romper UI */
   codigo_unico?: string;
-  codigo_pedido?: string;
-}
-
-export interface OrderHistoryItem {
-  id_pedido: number;
-  fecha_hora: string;
-  hora_recogida: string | null;
-  total: number;
-  producto: string;
-  codigo_pedido?: string;
+  codigo_pedido?: string; // compatibilidad
 }
 
 export interface OrderProduct {
@@ -35,46 +24,44 @@ export interface CreateOrderRequest {
   productos: OrderProduct[];
   hora_recogida: string;
   puntos_usados: number;
-  codigo_promocional?: string;
 }
 
 export interface CreateOrderResponse {
   codigo_pedido: string;
   puntos_ganados: number;
+  puntos_totales: number;
+  total: number;
 }
+
+export interface OrderHistoryItem {
+  // campos opcionales para cubrir todos los templates existentes
+  id_pedido?: number;
+  codigo_unico?: string;
+  codigo_pedido?: string;
+  fecha_hora?: string;
+  hora_recogida?: string | null;
+  total: number;
+  estado?: string;
+  producto?: string;
+}
+
+const API_BASE = 'http://localhost:3000/api';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
-  private apiUrl = 'http://localhost:3000/api/orders';
+  private apiUrl = `${API_BASE}/orders`;
 
-  constructor(
-    private http: HttpClient,
-    private authService: AuthService
-  ) {}
+  constructor(private http: HttpClient) {}
 
   private getAuthHeaders(): HttpHeaders {
-    return this.authService.getAuthHeaders();
+    const token = localStorage.getItem('auth_token') || '';
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
   }
 
-  /** ADMIN: devuelve todos los pedidos (requiere Bearer y rol admin) */
-  getAllOrders(): Observable<Order[]> {
-    return this.http.get<Order[]>(
-      `${this.apiUrl}`,
-      { headers: this.getAuthHeaders() }
-    );
-  }
-
-  /** ADMIN: marca un pedido con un nuevo estado */
-  updateOrderStatus(id: number, status: PedidoEstado | string): Observable<Order> {
-    const headers = this.getAuthHeaders().set('Content-Type', 'application/json');
-    return this.http.patch<Order>(
-      `${this.apiUrl}/${id}/status`,
-      { status },
-      { headers }
-    );
-  }
-
-  /** CLIENTE: crea nuevo pedido */
+  /** CLIENTE: crear pedido */
   createOrder(body: CreateOrderRequest): Observable<CreateOrderResponse> {
     return this.http.post<CreateOrderResponse>(
       `${this.apiUrl}`,
@@ -83,10 +70,27 @@ export class OrderService {
     );
   }
 
-  /** CLIENTE: historial de pedidos del usuario */
-  getOrderHistory(): Observable<{ history: OrderHistoryItem[] }> {
-    return this.http.get<{ history: OrderHistoryItem[] }>(
+  /** CLIENTE: historial de pedidos del usuario (array directo) */
+  getOrderHistory(): Observable<OrderHistoryItem[]> {
+    return this.http.get<OrderHistoryItem[]>(
       `${this.apiUrl}/history`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /** ADMIN: pendientes */
+  getPendingOrders(): Observable<Order[]> {
+    return this.http.get<Order[]>(
+      `${this.apiUrl}/pending`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /** ADMIN: cambiar estado */
+  updateStatus(idPedido: number, status: PedidoEstado): Observable<Order> {
+    return this.http.patch<Order>(
+      `${this.apiUrl}/${idPedido}/status`,
+      { status },
       { headers: this.getAuthHeaders() }
     );
   }

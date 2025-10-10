@@ -19,33 +19,26 @@ import { StoreClosedOverlayComponent } from '../../shared/store-closed-overlay/s
 })
 export class ProductMenuComponent implements OnInit, OnDestroy {
   flavors: Flavor[] = [];
-  loading = false;
-  errorMsg: string | null = null;
-
+  loading = true;
+  errorMsg = '';
   isOpen = true;
-  private sub?: Subscription;
+
+  private subs: Subscription[] = [];
 
   constructor(
+    private router: Router,
     private productService: ProductService,
     private cartService: CartService,
     private authService: AuthService,
-    private router: Router,
     private schedule: ScheduleService
   ) {}
 
   ngOnInit(): void {
-    this.isOpen = this.schedule.isOpenNow();
-    this.sub = this.schedule.isOpen$.subscribe(v => (this.isOpen = v));
-    this.loadFlavors();
-  }
+    // Traer horario y observar estado de apertura
+    this.schedule.fetch();
+    this.subs.push(this.schedule.isOpen$.subscribe(v => (this.isOpen = v)));
 
-  ngOnDestroy(): void {
-    this.sub?.unsubscribe();
-  }
-
-  loadFlavors(): void {
-    this.loading = true;
-    this.errorMsg = null;
+    // Cargar sabores
     this.productService.getFlavors().subscribe({
       next: (list) => {
         this.flavors = list || [];
@@ -58,13 +51,18 @@ export class ProductMenuComponent implements OnInit, OnDestroy {
     });
   }
 
+  ngOnDestroy(): void {
+    this.subs.forEach(s => s.unsubscribe());
+  }
+
   onSelectFlavor(flavor: Flavor): void {
     if (!this.isOpen) {
       Swal.fire('Estamos cerrados', 'Vuelve dentro del horario para poder pedir.', 'info');
       return;
     }
     this.cartService.setFlavor(flavor);
-    this.router.navigate(['/user/customize']);
+    // Ruta correcta según tu routing (user-routing.module.ts)
+    this.router.navigate(['/user/personalize']);
   }
 
   goToHistory(): void { this.router.navigate(['/user/history']); }

@@ -3,16 +3,18 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
+
 import { AuthService, User } from '../../../services/auth.service';
 import { UserService } from '../../../services/user.service';
 import { CartService } from '../../../services/cart.service';
 import { Flavor } from '../../../services/product.service';
-import { PromotionService } from '../../../services/promotion.service';
 import {
   OrderService,
   OrderProduct,
-  CreateOrderRequest
+  CreateOrderRequest,
+  CreateOrderResponse
 } from '../../../services/order.service';
+import { LoyaltyService, LoyaltySettings } from '../../../services/loyalty.service';
 
 @Component({
   selector: 'app-payment-confirmation',
@@ -25,7 +27,9 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
   flavor!: Flavor;
   toppings: Flavor[] = [];
   size!: Flavor;
-  pickupTime: string = '';
+
+  /** Hora del carrito en formato HH:mm (viene de SelectTime) */
+  pickupTimeHM: string = '';
 
   subtotal = 0;
   descuento = 0;
@@ -34,141 +38,140 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
   puntosUsuario = 0;
   puntosAUsar = 0;
 
-  codigoPromocional: string = '';
-  descuentoAplicado: number = 0;
-  errorPromo: string = '';
   errorMsg = '';
 
+  loyalty: LoyaltySettings = { earnRate: 1, pointsPerEuro: 10 };
+
   constructor(
-    private cartService: CartService,
-    private authService: AuthService,
-    private promoService: PromotionService,
+    private router: Router,
+    private auth: AuthService,
     private userService: UserService,
+    private cartService: CartService,
     private orderService: OrderService,
-    private router: Router
+    private loyaltyService: LoyaltyService
   ) {}
 
   ngOnInit(): void {
-    if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/user/login']);
-      return;
-    }
+    // Datos del carrito
+    this.flavor = this.cartService.getFlavor() as any;
+    this.toppings = this.cartService.getToppings() || [];
+    this.size = this.cartService.getSize() as any;
+    this.pickupTimeHM = this.cartService.getPickupTime() || ''; // "HH:mm"
 
-    this.flavor = this.cartService.getFlavor() as Flavor;
-    this.toppings = this.cartService.getToppings() as Flavor[];
-    this.size = this.cartService.getSize() as Flavor;
-    this.pickupTime = this.cartService.getPickupTime() || '';
+    // Subtotal
+    this.calculateSubtotal();
 
-    if (!this.flavor || !this.size || !this.pickupTime) {
-      this.router.navigate(['/user/menu']);
-      return;
-    }
+    // Puntos actuales del usuario
+    const user = this.auth.getCurrentUser?.() as User | undefined;
+    if (user) this.puntosUsuario = user.puntos || 0;
 
-    this.subtotal = 0;
-    if (this.flavor.precio) this.subtotal += Number(this.flavor.precio);
-    if (this.size.precio) this.subtotal += Number(this.size.precio);
-    this.toppings.forEach(t => {
-      if (t.precio) this.subtotal += Number(t.precio);
-    });
-
-    this.userService.getProfile().subscribe({
-      next: (user: User) => {
-        this.puntosUsuario = user.puntos;
+    // Reglas de puntos
+    this.loyaltyService.load().subscribe({
+      next: () => {
+        this.loyalty = this.loyaltyService.value;
         this.calculateTotal();
       },
       error: () => {
-        this.errorMsg = 'No se pudieron cargar tus puntos.';
+        this.loyalty = this.loyaltyService.value;
         this.calculateTotal();
       }
     });
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => {
-      if ((window as any).paypal) {
-        (window as any).paypal.Buttons({
-          style: {
-            layout: 'vertical',
-            color: 'blue',
-            shape: 'pill',
-            label: 'pay'
-          },
-          createOrder: (data: any, actions: any) => {
-            return actions.order.create({
-              purchase_units: [
-                {
-                  amount: {
-                    value: this.total.toFixed(2)
-                  },
-                  description: `Pedido Yogur: ${this.flavor.nombre} - ${this.size.nombre}`
-                }
-              ]
-            });
-          },
-          onApprove: (data: any, actions: any) => {
-            return actions.order.capture().then(() => {
-              this.createOrderOnBackend();
-            });
-          },
-          onCancel: () => {
-            Swal.fire('Pago cancelado', 'Has cancelado el pago.', 'info');
-          },
-          onError: (err: any) => {
-            console.error(err);
-            Swal.fire('Error', 'Ocurrió un problema con PayPal.', 'error');
-          }
-        }).render('#paypal-button-container');
-      }
-    }, 0);
+    // PayPal se integrará aquí si aplica
   }
 
   get toppingNames(): string {
-    return this.toppings.map(t => t.nombre).join(', ');
+    return (this.toppings || []).map(t => t.nombre).join(', ');
+  }
+
+  /** Etiqueta visible en UI (ya viene en HH:mm) */
+  get pickupTimeLabel(): string {
+    return this.pickupTimeHM || '';
+  }
+
+  private calculateSubtotal(): void {
+    const f = this.flavor?.precio || 0;
+    const s = this.size?.precio || 0;
+    const t = (this.toppings || []).reduce((acc, it) => acc + (it.precio || 0), 0);
+    this.subtotal = Math.round((f + s + t) * 100) / 100;
+  }
+
+  /** Máximo canjeable según saldo y subtotal con la regla actual */
+  get maxRedeemable(): number {
+    const pointsPerEuro = this.loyalty.pointsPerEuro || 10;
+    const maxBySaldo = this.puntosUsuario;
+    const maxBySubtotal = Math.floor(this.subtotal * pointsPerEuro);
+    return Math.min(maxBySaldo, maxBySubtotal);
   }
 
   calculateTotal(): void {
-    const descuentoPuntos = this.puntosAUsar / 10;
-    const descuentoPromo = this.subtotal * (this.descuentoAplicado / 100);
-    this.descuento = descuentoPuntos + descuentoPromo;
-    this.total = Math.max(0, this.subtotal - this.descuento);
+    const pointsPerEuro = this.loyalty.pointsPerEuro || 10;
+    const desired = Math.max(0, Math.floor(this.puntosAUsar || 0));
+    this.puntosAUsar = Math.min(desired, this.maxRedeemable);
+
+    this.descuento = this.puntosAUsar / pointsPerEuro;
+    this.total = Math.max(0, Math.round((this.subtotal - this.descuento) * 100) / 100);
   }
 
   simulatePurchase(): void {
-    this.errorMsg = '';
-    if (this.puntosAUsar > this.puntosUsuario) {
-      Swal.fire('Error', 'No tienes suficientes puntos.', 'error');
-      return;
-    }
-    this.createOrderOnBackend();
+    this.createOrder();
   }
 
-  private createOrderOnBackend(): void {
-    const productosParaApi: OrderProduct[] = [
-      { id_producto: this.flavor.id_producto, cantidad: 1 },
-      ...this.toppings.map(t => ({
-        id_producto: t.id_producto,
-        cantidad: 1
-      })),
-      { id_producto: this.size.id_producto, cantidad: 1 }
-    ];
+  private buildOrderLines(): OrderProduct[] {
+    const lines: OrderProduct[] = [];
+    if (this.flavor) lines.push({ id_producto: this.flavor.id_producto, cantidad: 1 });
+    if (this.size)   lines.push({ id_producto: this.size.id_producto, cantidad: 1 });
+    for (const t of (this.toppings || [])) {
+      lines.push({ id_producto: t.id_producto, cantidad: 1 });
+    }
+    return lines;
+  }
+
+  /** Convierte "HH:mm" de hoy a "YYYY-MM-DDTHH:mm:00" (LOCAL, sin 'Z') */
+  private toLocalIsoToday(hm: string): string {
+    const [hh, mm] = (hm || '').split(':').map(n => parseInt(n, 10));
+    if (!Number.isFinite(hh) || !Number.isFinite(mm)) return '';
+    const now = new Date();
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, 0, 0);
+
+    const yyyy = d.getFullYear();
+    const MM = (d.getMonth() + 1).toString().padStart(2, '0');
+    const DD = d.getDate().toString().padStart(2, '0');
+    const HH = d.getHours().toString().padStart(2, '0');
+    const Min = d.getMinutes().toString().padStart(2, '0');
+
+    return `${yyyy}-${MM}-${DD}T${HH}:${Min}:00`;
+  }
+
+  private createOrder(): void {
+    if (!this.pickupTimeHM) {
+      this.errorMsg = 'Selecciona una hora de recogida';
+      return;
+    }
+
+    const pickupIso = this.toLocalIsoToday(this.pickupTimeHM);
+    if (!pickupIso) {
+      Swal.fire('Error', 'Formato de hora de recogida inválido.', 'error');
+      return;
+    }
 
     const body: CreateOrderRequest = {
-      productos: productosParaApi,
-      hora_recogida: this.pickupTime,
-      puntos_usados: this.puntosAUsar,
-      codigo_promocional: this.codigoPromocional
+      productos: this.buildOrderLines(),
+      hora_recogida: pickupIso,        // ✅ ISO local para el backend
+      puntos_usados: this.puntosAUsar
     };
 
     this.orderService.createOrder(body).subscribe({
-      next: res => {
+      next: (res: CreateOrderResponse) => {
         Swal.fire({
           title: '¡Pedido confirmado!',
           html: `
-            Código de pedido: <strong>${res.codigo_pedido}</strong><br>
+            Código: <strong>${res.codigo_pedido}</strong><br>
+            Total pagado: <strong>€${res.total.toFixed(2)}</strong><br>
             Has ganado <strong>${res.puntos_ganados}</strong> puntos.<br>
-            Puntos restantes: <strong>${
-              this.puntosUsuario - this.puntosAUsar + res.puntos_ganados
-            }</strong>.
+            Puntos restantes: <strong>${res.puntos_totales}</strong>.
           `,
           icon: 'success',
           confirmButtonText: 'Aceptar'
@@ -180,26 +183,6 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
       error: err => {
         const msg = err.error?.error || 'Error al crear el pedido.';
         Swal.fire('Error', msg, 'error');
-      }
-    });
-  }
-
-  validarCodigoPromo(): void {
-    this.errorPromo = '';
-    if (!this.codigoPromocional) return;
-
-    this.promoService.validateCode(this.codigoPromocional.trim().toLowerCase())
-.subscribe({
-      next: (promo) => {
-        this.descuentoAplicado = promo.descuento;
-        Swal.fire('¡Promoción aplicada!', `Se ha aplicado un ${promo.descuento}% de descuento`, 'success');
-        this.calculateTotal();
-      },
-      error: () => {
-        this.descuentoAplicado = 0;
-        this.errorPromo = 'Código no válido';
-        Swal.fire('Código inválido', 'No se encontró la promoción', 'error');
-        this.calculateTotal();
       }
     });
   }

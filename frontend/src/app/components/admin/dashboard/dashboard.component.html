@@ -7,6 +7,9 @@
       <button class="btn" (click)="showScheduleDialog = true" aria-label="Ajustar horario">
         ⚙ Ajustar horario
       </button>
+      <button class="btn" (click)="showLoyaltyDialog = true" aria-label="Configurar puntos">
+        ⭐ Puntos
+      </button>
       <button class="btn-logout" (click)="onLogout()">Cerrar Sesión</button>
     </div>
   </header>
@@ -22,21 +25,23 @@
     <!-- Pendientes -->
     <div *ngIf="activeTab==='stats'" class="tab-panel">
       <div class="mi-container">
-        <h2>Pedidos Pendientes</h2>
 
-        <ul class="mi-list" *ngIf="pendingOrders.length; else noPendientes">
-          <li *ngFor="let o of pendingOrders" class="mi-item">
-            <div class="mi-info">
-              <strong>{{ o.codigo_unico || o.id_pedido }}</strong>
-              <span>Total: {{ o.total | number:'1.2-2' }} €</span>
-              <span>Estado: {{ o.estado }}</span>
-            </div>
-            <div class="mi-actions">
-              <button class="btn" (click)="markReady(o)">Marcar listo</button>
-              <button class="btn primary" (click)="markDelivered(o)">Completar</button>
-            </div>
-          </li>
-        </ul>
+        <ng-container *ngIf="pendingOrders?.length; else noPendientes">
+          <ul class="orders">
+            <li *ngFor="let o of pendingOrders" class="order">
+              <div class="row">
+                <div><strong>#{{ o.codigo_unico || o.id_pedido }}</strong></div>
+                <div>Total: €{{ o.total?.toFixed?.(2) ?? o.total }}</div>
+                <div>Estado: {{ o.estado }}</div>
+              </div>
+              <div class="actions">
+                <button class="btn" (click)="markReady(o)">Marcar listo</button>
+                <button class="btn" (click)="markDelivered(o)">Marcar completado</button>
+                <button class="btn danger" (click)="markRejected(o)">Rechazar</button>
+              </div>
+            </li>
+          </ul>
+        </ng-container>
 
         <ng-template #noPendientes>
           <div class="empty">No hay pedidos pendientes.</div>
@@ -54,14 +59,21 @@
       <app-manage-inventory></app-manage-inventory>
     </div>
 
-    <!-- Promociones -->
+    <!-- Promociones (en desuso; lo limpiaremos cuando quitemos promos) -->
     <div *ngIf="activeTab==='promotions'" class="tab-panel">
       <app-manage-promotions></app-manage-promotions>
     </div>
   </section>
 </div>
 
+<!-- Diálogo Horario -->
 <app-schedule-settings-dialog
   *ngIf="showScheduleDialog"
   (closed)="showScheduleDialog = false">
 </app-schedule-settings-dialog>
+
+<!-- Diálogo Puntos -->
+<app-loyalty-settings-dialog
+  *ngIf="showLoyaltyDialog"
+  (closed)="showLoyaltyDialog = false">
+</app-loyalty-settings-dialog>

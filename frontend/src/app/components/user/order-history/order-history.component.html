@@ -1,36 +1,33 @@
-<!-- src/app/components/user/order-history/order-history.component.html -->
+<div class="history-wrapper">
+  <h1>Historial de pedidos</h1>
 
-<div class="order-history-container">
-  <h2>Historial de Pedidos</h2>
-
-  <div *ngIf="loading" class="loading">Cargando tus pedidos...</div>
-
+  <div *ngIf="loading" class="loading">Cargando...</div>
   <div *ngIf="!loading && errorMsg" class="error">{{ errorMsg }}</div>
 
-  <table *ngIf="!loading && !errorMsg && orders.length > 0" class="orders-table">
+  <table *ngIf="!loading && !errorMsg && history?.length" class="table">
     <thead>
       <tr>
         <th>Código</th>
-        <th>Fecha/Hora</th>
-        <th>Hora Recogida</th>
+        <th>Fecha</th>
+        <th>Hora recogida</th>
+        <th>Resumen</th>
         <th>Total (€)</th>
-        <th>Primer Producto</th>
+        <th>Estado</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let o of orders">
-        <td>{{ o.codigo_pedido || o.id_pedido }}</td>
-        <td>{{ o.fecha_hora | date:'short' }}</td>
-        <td>{{ o.hora_recogida }}</td>
-        <td>{{ o.total.toFixed(2) }}</td>
-        <td>{{ o.producto }}</td>
+      <tr *ngFor="let o of history">
+        <td>{{ codeOf(o) }}</td>
+        <td>{{ o.fecha_hora || '—' }}</td>
+        <td>{{ o.hora_recogida || '—' }}</td>
+        <td>{{ o.producto || '—' }}</td>
+        <td>{{ (o.total ?? 0) | number:'1.2-2' }}</td>
+        <td>{{ o.estado || '—' }}</td>
       </tr>
     </tbody>
   </table>
 
-  <div *ngIf="!loading && !errorMsg && orders.length === 0" class="no-orders">
-    No tienes pedidos en tu historial.
+  <div *ngIf="!loading && !errorMsg && !history?.length" class="empty">
+    No tienes pedidos todavía.
   </div>
-
-  <button (click)="goBack()" class="btn-back">Volver al menú</button>
 </div>

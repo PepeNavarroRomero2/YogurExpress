@@ -4,8 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { Subscription } from 'rxjs';
+
 import { CartService } from '../../../services/cart.service';
-import { ScheduleService } from '../../../services/schedule.service';
+import { ScheduleService, Schedule } from '../../../services/schedule.service';
 
 @Component({
   selector: 'app-select-time',
@@ -15,16 +16,20 @@ import { ScheduleService } from '../../../services/schedule.service';
   styleUrls: ['./select-time.component.scss']
 })
 export class SelectTimeComponent implements OnInit, OnDestroy {
-  hora: string | null = null;
+  // Estos valores vienen del servicio y se reflejan en la plantilla
+  openHour!: number;
+  closeHour!: number;
+  minLeadMinutes!: number;
 
-  openHour = 10;
-  closeHour = 22;
-  minLeadMinutes = 30;
+  // HH:mm seleccionado
+  hora = '';
 
-  minAttr = '10:00';
-  maxAttr = '22:00';
+  // Atributos dinámicos del input time
+  minAttr = '';
+  maxAttr = '';
 
   private sub?: Subscription;
+  private readonly STEP_MIN = 15; // minutos
 
   constructor(
     private cartService: CartService,
@@ -33,27 +38,30 @@ export class SelectTimeComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.sub = this.schedule.schedule$.subscribe(s => {
-      this.openHour = s.openHour;
-      this.closeHour = s.closeHour;
-      this.minLeadMinutes = s.minLeadMinutes;
-      this.updateMinMaxAttrs();
-      this.ensureSuggestedTime();
-    });
+    // Inicializamos con lo que haya en memoria (puede ser default al arrancar)
+    this.applySchedule(this.schedule.value);
 
-    this.ensureSuggestedTime();
+    // Auto-refresh: GET inicial + re-fetch cada 60s (sube o baja si quieres)
+    this.schedule.startAutoRefresh(60_000);
+
+    // Nos suscribimos a cambios para reaccionar en vivo a ajustes del admin
+    this.sub = this.schedule.schedule$.subscribe((s: Schedule) => {
+      this.applySchedule(s);
+    });
   }
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
   }
 
+  /** Alias si tu template/otros llaman confirm() */
+  confirm(): void { this.onConfirm(); }
+
   onConfirm(): void {
     if (!this.hora) {
       Swal.fire('Error', 'Debes seleccionar una hora de recogida.', 'error');
       return;
     }
-
     const selected = this.todayWithTime(this.hora);
     const minAllowed = new Date(Date.now() + this.minLeadMinutes * 60000);
 
@@ -61,35 +69,38 @@ export class SelectTimeComponent implements OnInit, OnDestroy {
       Swal.fire('Hora no válida', `La recogida debe ser al menos dentro de ${this.minLeadMinutes} minutos.`, 'warning');
       return;
     }
-
     if (!this.isWithinScheduleDate(selected)) {
-      Swal.fire(
-        'Fuera de horario',
-        `Nuestro horario es de ${this.pad(this.openHour)}:00 a ${this.pad(this.closeHour)}:00.`,
-        'warning'
-      );
+      Swal.fire('Fuera de horario', `Nuestro horario es de ${this.pad(this.openHour)}:00 a ${this.pad(this.closeHour)}:00.`, 'warning');
       return;
     }
 
+    // Guardamos HH:mm (tal y como espera tu flujo actual) y seguimos
     this.cartService.setPickupTime(this.hora);
     this.router.navigate(['/user/payment']);
   }
 
+  /* ─────────── Helpers ─────────── */
+
+  private applySchedule(s: Schedule): void {
+    this.openHour = s.openHour;
+    this.closeHour = s.closeHour;
+    this.minLeadMinutes = s.minLeadMinutes;
+    this.updateMinMaxAttrs();
+    this.ensureSuggestedTime();
+  }
+
   private ensureSuggestedTime(): void {
     const now = new Date();
-    const suggested = new Date(now.getTime() + this.minLeadMinutes * 60000);
+    const earliest = new Date(now.getTime() + this.minLeadMinutes * 60000);
 
-    let candidate: Date;
-    if (this.isWithinScheduleDate(suggested)) {
-      candidate = suggested;
-    } else {
-      const open = new Date();
-      open.setHours(this.openHour, 0, 0, 0);
-      candidate = open;
-    }
+    const open = new Date(now);  open.setHours(this.openHour, 0, 0, 0);
+    const close = new Date(now); close.setHours(this.closeHour, 0, 0, 0);
+
+    let start = new Date(Math.max(earliest.getTime(), open.getTime()));
+    start = this.roundUpToStep(start, this.STEP_MIN);
 
     if (!this.hora || !this.isWithinScheduleDate(this.todayWithTime(this.hora))) {
-      this.hora = this.toHHMM(candidate);
+      this.hora = (start >= close) ? '' : this.toHHMM(start);
     }
   }
 
@@ -99,7 +110,7 @@ export class SelectTimeComponent implements OnInit, OnDestroy {
   }
 
   private todayWithTime(hhmm: string): Date {
-    const [hh, mm] = hhmm.split(':').map(Number);
+    const [hh, mm] = hhmm.split(':').map(n => parseInt(n, 10));
     const d = new Date();
     d.setHours(hh, mm, 0, 0);
     return d;
@@ -117,5 +128,13 @@ export class SelectTimeComponent implements OnInit, OnDestroy {
 
   private pad(n: number): string {
     return n.toString().padStart(2, '0');
+  }
+
+  private roundUpToStep(d: Date, stepMin: number): Date {
+    const res = new Date(d);
+    const mins = res.getMinutes();
+    const rounded = Math.ceil(mins / stepMin) * stepMin;
+    res.setMinutes(rounded, 0, 0);
+    return res;
   }
 }

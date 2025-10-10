@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import Swal from 'sweetalert2';
+import Swal, { SweetAlertIcon } from 'sweetalert2';
 
 import { AuthService } from '../../../services/auth.service';
 import { OrderService, Order, PedidoEstado } from '../../../services/order.service';
@@ -9,6 +9,7 @@ import { ManageProductsComponent } from '../manage-products/manage-products.comp
 import { ManageInventoryComponent } from '../manage-inventory/manage-inventory.component';
 import { ManagePromotionsComponent } from '../manage-promotions/manage-promotions.component';
 import { ScheduleSettingsDialogComponent } from '../../shared/schedule-settings-dialog/schedule-settings-dialog.component';
+import { LoyaltySettingsDialogComponent } from '../../shared/loyalty-settings-dialog/loyalty-settings-dialog.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,7 +19,8 @@ import { ScheduleSettingsDialogComponent } from '../../shared/schedule-settings-
     ManageProductsComponent,
     ManageInventoryComponent,
     ManagePromotionsComponent,
-    ScheduleSettingsDialogComponent
+    ScheduleSettingsDialogComponent,
+    LoyaltySettingsDialogComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
@@ -27,7 +29,9 @@ export class DashboardComponent implements OnInit {
   activeTab: 'stats' | 'products' | 'inventory' | 'promotions' = 'stats';
   orders: Order[] = [];
   pendingOrders: Order[] = [];
+
   showScheduleDialog = false;
+  showLoyaltyDialog = false;
 
   constructor(
     private authService: AuthService,
@@ -35,7 +39,8 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadOrders();
+    // Cargamos solo los pendientes (el endpoint ya filtra)
+    this.loadPending();
   }
 
   onLogout(): void {
@@ -44,44 +49,65 @@ export class DashboardComponent implements OnInit {
 
   setTab(tab: 'stats' | 'products' | 'inventory' | 'promotions'): void {
     this.activeTab = tab;
-    if (tab === 'stats') this.loadOrders();
+    if (tab === 'stats') this.loadPending();
   }
 
-  private loadOrders(): void {
-    this.orderService.getAllOrders().subscribe({
+  private loadPending(): void {
+    this.orderService.getPendingOrders().subscribe({
       next: (orders) => {
+        // El endpoint devuelve pendientes; mantenemos ambas colecciones por compatibilidad
         this.orders = orders ?? [];
-        this.pendingOrders = this.orders.filter(o => (o.estado as PedidoEstado) === 'pendiente');
+        this.pendingOrders = orders ?? [];
       },
       error: (err) => {
         console.error('Error obteniendo pedidos', err);
-        Swal.fire('Error', 'No se pudieron cargar los pedidos.', 'error');
+        this.toast('No se pudieron cargar los pedidos.', 'error');
       }
     });
   }
 
+  private toast(text: string, icon: SweetAlertIcon = 'info'): void {
+    Swal.fire({ text, icon, timer: 1400, showConfirmButton: false });
+  }
+
   markReady(order: Order): void {
-    this.orderService.updateOrderStatus(order.id_pedido, 'listo').subscribe({
+    this.orderService.updateStatus(order.id_pedido, 'listo').subscribe({
       next: () => {
-        order.estado = 'listo';
-        Swal.fire('Actualizado', `Pedido ${order.codigo_unico ?? order.id_pedido} marcado como listo.`, 'success');
+        order.estado = 'listo' as PedidoEstado;
+        this.pendingOrders = this.pendingOrders.filter(o => o.id_pedido !== order.id_pedido);
+        this.toast(`Pedido ${order.codigo_unico ?? order.id_pedido} marcado como listo.`, 'success');
       },
       error: (err) => {
         console.error('Error actualizando estado', err);
-        Swal.fire('Error', 'No se pudo actualizar el estado del pedido.', 'error');
+        this.toast('No se pudo actualizar el estado del pedido.', 'error');
       }
     });
   }
 
   markDelivered(order: Order): void {
-    this.orderService.updateOrderStatus(order.id_pedido, 'completado').subscribe({
+    this.orderService.updateStatus(order.id_pedido, 'completado').subscribe({
       next: () => {
+        order.estado = 'completado' as PedidoEstado;
         this.pendingOrders = this.pendingOrders.filter(o => o.id_pedido !== order.id_pedido);
-        Swal.fire('¡Listo!', `Pedido ${order.codigo_unico ?? order.id_pedido} completado.`, 'success');
+        this.toast(`Pedido ${order.codigo_unico ?? order.id_pedido} completado.`, 'success');
       },
       error: (err) => {
         console.error('Error actualizando estado', err);
-        Swal.fire('Error', 'No se pudo actualizar el estado del pedido.', 'error');
+        this.toast('No se pudo actualizar el estado del pedido.', 'error');
+      }
+    });
+  }
+
+  markRejected(order: Order): void {
+    this.orderService.updateStatus(order.id_pedido, 'rechazado').subscribe({
+      next: () => {
+        order.estado = 'rechazado' as PedidoEstado;
+        this.pendingOrders = this.pendingOrders.filter(o => o.id_pedido !== order.id_pedido);
+        this.toast(`Pedido ${order.codigo_unico ?? order.id_pedido} rechazado.`, 'success');
+      },
+      error: (err) => {
+        console.error('Error actualizando estado', err);
+        this.toast('No se pudo actualizar el estado del pedido.', 'error');
       }
     });
   }

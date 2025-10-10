@@ -1,28 +1,31 @@
-<div class="st-wrapper">
-  <div class="st-card">
-    <h2 class="st-title">Selecciona hora de recogida</h2>
+<div class="select-time-wrapper">
+  <h1>Selecciona hora de recogida</h1>
 
-    <p class="st-subtitle">
-      Horario: {{ openHour }}:00–{{ closeHour }}:00 · Mínimo {{ minLeadMinutes }} min
-    </p>
+  <p class="hint">
+    Horario: {{ openHour }}:00–{{ closeHour }}:00 ·
+    Mínimo {{ minLeadMinutes }} min
+  </p>
 
-    <div class="st-icon-wrapper">
-      <img src="assets/clock-icon.png" alt="Icono de reloj" class="st-icon" />
-    </div>
-
-    <form (ngSubmit)="onConfirm()" class="st-form">
-      <label for="pickupTime" class="st-label">Hora</label>
+  <form (ngSubmit)="onConfirm()" class="st-form">
+    <div class="field">
+      <label for="pickup">Hora</label>
       <input
+        id="pickup"
         type="time"
-        id="pickupTime"
-        name="pickupTime"
-        class="st-input"
-        [(ngModel)]="hora"
+        name="hora"
+        required
+        [step]="900"              
         [attr.min]="minAttr"
         [attr.max]="maxAttr"
-        required
+        [(ngModel)]="hora"
       />
-      <button type="submit" class="st-btn-primary">Confirmar</button>
-    </form>
-  </div>
+      <small class="help" *ngIf="!hora">
+        Elige una hora entre {{ minAttr }} y {{ maxAttr }}.
+      </small>
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="btn primary">Continuar</button>
+    </div>
+  </form>
 </div>
