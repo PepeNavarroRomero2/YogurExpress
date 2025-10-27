@@ -11,6 +11,7 @@ import usersRouter from './routes/users.js';
 import inventoryRouter from './routes/inventory.js';
 import promotionsRouter from './routes/promotions.js';
 import settingsRouter from './routes/settings.js';
+import paypalRouter from './routes/paypal.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,6 +26,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/inventory', inventoryRouter);
 app.use('/api/promotions', promotionsRouter);
 app.use('/api/settings', settingsRouter);
+app.use('/api/paypal', paypalRouter);
 
 app.get('/', (_req, res) => {
   res.json({ message: 'YogurExpress Backend funcionando' });

@@ -26,6 +26,10 @@ export interface CreateOrderRequest {
   puntos_usados: number;
 }
 
+export interface CreateOrderAfterPaypalRequest extends CreateOrderRequest {
+  paypalOrderId: string;
+}
+
 export interface CreateOrderResponse {
   codigo_pedido: string;
   puntos_ganados: number;
@@ -61,10 +65,19 @@ export class OrderService {
     });
   }
 
-  /** CLIENTE: crear pedido */
+  /** CLIENTE: crear pedido (flujo original) */
   createOrder(body: CreateOrderRequest): Observable<CreateOrderResponse> {
     return this.http.post<CreateOrderResponse>(
       `${this.apiUrl}`,
+      body,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /** CLIENTE: crear pedido tras pago PayPal (nuevo) */
+  createOrderAfterPaypal(body: CreateOrderAfterPaypalRequest): Observable<CreateOrderResponse> {
+    return this.http.post<CreateOrderResponse>(
+      `${this.apiUrl}/after-paypal`,
       body,
       { headers: this.getAuthHeaders() }
     );
