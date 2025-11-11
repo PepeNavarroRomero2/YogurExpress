@@ -1,5 +1,3 @@
-/* src/app/components/user/payment-confirmation/payment-confirmation.component.scss */
-
 .payment-confirmation-container {
   max-width: 480px;
   margin: 2rem auto;
@@ -19,6 +17,17 @@
     color: #d32f2f;
     background-color: #fdecea;
     border: 1px solid #f5c2c2;
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-weight: 500;
+  }
+
+  .info {
+    color: #2563eb;
+    background-color: #e8f0fe;
+    border: 1px solid #c7d2fe;
     padding: 0.75rem 1rem;
     border-radius: 4px;
     margin-bottom: 1rem;
@@ -87,45 +96,11 @@
     }
   }
 
-  .promo-line {
-  align-items: center;
-}
-
-.promo-input-container {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.promo-input {
-  flex: 1 1 auto;
-  min-width: 160px;
-  padding: 0.25rem 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.promo-btn {
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  padding: 0.25rem 0.75rem;
-  border-radius: 4px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.promo-btn:hover {
-  background-color: #1e40af;
-}
-
-  /* Continuamos usando .btn-primary de Angular que ya tienes */
   .btn-primary {
     display: block;
     width: 100%;
     padding: 0.75rem;
-    background-color: #3b82f6; /* Azul primario consistente con otras vistas */
+    background-color: #3b82f6;
     color: #ffffff;
     font-size: 1rem;
     font-weight: 600;
@@ -134,21 +109,19 @@
     cursor: pointer;
     text-align: center;
     transition: background-color 0.2s ease-in-out;
-    margin-bottom: 1rem; /* separación antes de PayPal */
+    margin-bottom: 1rem;
   }
 
   .btn-primary:hover {
-    background-color: #2563eb; /* Azul más oscuro en hover */
+    background-color: #2563eb;
   }
 
-  /* CONTENEDOR DEL BOTÓN PAYPAL: que ocupe el 100% */
   #paypal-button-container {
     width: 100%;
     margin-top: 1rem;
   }
 }
 
-/* Media queries para pantallas muy pequeñas */
 @media (max-width: 400px) {
   .payment-confirmation-container {
     padding: 1rem;
