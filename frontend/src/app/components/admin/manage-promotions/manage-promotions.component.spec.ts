@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ManagePromotionsComponent } from './manage-promotions.component';
 
@@ -21,3 +21,4 @@ describe('ManagePromotionsComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+﻿import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ScheduleService, Schedule } from '../../../services/schedule.service';
@@ -48,3 +48,4 @@ export class ScheduleSettingsDialogComponent {
     this.model = { openHour: 10, closeHour: 22, minLeadMinutes: 30 };
   }
 }
+

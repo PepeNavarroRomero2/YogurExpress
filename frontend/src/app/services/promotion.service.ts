@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
@@ -15,7 +15,7 @@ export class PromotionService {
   private API_URL = 'http://localhost:3000/api/promotions';
   constructor(private http: HttpClient, private auth: AuthService) {}
 
-  // Públicas
+  // PÃºblicas
   getPromotions(): Observable<Promotion[]> {
     return this.http.get<Promotion[]>(this.API_URL);
   }
@@ -27,7 +27,7 @@ export class PromotionService {
     );
   }
 
-  // Admin-only (añadimos Authorization)
+  // Admin-only (aÃ±adimos Authorization)
   createPromotion(promo: Omit<Promotion,'id_promocion'>): Observable<Promotion> {
     return this.http.post<Promotion>(this.API_URL, promo, { headers: this.auth.getAuthHeaders() });
   }
@@ -40,3 +40,4 @@ export class PromotionService {
     return this.http.delete<void>(`${this.API_URL}/${id}`, { headers: this.auth.getAuthHeaders() });
   }
 }
+

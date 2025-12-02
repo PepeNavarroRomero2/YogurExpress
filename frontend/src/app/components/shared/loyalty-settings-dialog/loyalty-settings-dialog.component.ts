@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+﻿import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LoyaltyService, LoyaltySettings } from '../../../services/loyalty.service';
@@ -38,8 +38,9 @@ export class LoyaltySettingsDialogComponent {
       },
       error: () => {
         this.saving = false;
-        alert('Error guardando configuración de puntos');
+        alert('Error guardando configuraciÃ³n de puntos');
       }
     });
   }
 }
+

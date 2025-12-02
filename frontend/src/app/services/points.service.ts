@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { AuthService, User } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
@@ -14,8 +14,8 @@ export class PointsService {
   }
 
   /**
-   * Añade puntos al usuario actual y persiste los cambios en localStorage.
-   * @param pts Número de puntos a sumar
+   * AÃ±ade puntos al usuario actual y persiste los cambios en localStorage.
+   * @param pts NÃºmero de puntos a sumar
    */
   addPoints(pts: number): void {
     const user = this.auth.getUser();
@@ -26,8 +26,8 @@ export class PointsService {
 
   /**
    * Canjea puntos del usuario actual si hay saldo suficiente.
-   * @param pts Número de puntos a canjear
-   * @returns true si la operación tuvo éxito, false si no hay puntos suficientes
+   * @param pts NÃºmero de puntos a canjear
+   * @returns true si la operaciÃ³n tuvo Ã©xito, false si no hay puntos suficientes
    */
   redeemPoints(pts: number): boolean {
     const user = this.auth.getUser();
@@ -41,7 +41,7 @@ export class PointsService {
 
   /** Guarda el estado actualizado del usuario en localStorage */
   private persistUser(user: User): void {
-    // Actualiza sólo el array de usuarios registrados (sin tocar al admin)
+    // Actualiza sÃ³lo el array de usuarios registrados (sin tocar al admin)
     const stored = localStorage.getItem('users');
     const users: User[] = stored ? JSON.parse(stored) : [];
     const idx = users.findIndex(u => u.email === user.email);
@@ -49,7 +49,8 @@ export class PointsService {
       users[idx] = user;
       localStorage.setItem('users', JSON.stringify(users));
     }
-    // Actualiza también currentUser
+    // Actualiza tambiÃ©n currentUser
     localStorage.setItem('currentUser', JSON.stringify(user));
   }
 }
+

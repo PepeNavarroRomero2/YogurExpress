@@ -1,4 +1,4 @@
-<div class="history-wrapper">
+﻿<div class="history-wrapper">
   <h1>Historial de pedidos</h1>
 
   <div *ngIf="loading" class="loading">Cargando...</div>
@@ -7,27 +7,28 @@
   <table *ngIf="!loading && !errorMsg && history?.length" class="table">
     <thead>
       <tr>
-        <th>Código</th>
+        <th>CÃ³digo</th>
         <th>Fecha</th>
         <th>Hora recogida</th>
         <th>Resumen</th>
-        <th>Total (€)</th>
+        <th>Total (â‚¬)</th>
         <th>Estado</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let o of history">
         <td>{{ codeOf(o) }}</td>
-        <td>{{ o.fecha_hora || '—' }}</td>
-        <td>{{ o.hora_recogida || '—' }}</td>
-        <td>{{ o.producto || '—' }}</td>
+        <td>{{ o.fecha_hora || 'â€”' }}</td>
+        <td>{{ o.hora_recogida || 'â€”' }}</td>
+        <td>{{ o.producto || 'â€”' }}</td>
         <td>{{ (o.total ?? 0) | number:'1.2-2' }}</td>
-        <td>{{ o.estado || '—' }}</td>
+        <td>{{ o.estado || 'â€”' }}</td>
       </tr>
     </tbody>
   </table>
 
   <div *ngIf="!loading && !errorMsg && !history?.length" class="empty">
-    No tienes pedidos todavía.
+    No tienes pedidos todavÃ­a.
   </div>
 </div>
+

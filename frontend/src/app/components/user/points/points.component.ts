@@ -1,4 +1,4 @@
-// frontend/src/app/components/user/points/points.component.ts
+﻿// frontend/src/app/components/user/points/points.component.ts
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';    // para NgIf
@@ -42,3 +42,4 @@ export class PointsComponent implements OnInit {
     });
   }
 }
+

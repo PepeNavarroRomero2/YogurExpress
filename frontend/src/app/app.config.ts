@@ -1,4 +1,4 @@
-import { importProvidersFrom } from '@angular/core';
+﻿import { importProvidersFrom } from '@angular/core';
 import { provideRouter }       from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
@@ -11,3 +11,4 @@ export const appConfig = {
     // importProvidersFrom(SomeModule), si hace falta
   ]
 };
+

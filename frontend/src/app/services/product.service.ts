@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -35,3 +35,4 @@ export class ProductService {
     return this.http.get<Flavor[]>(`${this.API_URL}/tamanos`);
   }
 }
+

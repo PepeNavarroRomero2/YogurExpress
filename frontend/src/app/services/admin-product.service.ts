@@ -1,5 +1,5 @@
-// src/app/services/admin-product.service.ts
-// Servicio “stub” en memoria: NO graba en base de datos, sólo en un array local.
+﻿// src/app/services/admin-product.service.ts
+// Servicio â€œstubâ€ en memoria: NO graba en base de datos, sÃ³lo en un array local.
 
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
@@ -56,3 +56,4 @@ export class AdminProductService {
     return of(void 0);
   }
 }
+

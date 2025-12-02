@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { LoyaltySettingsDialogComponent } from './loyalty-settings-dialog.component';
 
@@ -21,3 +21,4 @@ describe('LoyaltySettingsDialogComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+

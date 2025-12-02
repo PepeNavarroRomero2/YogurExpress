@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import Swal, { SweetAlertIcon } from 'sweetalert2';
 
@@ -112,3 +112,4 @@ export class DashboardComponent implements OnInit {
     });
   }
 }
+

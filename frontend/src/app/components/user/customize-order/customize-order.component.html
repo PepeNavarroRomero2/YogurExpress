@@ -1,14 +1,14 @@
-<!-- src/app/components/user/customize-order/customize-order.component.html -->
+﻿<!-- src/app/components/user/customize-order/customize-order.component.html -->
 
 <div class="co-wrapper">
   <div class="co-card">
-    <!-- Botón Volver -->
-    <button class="co-btn-back" (click)="goBack()">← Volver</button>
+    <!-- BotÃ³n Volver -->
+    <button class="co-btn-back" (click)="goBack()">â† Volver</button>
 
     <!-- 1) Encabezado principal -->
     <h2 class="co-page-title">Personalizar Pedido</h2>
 
-    <!-- 2) Bloque “Sabor”: recuadro que muestra el sabor ya elegido -->
+    <!-- 2) Bloque â€œSaborâ€: recuadro que muestra el sabor ya elegido -->
     <div class="co-section-label">Sabor</div>
     <div class="co-box">
       <span class="co-box-text">{{ flavor.nombre }}</span>
@@ -19,7 +19,7 @@
       />
     </div>
 
-    <!-- 3) Bloque “Toppings”: recuadro con enlace para abrir selección -->
+    <!-- 3) Bloque â€œToppingsâ€: recuadro con enlace para abrir selecciÃ³n -->
     <div class="co-section-label">Toppings</div>
     <div class="co-box co-box-link" (click)="selectToppings()">
       <span class="co-box-text">
@@ -45,8 +45,8 @@
       </svg>
     </div>
 
-    <!-- 4) Bloque “Tamaños”: mostramos cards para cada tamaño disponible -->
-    <div class="co-section-label">Tamaño</div>
+    <!-- 4) Bloque â€œTamaÃ±osâ€: mostramos cards para cada tamaÃ±o disponible -->
+    <div class="co-section-label">TamaÃ±o</div>
     <div *ngIf="errorMsg" class="co-error">{{ errorMsg }}</div>
     <div *ngIf="!errorMsg" class="co-sizes-grid">
       <div
@@ -57,21 +57,22 @@
         (click)="s.cantidad_disponible > 0 && selectSize(s)"
       >
         <span class="co-card-label">{{ s.nombre }}</span>
-        <span class="co-card-price">€{{ s.precio.toFixed(2) }}</span>
+        <span class="co-card-price">â‚¬{{ s.precio.toFixed(2) }}</span>
         <div *ngIf="s.cantidad_disponible === 0" class="co-out-of-stock">
           Agotado
         </div>
       </div>
     </div>
 
-    <!-- 5) Botón principal para agregar al carrito -->
+    <!-- 5) BotÃ³n principal para agregar al carrito -->
     <button class="co-btn-primary" (click)="addToCart()">Agregar al pedido</button>
 
-    <!-- 6) Botones inferiores (Historial, Mis Puntos, Cerrar Sesión) -->
+    <!-- 6) Botones inferiores (Historial, Mis Puntos, Cerrar SesiÃ³n) -->
     <div class="co-footer-buttons">
       <button (click)="goToHistory()">Historial</button>
       <button (click)="goToPoints()">Mis Puntos</button>
-      <button (click)="logout()">Cerrar Sesión</button>
+      <button (click)="logout()">Cerrar SesiÃ³n</button>
     </div>
   </div>
 </div>
+

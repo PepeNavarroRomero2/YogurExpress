@@ -1,4 +1,4 @@
-// src/app/components/admin/manage-products/manage-products.component.ts
+﻿// src/app/components/admin/manage-products/manage-products.component.ts
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -24,7 +24,7 @@ export class ManageProductsComponent implements OnInit {
   // Modelo de formulario (incluye cantidad_disponible para inventario)
   product: {
     nombre: string;
-    tipo: 'sabor' | 'topping' | 'tamanos';
+    tipo: 'sabor' | 'topping' | 'tamano';
     precio: number;
     descripcion?: string;
     alergenos?: string;
@@ -59,7 +59,7 @@ export class ManageProductsComponent implements OnInit {
     });
   }
 
-  /** 2. Abre el formulario en modo “crear”. */
+  /** 2. Abre el formulario en modo â€œcrearâ€. */
   onCreate(): void {
     this.showForm = true;
     this.isEditing = false;
@@ -91,14 +91,14 @@ export class ManageProductsComponent implements OnInit {
     };
   }
 
-  /** 4. Cancela creación/edición. */
+  /** 4. Cancela creaciÃ³n/ediciÃ³n. */
   onCancel(): void {
     this.showForm = false;
     this.isEditing = false;
     this.editingProductId = null;
   }
 
-  /** 5. Guarda: crea o actualiza según el modo. */
+  /** 5. Guarda: crea o actualiza segÃºn el modo. */
   onSave(form: NgForm): void {
     if (form.invalid) {
       Swal.fire('Error', 'Por favor, rellena todos los campos obligatorios.', 'error');
@@ -106,7 +106,7 @@ export class ManageProductsComponent implements OnInit {
     }
 
     if (this.isEditing && this.editingProductId != null) {
-      // MODO EDICIÓN: construimos un objeto con los campos que deben actualizarse
+      // MODO EDICIÃ“N: construimos un objeto con los campos que deben actualizarse
       const payload: any = {
         nombre: this.product.nombre,
         tipo: this.product.tipo,
@@ -114,7 +114,7 @@ export class ManageProductsComponent implements OnInit {
         descripcion: this.product.descripcion,
         alergenos: this.product.alergenos,
         imagen_url: this.product.imagen_url
-        // Si quisieras permitir editar el inventario aquí, descomenta:
+        // Si quisieras permitir editar el inventario aquÃ­, descomenta:
         // cantidad_disponible: this.product.cantidad_disponible
       };
       this.productoService.updateProducto(this.editingProductId, payload).subscribe({
@@ -129,7 +129,7 @@ export class ManageProductsComponent implements OnInit {
         }
       });
     } else {
-      // MODO CREACIÓN: construimos el payload con inventario incluido
+      // MODO CREACIÃ“N: construimos el payload con inventario incluido
       const payload: any = {
         nombre: this.product.nombre,
         tipo: this.product.tipo,
@@ -156,10 +156,10 @@ export class ManageProductsComponent implements OnInit {
   /** 6. Elimina un producto. */
   onDelete(id: number): void {
     Swal.fire({
-      title: '¿Estás seguro de eliminar este producto?',
+      title: 'Â¿EstÃ¡s seguro de eliminar este producto?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Sí, eliminar',
+      confirmButtonText: 'SÃ­, eliminar',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
@@ -177,3 +177,4 @@ export class ManageProductsComponent implements OnInit {
     });
   }
 }
+

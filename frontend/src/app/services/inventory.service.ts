@@ -1,4 +1,4 @@
-// src/app/services/inventory.service.ts
+﻿// src/app/services/inventory.service.ts
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -25,7 +25,7 @@ export class InventoryService {
     return this.http.get<InventoryItem[]>(this.apiUrl);
   }
 
-  /** PUT sí envía token para actualizar stock */
+  /** PUT sÃ­ envÃ­a token para actualizar stock */
   updateInventory(id: number, cantidad: number): Observable<InventoryItem> {
     const headers = this.authService.getAuthHeaders()
       .set('Content-Type', 'application/json');
@@ -36,3 +36,4 @@ export class InventoryService {
     );
   }
 }
+

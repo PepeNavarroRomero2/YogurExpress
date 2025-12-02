@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ScheduleSettingsDialogComponent } from './schedule-settings-dialog.component';
 
@@ -21,3 +21,4 @@ describe('ScheduleSettingsDialogComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+

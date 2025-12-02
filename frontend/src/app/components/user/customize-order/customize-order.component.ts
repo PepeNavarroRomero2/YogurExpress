@@ -1,4 +1,4 @@
-// src/app/components/user/customize-order/customize-order.component.ts
+﻿// src/app/components/user/customize-order/customize-order.component.ts
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -32,10 +32,10 @@ export class CustomizeOrderComponent implements OnInit {
   selectedToppings: (Flavor & { cantidad_disponible: number })[] = [];
   selectedSize?: Flavor & { cantidad_disponible: number };
 
-  // Mensaje de error si no carga toppings/tamaños
+  // Mensaje de error si no carga toppings/tamaÃ±os
   errorMsg: string = '';
 
-  // Mapa temporal { id_producto → cantidad_disponible } para acceso rápido
+  // Mapa temporal { id_producto â†’ cantidad_disponible } para acceso rÃ¡pido
   private invMap = new Map<number, number>();
 
   constructor(
@@ -50,11 +50,11 @@ export class CustomizeOrderComponent implements OnInit {
     // 1) recuperar el sabor base guardado en CartService
     const saved = this.cartService.getFlavor();
     if (!saved) {
-      // Si no hay sabor guardado, volvemos al menú de sabores
+      // Si no hay sabor guardado, volvemos al menÃº de sabores
       this.router.navigate(['/user/menu']);
       return;
     }
-    // Asignamos el flavor con cantidad_disponible=0 (se actualizará luego)
+    // Asignamos el flavor con cantidad_disponible=0 (se actualizarÃ¡ luego)
     this.flavor = { ...saved, cantidad_disponible: 0 };
 
     // 2) cargamos todo el inventario
@@ -79,21 +79,21 @@ export class CustomizeOrderComponent implements OnInit {
           }
         });
 
-        // 4) cargamos tamaños y aplicamos cantidad_disponible
+        // 4) cargamos tamaÃ±os y aplicamos cantidad_disponible
         this.productService.getSizes().subscribe({
           next: (sz: Flavor[]) => {
             this.sizes = sz.map(s => ({
               ...s,
               cantidad_disponible: this.invMap.get(s.id_producto) ?? 0
             }));
-            // Preseleccionar el primer tamaño disponible (si existe)
+            // Preseleccionar el primer tamaÃ±o disponible (si existe)
             const primerDisp = this.sizes.find(s => s.cantidad_disponible > 0);
             if (primerDisp) {
               this.selectedSize = primerDisp;
             }
           },
           error: () => {
-            this.errorMsg = 'No se pudieron cargar los tamaños.';
+            this.errorMsg = 'No se pudieron cargar los tamaÃ±os.';
             this.sizes = [];
           }
         });
@@ -102,7 +102,7 @@ export class CustomizeOrderComponent implements OnInit {
       error: (err) => {
         console.error('Error cargando inventario:', err);
         this.errorMsg = 'No se pudo cargar inventario.';
-        // Aunque falle inventario, intentamos cargar toppings y tamaños con qty=0
+        // Aunque falle inventario, intentamos cargar toppings y tamaÃ±os con qty=0
         this.productService.getToppings().subscribe();
         this.productService.getSizes().subscribe();
       }
@@ -155,14 +155,14 @@ export class CustomizeOrderComponent implements OnInit {
     });
   }
 
-  /** Selecciona un tamaño (solo si hay stock) */
+  /** Selecciona un tamaÃ±o (solo si hay stock) */
   selectSize(s: Flavor & { cantidad_disponible: number }): void {
     if (s.cantidad_disponible > 0) {
       this.selectedSize = s;
     }
   }
 
-  /** Alterna la selección de un topping (solo si hay stock) */
+  /** Alterna la selecciÃ³n de un topping (solo si hay stock) */
   toggleToppingSelection(t: Flavor & { cantidad_disponible: number }): void {
     if (t.cantidad_disponible <= 0) {
       return;
@@ -175,39 +175,39 @@ export class CustomizeOrderComponent implements OnInit {
     }
   }
 
-  /** Indica si un topping ya está en selectedToppings */
+  /** Indica si un topping ya estÃ¡ en selectedToppings */
   isToppingSelected(t: Flavor & { cantidad_disponible: number }): boolean {
     return this.selectedToppings.some(x => x.id_producto === t.id_producto);
   }
 
-  /** Indica si ese tamaño es el seleccionado */
+  /** Indica si ese tamaÃ±o es el seleccionado */
   isSizeSelected(s: Flavor & { cantidad_disponible: number }): boolean {
     return this.selectedSize?.id_producto === s.id_producto;
   }
 
   /**
    * Al hacer clic en "Agregar al pedido":
-   *  - Verifica stock de flavor, tamaño y toppings seleccionados.
-   *  - Guarda en CartService (sabores, toppings, tamaño).
+   *  - Verifica stock de flavor, tamaÃ±o y toppings seleccionados.
+   *  - Guarda en CartService (sabores, toppings, tamaÃ±o).
    *  - Redirige a /user/pickup
    */
   addToCart(): void {
     // 1) verificar flavor (sabor)
     if (!this.flavor || this.flavor.cantidad_disponible <= 0) {
-      Swal.fire('Error', 'El sabor seleccionado está agotado.', 'error');
+      Swal.fire('Error', 'El sabor seleccionado estÃ¡ agotado.', 'error');
       return;
     }
 
-    // 2) verificar size (tamaño)
+    // 2) verificar size (tamaÃ±o)
     if (!this.selectedSize || this.selectedSize.cantidad_disponible <= 0) {
-      Swal.fire('Error', 'Debes seleccionar un tamaño disponible.', 'error');
+      Swal.fire('Error', 'Debes seleccionar un tamaÃ±o disponible.', 'error');
       return;
     }
 
     // 3) verificar toppings seleccionados
     for (const top of this.selectedToppings) {
       if (top.cantidad_disponible <= 0) {
-        Swal.fire('Error', `El topping "${top.nombre}" está agotado.`, 'error');
+        Swal.fire('Error', `El topping "${top.nombre}" estÃ¡ agotado.`, 'error');
         return;
       }
     }
@@ -232,7 +232,7 @@ export class CustomizeOrderComponent implements OnInit {
       alergenos: t.alergenos,
       imagen_url: t.imagen_url
     })));
-    // tamaño (incluye tipo)
+    // tamaÃ±o (incluye tipo)
     this.cartService.setSize({ 
       id_producto: this.selectedSize.id_producto,
       nombre: this.selectedSize.nombre,
@@ -247,7 +247,7 @@ export class CustomizeOrderComponent implements OnInit {
     this.router.navigate(['/user/pickup']);
   }
 
-  /** Redirecciones de botones inferiores (Historial, Mis Puntos, Cerrar Sesión) */
+  /** Redirecciones de botones inferiores (Historial, Mis Puntos, Cerrar SesiÃ³n) */
   goToHistory(): void {
     this.router.navigate(['/user/history']);
   }
@@ -258,11 +258,11 @@ export class CustomizeOrderComponent implements OnInit {
 
   logout(): void {
     Swal.fire({
-      title: '¿Cerrar sesión?',
-      text: 'Se borrará tu sesión actual.',
+      title: 'Â¿Cerrar sesiÃ³n?',
+      text: 'Se borrarÃ¡ tu sesiÃ³n actual.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Sí, cerrar sesión',
+      confirmButtonText: 'SÃ­, cerrar sesiÃ³n',
       cancelButtonText: 'Cancelar'
     }).then(result => {
       if (result.isConfirmed) {
@@ -272,3 +272,4 @@ export class CustomizeOrderComponent implements OnInit {
     });
   }
 }
+

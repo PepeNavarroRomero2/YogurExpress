@@ -1,6 +1,6 @@
-<div class="menu-wrapper" [class.closed]="!isOpen">
+﻿<div class="menu-wrapper" [class.closed]="!isOpen">
   <div class="menu-card">
-    <h2 class="menu-title">Menú de productos</h2>
+    <h2 class="menu-title">MenÃº de productos</h2>
 
     <div *ngIf="errorMsg" class="menu-error">{{ errorMsg }}</div>
 
@@ -16,8 +16,8 @@
           <div class="card-image" [style.backgroundImage]="'url(' + (f.imagen_url || 'assets/placeholder.png') + ')'"></div>
           <div class="card-body">
             <div class="card-name">{{ f.nombre }}</div>
-            <div class="card-price">{{ f.precio | number:'1.2-2' }} €</div>
-            <a class="info-link" (click)="$event.stopPropagation()">Más información</a>
+            <div class="card-price">{{ f.precio | number:'1.2-2' }} â‚¬</div>
+            <a class="info-link" (click)="$event.stopPropagation()">MÃ¡s informaciÃ³n</a>
           </div>
         </div>
       </div>
@@ -25,10 +25,11 @@
       <div class="bottom-buttons">
         <button class="btn-secondary" (click)="goToHistory()">Historial</button>
         <button class="btn-secondary" (click)="goToPoints()">Mis Puntos</button>
-        <button class="btn-secondary" (click)="logout()">Cerrar Sesión</button>
+        <button class="btn-secondary" (click)="logout()">Cerrar SesiÃ³n</button>
       </div>
     </ng-container>
   </div>
 </div>
 
 <app-store-closed-overlay *ngIf="!isOpen"></app-store-closed-overlay>
+

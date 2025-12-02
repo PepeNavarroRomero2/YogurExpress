@@ -1,13 +1,13 @@
-<div class="manage-promotions">
+﻿<div class="manage-promotions">
   <h2>Promociones</h2>
-  <button (click)="onCreate()" class="btn-create">Nueva promoción</button>
+  <button (click)="onCreate()" class="btn-create">Nueva promociÃ³n</button>
 
   <table *ngIf="promotions.length > 0" class="table-promotions">
     <thead>
       <tr>
-        <th>Código</th>
+        <th>CÃ³digo</th>
         <th>Descuento</th>
-        <th>Descripción</th>
+        <th>DescripciÃ³n</th>
         <th>Acciones</th>
       </tr>
     </thead>
@@ -27,7 +27,7 @@
   <div *ngIf="showForm" class="form-container">
     <form #f="ngForm" (ngSubmit)="onSave(f)">
       <label>
-        Código:
+        CÃ³digo:
         <input name="codigo" [(ngModel)]="promoModel.codigo" required />
       </label>
       <label>
@@ -43,7 +43,7 @@
         />
       </label>
       <label>
-        Descripción:
+        DescripciÃ³n:
         <textarea name="descripcion" [(ngModel)]="promoModel.descripcion"></textarea>
       </label>
       <div class="buttons-group">
@@ -55,5 +55,6 @@
     </form>
   </div>
 
-  <p *ngIf="promotions.length === 0">No hay promociones aún.</p>
+  <p *ngIf="promotions.length === 0">No hay promociones aÃºn.</p>
 </div>
+

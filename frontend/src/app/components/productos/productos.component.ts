@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+﻿import { Component } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { ProductoService, Producto } from '../../services/producto.service';
 
@@ -18,3 +18,4 @@ export class ProductosComponent {
     });
   }
 }
+

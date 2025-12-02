@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 
-/** Datos del usuario según backend */
+/** Datos del usuario segÃºn backend */
 export interface User {
   id_usuario: number;
   nombre: string;
@@ -33,17 +33,17 @@ export class AuthService {
     private router: Router
   ) {}
 
-  // ─────────── Auth calls ───────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Auth calls â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  register(nombre: string, email: string, contraseña: string): Observable<AuthResponse> {
-    const body = { nombre, email, contraseña };
+  register(nombre: string, email: string, password: string): Observable<AuthResponse> {
+    const body = { nombre, email, password };
     return this.http.post<AuthResponse>(`${this.AUTH_API}/register`, body).pipe(
       tap(res => { this.setToken(res.token); this.setUser(res.user); })
     );
   }
 
-  login(email: string, contraseña: string): Observable<AuthResponse> {
-    const body = { email, contraseña };
+  login(email: string, password: string): Observable<AuthResponse> {
+    const body = { email, password };
     return this.http.post<AuthResponse>(`${this.AUTH_API}/login`, body).pipe(
       tap(res => { this.setToken(res.token); this.setUser(res.user); })
     );
@@ -55,7 +55,7 @@ export class AuthService {
     this.router.navigate(['/user/login']);
   }
 
-  // ─────────── Token & User helpers ───────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Token & User helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   private setToken(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
@@ -95,10 +95,10 @@ export class AuthService {
     }
   }
 
-  /** Devuelve true si el token no existe o está expirado/corrupto */
+  /** Devuelve true si el token no existe o estÃ¡ expirado/corrupto */
   isTokenExpired(): boolean {
     const p = this.getTokenPayload();
-    if (!p || !p.exp) return true; // si no podemos leer exp, tratamos como inválido
+    if (!p || !p.exp) return true; // si no podemos leer exp, tratamos como invÃ¡lido
     const expiresAtMs = p.exp * 1000;
     return Date.now() >= expiresAtMs;
   }
@@ -119,3 +119,6 @@ export class AuthService {
       .pipe(tap(user => this.setUser(user)));
   }
 }
+
+
+

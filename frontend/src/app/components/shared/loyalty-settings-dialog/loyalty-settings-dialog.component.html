@@ -1,22 +1,22 @@
-<div class="dialog-backdrop">
+﻿<div class="dialog-backdrop">
   <div class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="loyaltyTitle">
     <header class="dialog-header">
-      <h2 id="loyaltyTitle">Configuración de puntos</h2>
+      <h2 id="loyaltyTitle">ConfiguraciÃ³n de puntos</h2>
     </header>
 
     <section class="dialog-body">
       <div class="field">
-        <label for="earn">Puntos ganados por € pagado</label>
+        <label for="earn">Puntos ganados por â‚¬ pagado</label>
         <input id="earn" type="number" [(ngModel)]="model.earnRate" min="0" max="100" step="0.1" />
       </div>
 
       <div class="field">
-        <label for="redeem">Puntos necesarios para descontar 1 €</label>
+        <label for="redeem">Puntos necesarios para descontar 1 â‚¬</label>
         <input id="redeem" type="number" [(ngModel)]="model.pointsPerEuro" min="1" max="10000" step="1" />
       </div>
 
       <p class="help">
-        Ejemplo: si estableces <strong>10</strong> puntos por 1 €, entonces 10 puntos descuentan 1 €.
+        Ejemplo: si estableces <strong>10</strong> puntos por 1 â‚¬, entonces 10 puntos descuentan 1 â‚¬.
       </p>
     </section>
 
@@ -28,3 +28,4 @@
     </footer>
   </div>
 </div>
+

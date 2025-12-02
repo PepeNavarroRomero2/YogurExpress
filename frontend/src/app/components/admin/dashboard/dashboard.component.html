@@ -1,16 +1,16 @@
-<div class="dashboard-wrapper">
+﻿<div class="dashboard-wrapper">
   <header class="dashboard-header">
     <div class="logo-area">LOGO</div>
     <h1>Admin Dashboard</h1>
 
     <div class="header-actions">
       <button class="btn" (click)="showScheduleDialog = true" aria-label="Ajustar horario">
-        ⚙ Ajustar horario
+        âš™ Ajustar horario
       </button>
       <button class="btn" (click)="showLoyaltyDialog = true" aria-label="Configurar puntos">
-        ⭐ Puntos
+        â­ Puntos
       </button>
-      <button class="btn-logout" (click)="onLogout()">Cerrar Sesión</button>
+      <button class="btn-logout" (click)="onLogout()">Cerrar SesiÃ³n</button>
     </div>
   </header>
 
@@ -18,7 +18,6 @@
     <button (click)="setTab('stats')"      [class.active]="activeTab==='stats'">Pendientes</button>
     <button (click)="setTab('products')"   [class.active]="activeTab==='products'">Productos</button>
     <button (click)="setTab('inventory')"  [class.active]="activeTab==='inventory'">Inventario</button>
-    <button (click)="setTab('promotions')" [class.active]="activeTab==='promotions'">Promociones</button>
   </nav>
 
   <section class="tab-content">
@@ -31,7 +30,7 @@
             <li *ngFor="let o of pendingOrders" class="order">
               <div class="row">
                 <div><strong>#{{ o.codigo_unico || o.id_pedido }}</strong></div>
-                <div>Total: €{{ o.total?.toFixed?.(2) ?? o.total }}</div>
+                <div>Total: â‚¬{{ o.total?.toFixed?.(2) ?? o.total }}</div>
                 <div>Estado: {{ o.estado }}</div>
               </div>
               <div class="actions">
@@ -58,22 +57,18 @@
     <div *ngIf="activeTab==='inventory'" class="tab-panel">
       <app-manage-inventory></app-manage-inventory>
     </div>
-
-    <!-- Promociones (en desuso; lo limpiaremos cuando quitemos promos) -->
-    <div *ngIf="activeTab==='promotions'" class="tab-panel">
-      <app-manage-promotions></app-manage-promotions>
-    </div>
   </section>
 </div>
 
-<!-- Diálogo Horario -->
+<!-- DiÃ¡logo Horario -->
 <app-schedule-settings-dialog
   *ngIf="showScheduleDialog"
   (closed)="showScheduleDialog = false">
 </app-schedule-settings-dialog>
 
-<!-- Diálogo Puntos -->
+<!-- DiÃ¡logo Puntos -->
 <app-loyalty-settings-dialog
   *ngIf="showLoyaltyDialog"
   (closed)="showLoyaltyDialog = false">
 </app-loyalty-settings-dialog>
+

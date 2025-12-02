@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OrderService, OrderHistoryItem } from '../../../services/order.service';
 
@@ -39,3 +39,4 @@ export class OrderHistoryComponent implements OnInit {
     return o.codigo_unico || o.codigo_pedido || (o.id_pedido ?? '');
   }
 }
+

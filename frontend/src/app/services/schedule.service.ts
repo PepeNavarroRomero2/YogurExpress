@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import {
   BehaviorSubject,
@@ -25,7 +25,7 @@ export class ScheduleService {
   private readonly url = `${API_BASE}/settings/schedule`;
 
   private subj = new BehaviorSubject<Schedule>(DEFAULT_SCHEDULE);
-  /** Observable público del horario (los componentes se suscriben a esto) */
+  /** Observable pÃºblico del horario (los componentes se suscriben a esto) */
   readonly schedule$ = this.subj.asObservable();
 
   /** Indica si AHORA mismo estamos dentro del horario (se recalcula cada minuto) */
@@ -45,7 +45,7 @@ export class ScheduleService {
     return this.subj.value;
   }
 
-  /** Carga única del horario (por si quieres llamarla manualmente) */
+  /** Carga Ãºnica del horario (por si quieres llamarla manualmente) */
   fetch(): void {
     this.http.get<Schedule>(this.url, { headers: this.getAuthHeaders() })
       .subscribe({
@@ -58,10 +58,10 @@ export class ScheduleService {
    * Arranca un auto-refresh que:
    *  - Hace un GET inicial inmediatamente
    *  - Repite cada `periodMs` (por defecto 60s)
-   *  - Solo emite si cambia realmente el horario (evita renders inútiles)
+   *  - Solo emite si cambia realmente el horario (evita renders inÃºtiles)
    */
   startAutoRefresh(periodMs = 60_000): void {
-    if (this.refreshSub) return; // ya está activo
+    if (this.refreshSub) return; // ya estÃ¡ activo
     this.refreshSub = interval(periodMs).pipe(
       startWith(0),
       switchMap(() => this.http.get<Schedule>(this.url, { headers: this.getAuthHeaders() }))
@@ -81,7 +81,7 @@ export class ScheduleService {
     );
   }
 
-  /* ─────────── Helpers ─────────── */
+  /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('auth_token') || '';
@@ -116,3 +116,4 @@ export class ScheduleService {
     return { openHour: open, closeHour: close, minLeadMinutes: lead };
   }
 }
+

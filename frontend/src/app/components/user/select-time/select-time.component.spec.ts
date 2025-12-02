@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SelectTimeComponent } from './select-time.component';
 
@@ -21,3 +21,4 @@ describe('SelectTimeComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+

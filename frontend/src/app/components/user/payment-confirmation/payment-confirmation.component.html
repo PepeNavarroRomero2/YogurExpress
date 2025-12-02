@@ -1,5 +1,5 @@
-<div class="payment-confirmation-container">
-  <h1>Confirmación y Pago</h1>
+﻿<div class="payment-confirmation-container">
+  <h1>ConfirmaciÃ³n y Pago</h1>
 
   <div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
   <div *ngIf="infoMsg" class="info">{{ infoMsg }}</div>
@@ -10,20 +10,20 @@
       <li class="summary-item">
         <span class="label">Sabor:</span>
         <span class="value">
-          {{ flavor?.nombre }} – €{{ (flavor?.precio || 0) | number:'1.2-2' }}
+          {{ flavor?.nombre }} â€“ â‚¬{{ (flavor?.precio || 0) | number:'1.2-2' }}
         </span>
       </li>
 
       <li class="summary-item">
-        <span class="label">Tamaño:</span>
+        <span class="label">TamaÃ±o:</span>
         <span class="value">
-          {{ size?.nombre }} – €{{ (size?.precio || 0) | number:'1.2-2' }}
+          {{ size?.nombre }} â€“ â‚¬{{ (size?.precio || 0) | number:'1.2-2' }}
         </span>
       </li>
 
       <li class="summary-item">
         <span class="label">Toppings:</span>
-        <span class="value">{{ toppingNames || '—' }}</span>
+        <span class="value">{{ toppingNames || 'â€”' }}</span>
       </li>
 
       <li class="summary-item">
@@ -33,7 +33,7 @@
 
       <li class="summary-item">
         <span class="label">Subtotal:</span>
-        <span class="value">€{{ subtotal.toFixed(2) }}</span>
+        <span class="value">â‚¬{{ subtotal.toFixed(2) }}</span>
       </li>
 
       <li class="summary-item">
@@ -52,19 +52,19 @@
             (ngModelChange)="calculateTotal()"
           />
           <small class="hint">
-            ({{ loyalty.pointsPerEuro }} puntos = €1)
+            ({{ loyalty.pointsPerEuro }} puntos = â‚¬1)
           </small>
         </span>
       </li>
 
       <li class="summary-item">
         <span class="label">Descuento por puntos:</span>
-        <span class="value">€{{ descuento.toFixed(2) }}</span>
+        <span class="value">â‚¬{{ descuento.toFixed(2) }}</span>
       </li>
 
       <li class="summary-item total-line">
         <span class="label">Total a pagar:</span>
-        <span class="value"><strong>€{{ total.toFixed(2) }}</strong></span>
+        <span class="value"><strong>â‚¬{{ total.toFixed(2) }}</strong></span>
       </li>
     </ul>
   </div>
@@ -77,3 +77,4 @@
   <!-- PayPal -->
   <div id="paypal-button-container" class="mt-4"></div>
 </div>
+

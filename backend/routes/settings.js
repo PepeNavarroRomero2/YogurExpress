@@ -93,19 +93,18 @@ router.put('/loyalty', authenticateToken, isAdmin, async (req, res) => {
 });
 
 /* ─────────── Helpers ─────────── */
-function sanitizeSchedule(input, fillDefaults = false) {
-  const base = fillDefaults ? DEFAULT_SCHEDULE : DEFAULT_SCHEDULE;
-  let open = Number.isFinite(input.openHour) ? Number(input.openHour) : base.openHour;
-  let close = Number.isFinite(input.closeHour) ? Number(input.closeHour) : base.closeHour;
-  let lead = Number.isFinite(input.minLeadMinutes) ? Math.floor(Number(input.minLeadMinutes)) : base.minLeadMinutes;
-
-  open = Math.max(0, Math.min(23, open));
-  close = Math.max(1, Math.min(24, close));
-  lead = Math.max(0, Math.min(240, lead));
-  if (open >= close) close = Math.min(24, open + 1);
-
-  return { openHour: open, closeHour: close, minLeadMinutes: lead };
+function sanitizeSchedule(input) {
+  const out = {
+    openHour: Number(input?.openHour ?? 10),
+    closeHour: Number(input?.closeHour ?? 22),
+    minLeadMinutes: Math.floor(Number(input?.minLeadMinutes ?? 30)),
+  };
+  if (!Number.isFinite(out.openHour) || out.openHour < 0 || out.openHour > 23) out.openHour = 10;
+  if (!Number.isFinite(out.closeHour) || out.closeHour < 0 || out.closeHour > 23) out.closeHour = 22;
+  if (!Number.isFinite(out.minLeadMinutes) || out.minLeadMinutes < 0) out.minLeadMinutes = 30;
+  return out;
 }
+
 
 function sanitizeLoyalty(input, fillDefaults = false) {
   const base = fillDefaults ? DEFAULT_LOYALTY : DEFAULT_LOYALTY;

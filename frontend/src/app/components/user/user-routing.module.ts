@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+﻿import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { LoginRegisterComponent }         from './login-register/login-register.component';
@@ -13,10 +13,10 @@ import { authGuard }          from '../../guards/auth.guard';
 import { loginRedirectGuard } from '../../guards/login-redirect.guard';
 
 const routes: Routes = [
-  // /user → a login (si ya hay sesión, el guard puede redirigir)
+  // /user â†’ a login (si ya hay sesiÃ³n, el guard puede redirigir)
   { path: 'login', component: LoginRegisterComponent, canActivate: [loginRedirectGuard] },
 
-  // resto requiere sesión
+  // resto requiere sesiÃ³n
   { path: 'menu',        component: ProductMenuComponent,         canActivate: [authGuard] },
   { path: 'personalize', component: CustomizeOrderComponent,      canActivate: [authGuard] },
   { path: 'pickup',      component: SelectTimeComponent,          canActivate: [authGuard] },
@@ -36,3 +36,4 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class UserRoutingModule { }
+

@@ -1,4 +1,4 @@
-// frontend/src/app/services/cart.service.ts
+﻿// frontend/src/app/services/cart.service.ts
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 import { Flavor } from './product.service';
 
 /**
- * Interfaz para el payload que envía el componente al crear un pedido.
+ * Interfaz para el payload que envÃ­a el componente al crear un pedido.
  */
 export interface CreateOrderPayload {
   productos: { id_producto: number; cantidad: number }[];
@@ -35,7 +35,7 @@ export class CartService {
 
   constructor(private http: HttpClient) {}
 
-  /** ------------- MÉTODOS PARA MANEJAR LOCALSTORAGE ------------- */
+  /** ------------- MÃ‰TODOS PARA MANEJAR LOCALSTORAGE ------------- */
 
   /** SABOR */
   setFlavor(flavor: Flavor): void {
@@ -49,7 +49,7 @@ export class CartService {
     localStorage.removeItem(this.flavorKey);
   }
 
-  /** TAMAÑO */
+  /** TAMAÃ‘O */
   setSize(size: Flavor): void {
     localStorage.setItem(this.sizeKey, JSON.stringify(size));
   }
@@ -92,11 +92,11 @@ export class CartService {
     this.clearPickupTime();
   }
 
-  /** ------------- MÉTODO PARA CREAR PEDIDO EN BACKEND ------------- */
+  /** ------------- MÃ‰TODO PARA CREAR PEDIDO EN BACKEND ------------- */
 
   /**
    * POST /api/orders
-   * Envía el pedido al backend con el payload { productos, hora_recogida }.
+   * EnvÃ­a el pedido al backend con el payload { productos, hora_recogida }.
    */
   createOrder(payload: CreateOrderPayload): Observable<CreateOrderResponse> {
     return this.http.post<CreateOrderResponse>(
@@ -105,3 +105,4 @@ export class CartService {
     );
   }
 }
+
