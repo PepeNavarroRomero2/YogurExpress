@@ -18,7 +18,7 @@ export interface Schedule {
 }
 
 const DEFAULT_SCHEDULE: Schedule = { openHour: 10, closeHour: 22, minLeadMinutes: 30 };
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = '/api';
 
 @Injectable({ providedIn: 'root' })
 export class ScheduleService {

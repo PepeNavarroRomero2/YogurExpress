@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 import { AuthService, User } from '../../../services/auth.service';
 import { UserService } from '../../../services/user.service';
 import { CartService } from '../../../services/cart.service';
-import { Flavor } from '../../../services/product.service';
+import { Producto } from '../../../services/producto.service';
 import {
   OrderService,
   OrderProduct,
@@ -32,9 +32,9 @@ declare global {
   styleUrls: ['./payment-confirmation.component.scss']
 })
 export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
-  flavor!: Flavor;
-  toppings: Flavor[] = [];
-  size!: Flavor;
+  flavor!: Producto;
+  toppings: Producto[] = [];
+  size!: Producto;
 
   /** Hora del carrito en formato HH:mm (viene de SelectTime) */
   pickupTimeHM: string = '';

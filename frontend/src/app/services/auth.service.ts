@@ -21,8 +21,8 @@ export interface AuthResponse {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   /** APIs */
-  private AUTH_API  = 'http://localhost:3000/api/auth';
-  private USERS_API = 'http://localhost:3000/api/users';
+  private AUTH_API  = '/api/auth';
+  private USERS_API = '/api/users';
 
   /** Storage keys */
   private TOKEN_KEY = 'auth_token';

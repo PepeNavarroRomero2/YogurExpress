@@ -4,7 +4,7 @@ import { RouterModule, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 
-import { ProductService, Flavor } from '../../../services/product.service';
+import { ProductoService, Producto } from '../../../services/producto.service';
 import { CartService } from '../../../services/cart.service';
 import { AuthService } from '../../../services/auth.service';
 import { ScheduleService } from '../../../services/schedule.service';
@@ -18,7 +18,7 @@ import { StoreClosedOverlayComponent } from '../../shared/store-closed-overlay/s
   styleUrls: ['./product-menu.component.scss']
 })
 export class ProductMenuComponent implements OnInit, OnDestroy {
-  flavors: Flavor[] = [];
+  flavors: Producto[] = [];
   loading = true;
   errorMsg = '';
   isOpen = true;
@@ -27,7 +27,7 @@ export class ProductMenuComponent implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private productService: ProductService,
+    private productService: ProductoService,
     private cartService: CartService,
     private authService: AuthService,
     private schedule: ScheduleService
@@ -39,7 +39,7 @@ export class ProductMenuComponent implements OnInit, OnDestroy {
     this.subs.push(this.schedule.isOpen$.subscribe(v => (this.isOpen = v)));
 
     // Cargar sabores
-    this.productService.getFlavors().subscribe({
+    this.productService.getSabores().subscribe({
       next: (list) => {
         this.flavors = list || [];
         this.loading = false;
@@ -55,7 +55,7 @@ export class ProductMenuComponent implements OnInit, OnDestroy {
     this.subs.forEach(s => s.unsubscribe());
   }
 
-  onSelectFlavor(flavor: Flavor): void {
+  onSelectFlavor(flavor: Producto): void {
     if (!this.isOpen) {
       Swal.fire('Estamos cerrados', 'Vuelve dentro del horario para poder pedir.', 'info');
       return;
