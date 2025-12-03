@@ -5,32 +5,46 @@
         <p class="eyebrow">Pedidos anteriores</p>
         <h2>Historial de pedidos</h2>
       </div>
-      <button class="btn-secondary" routerLink="/user/menu">Volver al menú</button>
+      <button class="btn-secondary" type="button" (click)="goBackToMenu()">Volver al menú</button>
     </header>
 
     <div *ngIf="loading" class="alert-info">Cargando...</div>
     <div *ngIf="!loading && errorMsg" class="alert-error">{{ errorMsg }}</div>
 
-    <div *ngIf="!loading && !errorMsg && history?.length" class="history-list">
-      <div class="history-item" *ngFor="let o of history">
-        <div class="item-header">
-          <div>
-            <p class="order-code">Pedido {{ codeOf(o) }}</p>
-            <p class="order-time">{{ o.fecha_hora || '—' }} · Recogida {{ o.hora_recogida || '—' }}</p>
-          </div>
-          <span class="badge" [ngClass]="{
-            'tag-warning': o.estado === 'PENDIENTE',
-            'tag-info': o.estado === 'LISTO',
-            'tag-success': o.estado === 'COMPLETADO'
-          }">{{ o.estado || '—' }}</span>
-        </div>
-        <div class="item-body">
-          <p class="product">{{ o.producto || '—' }}</p>
-          <p class="total">{{ (o.total ?? 0) | number:'1.2-2' }} €</p>
-        </div>
-      </div>
+    <div *ngIf="!loading && !errorMsg && orders?.length" class="table-wrapper">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Fecha</th>
+            <th>Hora de recogida</th>
+            <th>Producto</th>
+            <th>Estado</th>
+            <th class="text-right">Total (€)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let o of orders">
+            <td>
+              <ng-container *ngIf="shouldShowCode(o); else codeHidden">
+                {{ codeOf(o) || '—' }}
+              </ng-container>
+              <ng-template #codeHidden>
+                <span class="code-hidden">—</span>
+              </ng-template>
+            </td>
+            <td>{{ o.fecha_hora || '—' }}</td>
+            <td>{{ o.hora_recogida || '—' }}</td>
+            <td>{{ o.producto || '—' }}</td>
+            <td>
+              <span class="badge" [ngClass]="stateClass(o)">{{ stateLabel(o) }}</span>
+            </td>
+            <td class="text-right">{{ (o.total ?? 0) | number:'1.2-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <div *ngIf="!loading && !errorMsg && !history?.length" class="empty">No tienes pedidos todavía.</div>
+    <div *ngIf="!loading && !errorMsg && !orders?.length" class="empty">No tienes pedidos todavía.</div>
   </div>
 </div>

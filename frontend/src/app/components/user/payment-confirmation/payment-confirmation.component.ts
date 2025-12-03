@@ -180,50 +180,6 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
     };
   }
 
-  // ========= BOTÓN "SIMULAR COMPRA" (TU FLUJO ORIGINAL) =========
-
-  simulatePurchase(): void {
-    this.createOrder();
-  }
-
-  private createOrder(): void {
-    if (!this.pickupTimeHM) {
-      this.errorMsg = 'Selecciona una hora de recogida';
-      return;
-    }
-
-    const pickupIso = this.toLocalIsoToday(this.pickupTimeHM);
-    if (!pickupIso) {
-      Swal.fire('Error', 'Formato de hora de recogida inválido.', 'error');
-      return;
-    }
-
-    const body = this.buildCreateOrderRequest();
-
-    this.orderService.createOrder(body).subscribe({
-      next: (res: CreateOrderResponse) => {
-        Swal.fire({
-          title: '¡Pedido confirmado!',
-          html: `
-            Código: <strong>${res.codigo_pedido}</strong><br>
-            Total pagado: <strong>€${res.total.toFixed(2)}</strong><br>
-            Has ganado <strong>${res.puntos_ganados}</strong> puntos.<br>
-            Puntos restantes: <strong>${res.puntos_totales}</strong>.
-          `,
-          icon: 'success',
-          confirmButtonText: 'Aceptar'
-        }).then(() => {
-          this.cartService.clear();
-          this.router.navigate(['/user/menu']);
-        });
-      },
-      error: err => {
-        const msg = err?.error?.error || 'Error al crear el pedido.';
-        Swal.fire('Error', msg, 'error');
-      }
-    });
-  }
-
   // ========= PAYPAL =========
 
   private renderPaypalButtons(): void {

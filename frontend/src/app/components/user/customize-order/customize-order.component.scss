@@ -121,6 +121,11 @@
   background: #fff;
   cursor: pointer;
 
+  &.selected {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+  }
+
   input {
     margin-top: 0.25rem;
   }

@@ -11,11 +11,11 @@ import { OrderService, OrderHistoryItem } from '../../../services/order.service'
   styleUrls: ['./order-history.component.scss']
 })
 export class OrderHistoryComponent implements OnInit {
-  history: OrderHistoryItem[] = [];
+  orders: OrderHistoryItem[] = [];
   loading = false;
   errorMsg = '';
 
-  constructor(private orders: OrderService, private router: Router) {}
+  constructor(private ordersService: OrderService, private router: Router) {}
 
   ngOnInit(): void {
     this.loadHistory();
@@ -28,11 +28,11 @@ export class OrderHistoryComponent implements OnInit {
   loadHistory(): void {
     this.loading = true;
     this.errorMsg = '';
-    this.orders.getOrderHistory().subscribe({
+    this.ordersService.getUserOrders().subscribe({
       next: (res) => {
         console.log('order history', res);
         const data = Array.isArray(res) ? res : (res as any)?.data || [];
-        this.history = (data || []).map((item: OrderHistoryItem) => ({
+        this.orders = (data || []).map((item: OrderHistoryItem) => ({
           ...item,
           estado: this.normalizedState(item)
         }));

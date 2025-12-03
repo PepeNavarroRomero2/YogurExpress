@@ -71,6 +71,30 @@ function genOrderCode() {
 }
 
 // ───────────────────────────────────────────────────────────
+// GET /api/orders/history → historial del usuario autenticado
+// ───────────────────────────────────────────────────────────
+router.get('/history', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id_usuario;
+    const { data, error } = await supabase
+      .from('pedidos')
+      .select('id_pedido, codigo_unico, codigo_pedido, fecha_hora, hora_recogida, estado, total')
+      .eq('id_usuario', userId)
+      .order('fecha_hora', { ascending: false });
+
+    if (error) {
+      console.error('[orders] history error:', error);
+      return res.status(500).json({ error: 'Error obteniendo historial de pedidos.' });
+    }
+
+    return res.json(data || []);
+  } catch (err) {
+    console.error('[orders] GET /history error:', err);
+    return res.status(500).json({ error: 'Error interno al obtener historial.' });
+  }
+});
+
+// ───────────────────────────────────────────────────────────
 // POST /api/orders  → crear pedido con puntos (flujo original)
 // ───────────────────────────────────────────────────────────
 router.post('/', authenticateToken, async (req, res) => {

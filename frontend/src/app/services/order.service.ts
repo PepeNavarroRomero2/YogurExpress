@@ -85,6 +85,11 @@ export class OrderService {
 
   /** CLIENTE: historial de pedidos del usuario (array directo o { data }) */
   getOrderHistory(): Observable<OrderHistoryItem[]> {
+    return this.getUserOrders();
+  }
+
+  /** CLIENTE: historial (alias) */
+  getUserOrders(): Observable<OrderHistoryItem[]> {
     return this.http
       .get<OrderHistoryItem[] | { data: OrderHistoryItem[] }>(
         `${this.apiUrl}/history`,

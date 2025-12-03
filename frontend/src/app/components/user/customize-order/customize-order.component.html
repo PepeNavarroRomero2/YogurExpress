@@ -49,13 +49,13 @@
             <p class="eyebrow">Toppings</p>
             <h4>Personaliza tu mezcla</h4>
           </div>
-          <button type="button" class="btn-secondary" (click)="selectToppings()">Seleccionar</button>
         </div>
         <div class="toppings-list">
           <label
             class="topping"
             *ngFor="let t of toppings"
             [class.disabled]="t.cantidad_disponible <= 0"
+            [class.selected]="isToppingSelected(t)"
           >
             <input
               type="checkbox"
