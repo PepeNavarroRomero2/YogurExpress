@@ -114,6 +114,47 @@ export class CustomizeOrderComponent implements OnInit {
     this.location.back();
   }
 
+  /** Abre un SweetAlert2 para seleccionar toppings con checkboxes */
+  selectToppings(): void {
+    let html = '<div style="text-align:left;">';
+    this.toppings.forEach(t => {
+      html += `
+        <div style="margin-bottom: 0.5rem;">
+          <input type="checkbox"
+                 id="topping-${t.id_producto}"
+                 name="topping"
+                 value="${t.id_producto}"
+                 style="margin-right: 0.5rem;"
+                 ${this.isToppingSelected(t) ? 'checked' : ''} />
+          <label for="topping-${t.id_producto}" style="cursor: pointer;">
+            ${t.nombre}
+          </label>
+        </div>
+      `;
+    });
+    html += '</div>';
+
+    Swal.fire({
+      title: 'Seleccionar Toppings',
+      html: html,
+      showCancelButton: true,
+      confirmButtonText: 'Aceptar',
+      cancelButtonText: 'Cancelar',
+      focusConfirm: false,
+      preConfirm: () => {
+        const checkedBoxes = Array.from(
+          document.querySelectorAll('input[name="topping"]:checked')
+        ) as HTMLInputElement[];
+        return checkedBoxes.map(cb => Number(cb.value));
+      }
+    }).then(result => {
+      if (result.isConfirmed && Array.isArray(result.value)) {
+        const selectedIds: number[] = result.value as number[];
+        this.selectedToppings = this.toppings.filter(t => selectedIds.includes(t.id_producto));
+      }
+    });
+  }
+
   /** Selecciona un tamaño (solo si hay stock) */
   selectSize(s: Producto & { cantidad_disponible: number }): void {
     if (s.cantidad_disponible > 0) {
