@@ -42,7 +42,7 @@
           <div class="order card" *ngFor="let o of pendingOrders">
             <div class="order-header">
               <div>
-                <p class="code">#{{ o.codigo_unico || o.id_pedido }}</p>
+                <p class="code">#{{ codeLabel(o) }}</p>
                 <p class="muted">Total {{ o.total?.toFixed?.(2) ?? o.total }} €</p>
               </div>
               <span class="badge tag-warning">{{ o.estado }}</span>

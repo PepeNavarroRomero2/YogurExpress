@@ -64,7 +64,14 @@ function ensurePickupValid(schedule, pickupIso) {
   if (h < schedule.openHour || h >= schedule.closeHour) return 'La hora de recogida está fuera del horario de apertura';
   return null;
 }
-function genOrderCode() {
+function buildOrderCode(row) {
+  if (!row) return '';
+  if (row.codigo_pedido) return row.codigo_pedido;
+  if (row.id_pedido) return `PED-${String(row.id_pedido).padStart(6, '0')}`;
+  if (row.codigo_unico) return `PED-${row.codigo_unico.toString().slice(0, 8).toUpperCase()}`;
+  return '';
+}
+function fallbackOrderCode() {
   const ts = Date.now().toString(36).toUpperCase();
   const rnd = Math.random().toString(36).slice(2, 6).toUpperCase();
   return `PED-${ts}-${rnd}`;
@@ -78,7 +85,7 @@ router.get('/history', authenticateToken, async (req, res) => {
     const userId = req.user.id_usuario;
     const { data, error } = await supabase
       .from('pedidos')
-      .select('id_pedido, codigo_unico, codigo_pedido, fecha_hora, hora_recogida, estado, total')
+      .select('id_pedido, codigo_unico, fecha_hora, hora_recogida, estado, total')
       .eq('id_usuario', userId)
       .order('fecha_hora', { ascending: false });
 
@@ -86,11 +93,43 @@ router.get('/history', authenticateToken, async (req, res) => {
       console.error('[orders] history error:', error);
       return res.status(500).json({ error: 'Error obteniendo historial de pedidos.' });
     }
+    const mapped = (data || []).map(row => ({
+      ...row,
+      codigo_pedido: buildOrderCode(row)
+    }));
 
-    return res.json(data || []);
+    return res.json(mapped);
   } catch (err) {
     console.error('[orders] GET /history error:', err);
     return res.status(500).json({ error: 'Error interno al obtener historial.' });
+  }
+});
+
+// ───────────────────────────────────────────────────────────
+// GET /api/orders/pending → pedidos para panel admin/cocina
+// ───────────────────────────────────────────────────────────
+router.get('/pending', authenticateToken, isAdmin, async (_req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('pedidos')
+      .select('id_pedido, codigo_unico, fecha_hora, hora_recogida, estado, total')
+      .in('estado', ['pendiente', 'listo'])
+      .order('fecha_hora', { ascending: false });
+
+    if (error) {
+      console.error('[orders] pending error:', error);
+      return res.status(500).json({ error: 'Error obteniendo pedidos pendientes.' });
+    }
+
+    const mapped = (data || []).map(row => ({
+      ...row,
+      codigo_pedido: buildOrderCode(row)
+    }));
+
+    return res.json(mapped);
+  } catch (err) {
+    console.error('[orders] GET /pending error:', err);
+    return res.status(500).json({ error: 'Error interno al listar pedidos pendientes.' });
   }
 });
 
@@ -179,7 +218,6 @@ router.post('/', authenticateToken, async (req, res) => {
     const puntosGanados = Math.floor(total * loyalty.earnRate);
 
     // 5) Persistir pedido
-    const codigo = genOrderCode(); // código humano (NO UUID)
     const { data: inserted, error: insErr } = await supabase
       .from('pedidos')
       .insert({
@@ -197,6 +235,8 @@ router.post('/', authenticateToken, async (req, res) => {
       console.error('[orders] insert pedido error:', insErr);
       return res.status(500).json({ error: 'Error creando el pedido.' });
     }
+
+    const codigo = buildOrderCode(inserted) || fallbackOrderCode();
 
     // 6) Descontar inventario
     for (const item of productos) {
@@ -338,7 +378,6 @@ router.post('/after-paypal', authenticateToken, async (req, res) => {
     const puntosGanados = Math.floor(total * loyalty.earnRate);
 
     // 5) Crear pedido (pagado ya en PayPal)
-    const codigo = genOrderCode(); // código humano (NO UUID)
     const { data: inserted, error: insErr } = await supabase
       .from('pedidos')
       .insert({
@@ -358,6 +397,7 @@ router.post('/after-paypal', authenticateToken, async (req, res) => {
       return res.status(500).json({ error: 'Error creando el pedido.' });
     }
     const idPedido = inserted.id_pedido;
+    const codigo = buildOrderCode(inserted) || fallbackOrderCode();
 
     // 6) Insertar líneas (opcional pero recomendable)
     const lineas = productos.map(item => ({
