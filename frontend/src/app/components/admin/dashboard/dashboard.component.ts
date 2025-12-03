@@ -7,7 +7,6 @@ import { OrderService, Order, PedidoEstado } from '../../../services/order.servi
 
 import { ManageProductsComponent } from '../manage-products/manage-products.component';
 import { ManageInventoryComponent } from '../manage-inventory/manage-inventory.component';
-import { ManagePromotionsComponent } from '../manage-promotions/manage-promotions.component';
 import { ScheduleSettingsDialogComponent } from '../../shared/schedule-settings-dialog/schedule-settings-dialog.component';
 import { LoyaltySettingsDialogComponent } from '../../shared/loyalty-settings-dialog/loyalty-settings-dialog.component';
 
@@ -18,7 +17,6 @@ import { LoyaltySettingsDialogComponent } from '../../shared/loyalty-settings-di
     CommonModule,
     ManageProductsComponent,
     ManageInventoryComponent,
-    ManagePromotionsComponent,
     ScheduleSettingsDialogComponent,
     LoyaltySettingsDialogComponent
   ],
@@ -26,7 +24,7 @@ import { LoyaltySettingsDialogComponent } from '../../shared/loyalty-settings-di
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
-  activeTab: 'stats' | 'products' | 'inventory' | 'promotions' = 'stats';
+  activeTab: 'stats' | 'products' | 'inventory' = 'stats';
   orders: Order[] = [];
   pendingOrders: Order[] = [];
 
@@ -47,7 +45,7 @@ export class DashboardComponent implements OnInit {
     this.authService.logout();
   }
 
-  setTab(tab: 'stats' | 'products' | 'inventory' | 'promotions'): void {
+  setTab(tab: 'stats' | 'products' | 'inventory'): void {
     this.activeTab = tab;
     if (tab === 'stats') this.loadPending();
   }

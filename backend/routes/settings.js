@@ -99,9 +99,19 @@ function sanitizeSchedule(input) {
     closeHour: Number(input?.closeHour ?? 22),
     minLeadMinutes: Math.floor(Number(input?.minLeadMinutes ?? 30)),
   };
-  if (!Number.isFinite(out.openHour) || out.openHour < 0 || out.openHour > 23) out.openHour = 10;
-  if (!Number.isFinite(out.closeHour) || out.closeHour < 0 || out.closeHour > 23) out.closeHour = 22;
-  if (!Number.isFinite(out.minLeadMinutes) || out.minLeadMinutes < 0) out.minLeadMinutes = 30;
+
+  if (!Number.isFinite(out.openHour) || out.openHour < 0 || out.openHour > 23) {
+    out.openHour = 10;
+  }
+
+  if (!Number.isFinite(out.closeHour) || out.closeHour < 0 || out.closeHour > 23) {
+    out.closeHour = 22;
+  }
+
+  if (!Number.isFinite(out.minLeadMinutes) || out.minLeadMinutes < 0) {
+    out.minLeadMinutes = 30;
+  }
+
   return out;
 }
 

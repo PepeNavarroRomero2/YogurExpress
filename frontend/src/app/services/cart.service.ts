@@ -3,7 +3,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Flavor } from './product.service';
+import { Producto } from './producto.service';
 
 /**
  * Interfaz para el payload que envÃ­a el componente al crear un pedido.
@@ -31,17 +31,17 @@ export class CartService {
   private pickupTimeKey = 'cart_pickup_time';
 
   // URL base del backend (ajusta si tu servidor corre en otro host/puerto)
-  private API_URL = 'http://localhost:3000/api';
+  private API_URL = '/api';
 
   constructor(private http: HttpClient) {}
 
   /** ------------- MÃ‰TODOS PARA MANEJAR LOCALSTORAGE ------------- */
 
   /** SABOR */
-  setFlavor(flavor: Flavor): void {
+  setFlavor(flavor: Producto): void {
     localStorage.setItem(this.flavorKey, JSON.stringify(flavor));
   }
-  getFlavor(): Flavor | null {
+  getFlavor(): Producto | null {
     const json = localStorage.getItem(this.flavorKey);
     return json ? JSON.parse(json) : null;
   }
@@ -50,10 +50,10 @@ export class CartService {
   }
 
   /** TAMAÃ‘O */
-  setSize(size: Flavor): void {
+  setSize(size: Producto): void {
     localStorage.setItem(this.sizeKey, JSON.stringify(size));
   }
-  getSize(): Flavor | null {
+  getSize(): Producto | null {
     const json = localStorage.getItem(this.sizeKey);
     return json ? JSON.parse(json) : null;
   }
@@ -62,10 +62,10 @@ export class CartService {
   }
 
   /** TOPPINGS */
-  setToppings(toppings: Flavor[]): void {
+  setToppings(toppings: Producto[]): void {
     localStorage.setItem(this.toppingsKey, JSON.stringify(toppings));
   }
-  getToppings(): Flavor[] {
+  getToppings(): Producto[] {
     const json = localStorage.getItem(this.toppingsKey);
     return json ? JSON.parse(json) : [];
   }

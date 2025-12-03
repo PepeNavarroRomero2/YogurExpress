@@ -13,7 +13,7 @@ export interface InventoryItem {
 
 @Injectable({ providedIn: 'root' })
 export class InventoryService {
-  private apiUrl = 'http://localhost:3000/api/inventory';
+  private apiUrl = '/api/inventory';
 
   constructor(
     private http: HttpClient,

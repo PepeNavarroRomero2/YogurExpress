@@ -18,8 +18,8 @@ export interface Producto {
   providedIn: 'root'
 })
 export class ProductoService {
-  // Debe coincidir con el backend: http://localhost:3000/api/products
-  private apiUrl = 'http://localhost:3000/api/products';
+  // Debe coincidir con el backend y aprovechar el proxy en dev
+  private apiUrl = '/api/products';
 
   constructor(private http: HttpClient) {}
 
@@ -38,14 +38,14 @@ export class ProductoService {
     return this.http.get<Producto[]>(`${this.apiUrl}/toppings`);
   }
 
-  /** 4. Devuelve todos los tamaÃ±os (tipo = 'tamano'). */
+  /** 4. Devuelve todos los tamaños (tipo = 'tamano'). */
   getTamanos(): Observable<Producto[]> {
     return this.http.get<Producto[]>(`${this.apiUrl}/tamanos`);
   }
 
   /**
-   * 5. Crea un producto (sabor, topping o tamaÃ±o).
-   *    EnvÃ­a JSON con:
+   * 5. Crea un producto (sabor, topping o tamaño).
+   *    Envía JSON con:
    *    { nombre:String, tipo:'sabor'|'topping'|'tamano', precio:Number,
    *      descripcion?:String, alergenos?:String, imagen_url?:String }
    */
