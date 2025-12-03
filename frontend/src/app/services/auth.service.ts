@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 
-/** Datos del usuario segÃºn backend */
+/** Datos del usuario según backend */
 export interface User {
   id_usuario: number;
   nombre: string;
@@ -95,10 +95,10 @@ export class AuthService {
     }
   }
 
-  /** Devuelve true si el token no existe o estÃ¡ expirado/corrupto */
+  /** Devuelve true si el token no existe o está expirado/corrupto */
   isTokenExpired(): boolean {
     const p = this.getTokenPayload();
-    if (!p || !p.exp) return true; // si no podemos leer exp, tratamos como invÃ¡lido
+    if (!p || !p.exp) return true; // si no podemos leer exp, tratamos como inválido
     const expiresAtMs = p.exp * 1000;
     return Date.now() >= expiresAtMs;
   }

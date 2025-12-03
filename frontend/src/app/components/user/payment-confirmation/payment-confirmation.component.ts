@@ -121,7 +121,7 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
     this.subtotal = Math.round((f + s + t) * 100) / 100;
   }
 
-  /** MÃ¡ximo canjeable segÃºn saldo y subtotal con la regla actual */
+  /** Máximo canjeable según saldo y subtotal con la regla actual */
   get maxRedeemable(): number {
     const pointsPerEuro = this.loyalty.pointsPerEuro || 10;
     const maxBySaldo = this.puntosUsuario;
@@ -138,7 +138,7 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
     this.total = Math.max(0, Math.round((this.subtotal - this.descuento) * 100) / 100);
   }
 
-  // ========= LÃ“GICA DE PEDIDO (COMÃšN) =========
+  // ========= LÓGICA DE PEDIDO (COMÚN) =========
 
   private buildOrderLines(): OrderProduct[] {
     const lines: OrderProduct[] = [];
@@ -180,50 +180,6 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
     };
   }
 
-  // ========= BOTÃ“N "SIMULAR COMPRA" (TU FLUJO ORIGINAL) =========
-
-  simulatePurchase(): void {
-    this.createOrder();
-  }
-
-  private createOrder(): void {
-    if (!this.pickupTimeHM) {
-      this.errorMsg = 'Selecciona una hora de recogida';
-      return;
-    }
-
-    const pickupIso = this.toLocalIsoToday(this.pickupTimeHM);
-    if (!pickupIso) {
-      Swal.fire('Error', 'Formato de hora de recogida invÃ¡lido.', 'error');
-      return;
-    }
-
-    const body = this.buildCreateOrderRequest();
-
-    this.orderService.createOrder(body).subscribe({
-      next: (res: CreateOrderResponse) => {
-        Swal.fire({
-          title: 'Â¡Pedido confirmado!',
-          html: `
-            CÃ³digo: <strong>${res.codigo_pedido}</strong><br>
-            Total pagado: <strong>â‚¬${res.total.toFixed(2)}</strong><br>
-            Has ganado <strong>${res.puntos_ganados}</strong> puntos.<br>
-            Puntos restantes: <strong>${res.puntos_totales}</strong>.
-          `,
-          icon: 'success',
-          confirmButtonText: 'Aceptar'
-        }).then(() => {
-          this.cartService.clear();
-          this.router.navigate(['/user/menu']);
-        });
-      },
-      error: err => {
-        const msg = err?.error?.error || 'Error al crear el pedido.';
-        Swal.fire('Error', msg, 'error');
-      }
-    });
-  }
-
   // ========= PAYPAL =========
 
   private renderPaypalButtons(): void {
@@ -248,13 +204,13 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
 
           const payload: any = {
             items: itemsForPaypal,
-            description: 'Pedido YogurterÃ­a',
+            description: 'Pedido Yogurtería',
             puntos_usados: this.puntosAUsar,
             pointsPerEuro: this.loyalty.pointsPerEuro
           };
 
           const r = await this.paypalApi.createOrder(payload);
-          if (!r?.id) throw new Error('Backend no devolviÃ³ order id');
+          if (!r?.id) throw new Error('Backend no devolvió order id');
           this.paypalOrderId = r.id;
           return r.id;
         } catch (e: any) {
@@ -268,7 +224,7 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
         try {
           const cap = await this.paypalApi.captureOrder(data.orderID);
           if (cap?.status !== 'COMPLETED') {
-            this.errorMsg = 'El pago no se completÃ³';
+            this.errorMsg = 'El pago no se completó';
             return;
           }
 
@@ -278,10 +234,10 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
           this.orderService.createOrderAfterPaypal(body).subscribe({
             next: (res: CreateOrderResponse) => {
               Swal.fire({
-                title: 'Â¡Pago completado y pedido confirmado!',
+                title: '¡Pago completado y pedido confirmado!',
                 html: `
-                  CÃ³digo: <strong>${res.codigo_pedido}</strong><br>
-                  Total: <strong>â‚¬${res.total.toFixed(2)}</strong><br>
+                  Código: <strong>${res.codigo_pedido}</strong><br>
+                  Total: <strong>€${res.total.toFixed(2)}</strong><br>
                   Has ganado <strong>${res.puntos_ganados}</strong> puntos.<br>
                   Puntos restantes: <strong>${res.puntos_totales}</strong>.
                 `,
@@ -293,8 +249,8 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
               });
             },
             error: err => {
-              const msg = err?.error?.error || 'El pago fue correcto, pero fallÃ³ la creaciÃ³n del pedido.';
-              Swal.fire('AtenciÃ³n', msg, 'warning');
+              const msg = err?.error?.error || 'El pago fue correcto, pero falló la creación del pedido.';
+              Swal.fire('Atención', msg, 'warning');
             }
           });
         } catch (e: any) {
@@ -308,7 +264,7 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
 
       onError: (err: any) => {
         console.error(err);
-        this.errorMsg = 'OcurriÃ³ un error con PayPal.';
+        this.errorMsg = 'Ocurrió un error con PayPal.';
       }
     }).render('#paypal-button-container');
   }

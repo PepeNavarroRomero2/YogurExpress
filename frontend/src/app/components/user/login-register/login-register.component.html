@@ -1,13 +1,13 @@
-﻿<!-- src/app/components/user/login-register/login-register.component.html -->
-<div class="login-container">
-  <div class="login-card">
-    <!-- TÃ­tulo dinÃ¡mico segÃºn el modo (Login vs Registro) -->
-    <h2 class="login-title">
-      {{ isLoginMode ? 'Login / Registro' : 'Registro' }}
-    </h2>
+<div class="auth-wrapper">
+  <div class="auth-card card">
+    <header class="auth-header">
+      <h1>{{ isLoginMode ? 'Inicia sesión' : 'Crea tu cuenta' }}</h1>
+      <p class="subtitle" *ngIf="!isLoginMode">
+        Regístrate para guardar tus pedidos y sumar puntos.
+      </p>
+    </header>
 
-    <form (ngSubmit)="onSubmit()">
-      <!-- Si NO es Login (es decir, estamos en modo â€œRegistroâ€), mostramos el campo Nombre -->
+    <form (ngSubmit)="onSubmit()" class="auth-form">
       <div *ngIf="!isLoginMode" class="form-group">
         <label for="name">Nombre</label>
         <input
@@ -19,9 +19,8 @@
         />
       </div>
 
-      <!-- Campo Email -->
       <div class="form-group">
-        <label for="email">Correo electrÃ³nico</label>
+        <label for="email">Correo electrónico</label>
         <input
           id="email"
           name="email"
@@ -31,9 +30,8 @@
         />
       </div>
 
-      <!-- Campo Password -->
       <div class="form-group">
-        <label for="password">ContraseÃ±a</label>
+        <label for="password">Contraseña</label>
         <input
           id="password"
           name="password"
@@ -43,23 +41,17 @@
         />
       </div>
 
-      <!-- BotÃ³n principal: â€œContinuarâ€ si es Login, â€œRegistrarseâ€ si es Registro -->
-      <button class="btn-primary" type="submit">
+      <button class="btn-primary full-width" type="submit">
         {{ isLoginMode ? 'Continuar' : 'Registrarse' }}
       </button>
     </form>
 
-    <!-- Link para alternar entre Login y Registro -->
     <p class="toggle-text">
-      <span *ngIf="isLoginMode">Â¿No tienes cuenta? </span>
-      <span *ngIf="!isLoginMode">Â¿Ya tienes cuenta? </span>
-      <a
-        href="#"
-        (click)="toggleMode(); $event.preventDefault();"
-      >
-        {{ isLoginMode ? 'RegÃ­strate' : 'Inicia SesiÃ³n' }}
+      <span *ngIf="isLoginMode">¿No tienes cuenta?</span>
+      <span *ngIf="!isLoginMode">¿Ya tienes cuenta?</span>
+      <a href="#" (click)="toggleMode(); $event.preventDefault();">
+        {{ isLoginMode ? 'Regístrate' : 'Inicia sesión' }}
       </a>
     </p>
   </div>
 </div>
-

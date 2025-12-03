@@ -19,7 +19,7 @@ export class ManagePromotionsComponent implements OnInit {
   isEditing = false;
   editingPromotionId: number | null = null;
 
-  // Modelo del formulario (aquÃ­ descuento en porcentaje, no en fracciÃ³n)
+  // Modelo del formulario (aquí descuento en porcentaje, no en fracción)
   promoModel: { codigo: string; descripcion: string; descuento: number } = {
     codigo: '',
     descripcion: '',
@@ -53,7 +53,7 @@ export class ManagePromotionsComponent implements OnInit {
     this.showForm = true;
     this.isEditing = true;
     this.editingPromotionId = p.id_promocion;
-    // Convertimos la fracciÃ³n a porcentaje para el formulario
+    // Convertimos la fracción a porcentaje para el formulario
     this.promoModel = {
       codigo: p.codigo,
       descripcion: p.descripcion || '',
@@ -61,7 +61,7 @@ export class ManagePromotionsComponent implements OnInit {
     };
   }
 
-  /** Crea el objeto que el backend espera, con 'descuento' como fracciÃ³n */
+  /** Crea el objeto que el backend espera, con 'descuento' como fracción */
   private toDto() {
     return {
       codigo: this.promoModel.codigo.trim(),
@@ -78,23 +78,23 @@ export class ManagePromotionsComponent implements OnInit {
     if (this.isEditing && this.editingPromotionId != null) {
       this.promotionService.updatePromotion(this.editingPromotionId, dto).subscribe({
         next: () => {
-          Swal.fire('Actualizado', 'PromociÃ³n actualizada', 'success');
+          Swal.fire('Actualizado', 'Promoción actualizada', 'success');
           this.onCancel();
           this.loadPromotions();
         },
         error: () => {
-          Swal.fire('Error', 'No se pudo actualizar la promociÃ³n', 'error');
+          Swal.fire('Error', 'No se pudo actualizar la promoción', 'error');
         },
       });
     } else {
       this.promotionService.createPromotion(dto).subscribe({
         next: () => {
-          Swal.fire('Ã‰xito', 'PromociÃ³n creada', 'success');
+          Swal.fire('Éxito', 'Promoción creada', 'success');
           this.onCancel();
           this.loadPromotions();
         },
         error: () => {
-          Swal.fire('Error', 'No se pudo crear la promociÃ³n', 'error');
+          Swal.fire('Error', 'No se pudo crear la promoción', 'error');
         },
       });
     }
@@ -102,20 +102,20 @@ export class ManagePromotionsComponent implements OnInit {
 
   onDelete(id: number): void {
     Swal.fire({
-      title: 'Â¿Eliminar esta promociÃ³n?',
-      text: 'Esta acciÃ³n no se puede deshacer',
+      title: '¿Eliminar esta promoción?',
+      text: 'Esta acción no se puede deshacer',
       icon: 'warning',
       showCancelButton: true,
     }).then((res) => {
       if (res.isConfirmed) {
         this.promotionService.deletePromotion(id).subscribe({
           next: () => {
-            Swal.fire('Eliminado', 'PromociÃ³n eliminada', 'success');
+            Swal.fire('Eliminado', 'Promoción eliminada', 'success');
             this.loadPromotions();
           },
           error: (err: any) => {
-            console.error('Error eliminando promociÃ³n', err);
-            Swal.fire('Error', 'No se pudo eliminar la promociÃ³n', 'error');
+            console.error('Error eliminando promoción', err);
+            Swal.fire('Error', 'No se pudo eliminar la promoción', 'error');
           },
         });
       }
