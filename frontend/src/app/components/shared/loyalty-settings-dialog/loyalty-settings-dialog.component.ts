@@ -38,7 +38,7 @@ export class LoyaltySettingsDialogComponent {
       },
       error: () => {
         this.saving = false;
-        alert('Error guardando configuraciÃ³n de puntos');
+        alert('Error guardando configuración de puntos');
       }
     });
   }

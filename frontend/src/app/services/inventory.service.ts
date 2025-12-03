@@ -25,7 +25,7 @@ export class InventoryService {
     return this.http.get<InventoryItem[]>(this.apiUrl);
   }
 
-  /** PUT sÃ­ envÃ­a token para actualizar stock */
+  /** PUT sí envía token para actualizar stock */
   updateInventory(id: number, cantidad: number): Observable<InventoryItem> {
     const headers = this.authService.getAuthHeaders()
       .set('Content-Type', 'application/json');

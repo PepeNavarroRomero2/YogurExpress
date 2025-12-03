@@ -60,26 +60,26 @@ export class ManageInventoryComponent implements OnInit {
     }
   }
 
-  /** Activa el modo ediciÃ³n para un Ã­tem concreto */
+  /** Activa el modo edición para un ítem concreto */
   enableEdit(item: InventoryItem): void {
     this.editId = item.id_producto;
     this.editQuantity = item.cantidad_disponible;
   }
 
-  /** Cancela la ediciÃ³n en curso */
+  /** Cancela la edición en curso */
   cancelEdit(): void {
     this.editId = null;
     this.editQuantity = null;
   }
 
-  /** Guarda la cantidad editada para el Ã­tem (hace PUT /api/inventory/:id_producto) */
+  /** Guarda la cantidad editada para el ítem (hace PUT /api/inventory/:id_producto) */
   saveEdit(item: InventoryItem): void {
     if (
       this.editQuantity === null ||
       this.editQuantity < 0 ||
       isNaN(this.editQuantity)
     ) {
-      Swal.fire('Error', 'La cantidad debe ser un nÃºmero vÃ¡lido â‰¥ 0.', 'error');
+      Swal.fire('Error', 'La cantidad debe ser un número válido ≥ 0.', 'error');
       return;
     }
 
@@ -92,7 +92,7 @@ export class ManageInventoryComponent implements OnInit {
           this.editId = null;
           this.editQuantity = null;
           Swal.fire(
-            'Ã‰xito',
+            'Éxito',
             'Cantidad actualizada correctamente.',
             'success'
           );

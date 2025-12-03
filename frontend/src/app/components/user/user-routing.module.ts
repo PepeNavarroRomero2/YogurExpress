@@ -13,10 +13,10 @@ import { authGuard }          from '../../guards/auth.guard';
 import { loginRedirectGuard } from '../../guards/login-redirect.guard';
 
 const routes: Routes = [
-  // /user â†’ a login (si ya hay sesiÃ³n, el guard puede redirigir)
+  // /user â†’ a login (si ya hay sesión, el guard puede redirigir)
   { path: 'login', component: LoginRegisterComponent, canActivate: [loginRedirectGuard] },
 
-  // resto requiere sesiÃ³n
+  // resto requiere sesión
   { path: 'menu',        component: ProductMenuComponent,         canActivate: [authGuard] },
   { path: 'personalize', component: CustomizeOrderComponent,      canActivate: [authGuard] },
   { path: 'pickup',      component: SelectTimeComponent,          canActivate: [authGuard] },

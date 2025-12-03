@@ -15,7 +15,7 @@ export class PromotionService {
   private API_URL = '/api/promotions';
   constructor(private http: HttpClient, private auth: AuthService) {}
 
-  // PÃºblicas
+  // Públicas
   getPromotions(): Observable<Promotion[]> {
     return this.http.get<Promotion[]>(this.API_URL);
   }
@@ -27,7 +27,7 @@ export class PromotionService {
     );
   }
 
-  // Admin-only (aÃ±adimos Authorization)
+  // Admin-only (añadimos Authorization)
   createPromotion(promo: Omit<Promotion,'id_promocion'>): Observable<Promotion> {
     return this.http.post<Promotion>(this.API_URL, promo, { headers: this.auth.getAuthHeaders() });
   }

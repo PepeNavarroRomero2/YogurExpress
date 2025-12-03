@@ -61,7 +61,7 @@ export class ProductMenuComponent implements OnInit, OnDestroy {
       return;
     }
     this.cartService.setFlavor(flavor);
-    // Ruta correcta segÃºn tu routing (user-routing.module.ts)
+    // Ruta correcta según tu routing (user-routing.module.ts)
     this.router.navigate(['/user/personalize']);
   }
 
@@ -70,17 +70,17 @@ export class ProductMenuComponent implements OnInit, OnDestroy {
 
   logout(): void {
     Swal.fire({
-      title: 'Â¿Cerrar sesiÃ³n?',
-      text: 'Se limpiarÃ¡ tu carrito.',
+      title: '¿Cerrar sesión?',
+      text: 'Se limpiará tu carrito.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'SÃ­, cerrar sesiÃ³n',
+      confirmButtonText: 'Sí, cerrar sesión',
       cancelButtonText: 'Cancelar'
     }).then(result => {
       if (result.isConfirmed) {
         this.authService.logout();
         this.cartService.clear();
-        Swal.fire('Desconectado', 'Has cerrado sesiÃ³n.', 'success');
+        Swal.fire('Desconectado', 'Has cerrado sesión.', 'success');
         this.router.navigate(['/user/login']);
       }
     });

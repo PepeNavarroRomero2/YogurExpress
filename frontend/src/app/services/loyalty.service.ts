@@ -3,9 +3,9 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, tap } from 'rxjs';
 
 export interface LoyaltySettings {
-  /** Puntos que se ganan por cada â‚¬ pagado (tras canje) */
+  /** Puntos que se ganan por cada € pagado (tras canje) */
   earnRate: number;
-  /** Puntos necesarios para descontar 1 â‚¬ (ej: 10 = 10 puntos â†’ 1 â‚¬) */
+  /** Puntos necesarios para descontar 1 € (ej: 10 = 10 puntos â†’ 1 €) */
   pointsPerEuro: number;
 }
 

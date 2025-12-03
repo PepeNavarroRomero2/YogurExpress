@@ -2,8 +2,8 @@
   <div class="auth-card card">
     <header class="auth-header">
       <h1>{{ isLoginMode ? 'Inicia sesión' : 'Crea tu cuenta' }}</h1>
-      <p class="subtitle">
-        {{ isLoginMode ? 'Accede para gestionar tus pedidos y puntos.' : 'Regístrate para guardar tus pedidos y sumar puntos.' }}
+      <p class="subtitle" *ngIf="!isLoginMode">
+        Regístrate para guardar tus pedidos y sumar puntos.
       </p>
     </header>
 
