@@ -19,6 +19,7 @@ import { AuthService, User } from '../../../services/auth.service';
 export class PointsComponent implements OnInit {
   puntos: number = 0;
   errorMsg: string = '';
+  Math = Math;
 
   // Cambiado a 'public' para poder usar 'router' desde el HTML
   constructor(

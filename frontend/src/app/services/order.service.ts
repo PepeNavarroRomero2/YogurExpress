@@ -1,6 +1,6 @@
 ﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 export type PedidoEstado = 'pendiente' | 'listo' | 'completado' | 'rechazado';
 
@@ -83,12 +83,16 @@ export class OrderService {
     );
   }
 
-  /** CLIENTE: historial de pedidos del usuario (array directo) */
+  /** CLIENTE: historial de pedidos del usuario (array directo o { data }) */
   getOrderHistory(): Observable<OrderHistoryItem[]> {
-    return this.http.get<OrderHistoryItem[]>(
-      `${this.apiUrl}/history`,
-      { headers: this.getAuthHeaders() }
-    );
+    return this.http
+      .get<OrderHistoryItem[] | { data: OrderHistoryItem[] }>(
+        `${this.apiUrl}/history`,
+        { headers: this.getAuthHeaders() }
+      )
+      .pipe(
+        map((res) => (Array.isArray(res) ? res : res?.data || []))
+      );
   }
 
   /** ADMIN: pendientes */
