@@ -58,8 +58,13 @@ export class DashboardComponent implements OnInit {
     this.orderService.getPendingOrders().subscribe({
       next: (orders) => {
         // El endpoint devuelve pendientes; mantenemos ambas colecciones por compatibilidad
-        this.orders = orders ?? [];
-        this.pendingOrders = orders ?? [];
+        const normalized = (orders ?? []).sort((a, b) => {
+          const aDate = new Date(a.fecha_hora).getTime();
+          const bDate = new Date(b.fecha_hora).getTime();
+          return aDate - bDate;
+        });
+        this.orders = normalized;
+        this.pendingOrders = normalized;
       },
       error: (err) => {
         console.error('Error obteniendo pedidos', err);
@@ -70,20 +75,6 @@ export class DashboardComponent implements OnInit {
 
   private toast(text: string, icon: SweetAlertIcon = 'info'): void {
     Swal.fire({ text, icon, timer: 1400, showConfirmButton: false });
-  }
-
-  markReady(order: Order): void {
-    this.orderService.updateStatus(order.id_pedido, 'listo').subscribe({
-      next: () => {
-        order.estado = 'listo' as PedidoEstado;
-        this.pendingOrders = this.pendingOrders.filter(o => o.id_pedido !== order.id_pedido);
-        this.toast(`Pedido ${this.codeLabel(order)} marcado como listo.`, 'success');
-      },
-      error: (err) => {
-        console.error('Error actualizando estado', err);
-        this.toast('No se pudo actualizar el estado del pedido.', 'error');
-      }
-    });
   }
 
   markDelivered(order: Order): void {
@@ -116,6 +107,10 @@ export class DashboardComponent implements OnInit {
 
   codeLabel(order: Order): string | number {
     return order.codigo_pedido || order.codigo_unico || order.id_pedido;
+  }
+
+  pickupLabel(order: Order): string {
+    return order.hora_recogida || '—';
   }
 }
 

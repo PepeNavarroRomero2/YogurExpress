@@ -58,7 +58,6 @@ export class OrderHistoryComponent implements OnInit {
   stateClass(o: OrderHistoryItem): string {
     const state = this.normalizedState(o);
     if (state === 'pendiente') return 'tag-warning';
-    if (state === 'listo') return 'tag-info';
     if (state === 'completado') return 'tag-success';
     return '';
   }
@@ -68,6 +67,8 @@ export class OrderHistoryComponent implements OnInit {
   }
 
   private normalizedState(o: OrderHistoryItem): string {
-    return (o.estado || '').toString().trim().toLowerCase();
+    const state = (o.estado || '').toString().trim().toLowerCase();
+    if (state === 'listo') return 'completado';
+    return state;
   }
 }

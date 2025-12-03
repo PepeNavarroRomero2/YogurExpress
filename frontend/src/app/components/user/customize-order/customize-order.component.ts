@@ -3,7 +3,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { Location } from '@angular/common';
 import Swal from 'sweetalert2';
 
 import { Producto, ProductoService } from '../../../services/producto.service';
@@ -39,7 +38,6 @@ export class CustomizeOrderComponent implements OnInit {
   private invMap = new Map<number, number>();
 
   constructor(
-    private location: Location,
     private productService: ProductoService,
     private cartService: CartService,
     private inventoryService: InventoryService,
@@ -111,7 +109,7 @@ export class CustomizeOrderComponent implements OnInit {
 
   /** Navegar a la vista anterior */
   goBack(): void {
-    this.location.back();
+    this.router.navigate(['/user/menu']);
   }
 
   /** Selecciona un tamaño (solo si hay stock) */
