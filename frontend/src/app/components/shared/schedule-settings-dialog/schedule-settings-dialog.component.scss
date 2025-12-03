@@ -1,34 +1,23 @@
 .dlg-backdrop {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
-  backdrop-filter: blur(1px);
+  @extend .dialog-backdrop;
 }
 
 .dlg {
-  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  width: min(520px, 92vw);
-  background: #111; color: #eee; border-radius: 16px; padding: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  @extend .dialog-card;
 }
-
-.dlg-title { margin: 0 0 10px; font-size: 1.2rem; }
 
 .dlg-form .row {
-  display: grid; grid-template-columns: 1fr 140px; align-items: center;
-  gap: 12px; margin: 10px 0;
+  display: grid;
+  grid-template-columns: 1fr 160px;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.dlg-form input {
-  width: 100%; padding: 8px 10px; border-radius: 10px; border: 1px solid #333;
-  background: #1a1a1a; color: #eee;
+.hint {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
 }
 
-.hint { font-size: .85rem; opacity: .8; margin-top: 4px; }
-
-.actions { display: flex; align-items: center; margin-top: 16px; }
-.spacer { flex: 1; }
-.btn {
-  padding: 8px 12px; border-radius: 10px; border: 1px solid #333; background: #1c1c1c; color: #eee;
-  cursor: pointer;
+.spacer {
+  flex: 1;
 }
-.btn.primary { background: #2d6cdf; border-color: #264fa2; }
-.btn:disabled { opacity: .6; cursor: not-allowed; }

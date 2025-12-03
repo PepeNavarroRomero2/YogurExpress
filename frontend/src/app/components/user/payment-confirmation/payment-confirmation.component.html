@@ -1,80 +1,86 @@
-﻿<div class="payment-confirmation-container">
-  <h1>ConfirmaciÃ³n y Pago</h1>
+<div class="payment-wrapper">
+  <div class="card payment-card">
+    <div class="payment-header" [class.error]="errorMsg">
+      <div class="status-icon" [class.error]="errorMsg">
+        <span *ngIf="!errorMsg">✓</span>
+        <span *ngIf="errorMsg">!</span>
+      </div>
+      <div>
+        <h2>{{ errorMsg ? 'Hubo un problema con el pago' : 'Pago completado' }}</h2>
+        <p class="subtitle">
+          {{ errorMsg ? 'Revisa los datos y vuelve a intentar.' : 'Tu pedido está confirmado. Te enviaremos una notificación cuando esté listo.' }}
+        </p>
+      </div>
+    </div>
 
-  <div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
-  <div *ngIf="infoMsg" class="info">{{ infoMsg }}</div>
+    <div *ngIf="errorMsg" class="alert-error">{{ errorMsg }}</div>
+    <div *ngIf="infoMsg" class="alert-info">{{ infoMsg }}</div>
 
-  <div class="order-summary">
-    <h2>Tu Pedido</h2>
-    <ul class="summary-list">
-      <li class="summary-item">
-        <span class="label">Sabor:</span>
-        <span class="value">
-          {{ flavor?.nombre }} â€“ â‚¬{{ (flavor?.precio || 0) | number:'1.2-2' }}
-        </span>
-      </li>
+    <div class="summary-grid">
+      <section class="order-summary">
+        <h3>Tu pedido</h3>
+        <ul class="summary-list">
+          <li class="summary-item">
+            <span class="label">Sabor</span>
+            <span class="value">{{ flavor?.nombre }} – {{ (flavor?.precio || 0) | number:'1.2-2' }} €</span>
+          </li>
+          <li class="summary-item">
+            <span class="label">Tamaño</span>
+            <span class="value">{{ size?.nombre }} – {{ (size?.precio || 0) | number:'1.2-2' }} €</span>
+          </li>
+          <li class="summary-item">
+            <span class="label">Toppings</span>
+            <span class="value">{{ toppingNames || '—' }}</span>
+          </li>
+          <li class="summary-item">
+            <span class="label">Hora de recogida</span>
+            <span class="value">{{ pickupTimeLabel }}</span>
+          </li>
+          <li class="summary-item">
+            <span class="label">Subtotal</span>
+            <span class="value">{{ subtotal.toFixed(2) }} €</span>
+          </li>
+          <li class="summary-item">
+            <span class="label">Tienes</span>
+            <span class="value">{{ puntosUsuario }} puntos</span>
+          </li>
+          <li class="summary-item">
+            <span class="label">Puntos a usar</span>
+            <span class="value inline-input">
+              <input
+                type="number"
+                min="0"
+                [max]="maxRedeemable"
+                [(ngModel)]="puntosAUsar"
+                (ngModelChange)="calculateTotal()"
+              />
+              <small class="hint">{{ loyalty.pointsPerEuro }} puntos = 1 €</small>
+            </span>
+          </li>
+          <li class="summary-item">
+            <span class="label">Descuento</span>
+            <span class="value">{{ descuento.toFixed(2) }} €</span>
+          </li>
+          <li class="summary-item total-line">
+            <span class="label">Total a pagar</span>
+            <span class="value"><strong>{{ total.toFixed(2) }} €</strong></span>
+          </li>
+        </ul>
+      </section>
 
-      <li class="summary-item">
-        <span class="label">TamaÃ±o:</span>
-        <span class="value">
-          {{ size?.nombre }} â€“ â‚¬{{ (size?.precio || 0) | number:'1.2-2' }}
-        </span>
-      </li>
+      <aside class="actions-panel">
+        <div class="card mini-card">
+          <h4>Acciones rápidas</h4>
+          <p class="muted">Gestiona tu pedido o sigue explorando.</p>
+          <div class="button-group">
+            <button class="btn-primary full-width" (click)="simulatePurchase()">Simular compra</button>
+            <button class="btn-secondary full-width" routerLink="/user/history">Ver historial de pedidos</button>
+            <button class="btn-ghost full-width" routerLink="/user/menu">Volver al menú</button>
+          </div>
+        </div>
 
-      <li class="summary-item">
-        <span class="label">Toppings:</span>
-        <span class="value">{{ toppingNames || 'â€”' }}</span>
-      </li>
-
-      <li class="summary-item">
-        <span class="label">Hora de recogida:</span>
-        <span class="value">{{ pickupTimeLabel }}</span>
-      </li>
-
-      <li class="summary-item">
-        <span class="label">Subtotal:</span>
-        <span class="value">â‚¬{{ subtotal.toFixed(2) }}</span>
-      </li>
-
-      <li class="summary-item">
-        <span class="label">Tienes:</span>
-        <span class="value">{{ puntosUsuario }} puntos</span>
-      </li>
-
-      <li class="summary-item">
-        <span class="label">Puntos a usar:</span>
-        <span class="value">
-          <input
-            type="number"
-            min="0"
-            [max]="maxRedeemable"
-            [(ngModel)]="puntosAUsar"
-            (ngModelChange)="calculateTotal()"
-          />
-          <small class="hint">
-            ({{ loyalty.pointsPerEuro }} puntos = â‚¬1)
-          </small>
-        </span>
-      </li>
-
-      <li class="summary-item">
-        <span class="label">Descuento por puntos:</span>
-        <span class="value">â‚¬{{ descuento.toFixed(2) }}</span>
-      </li>
-
-      <li class="summary-item total-line">
-        <span class="label">Total a pagar:</span>
-        <span class="value"><strong>â‚¬{{ total.toFixed(2) }}</strong></span>
-      </li>
-    </ul>
+        <div id="paypal-button-container" class="paypal-container"></div>
+      </aside>
+    </div>
   </div>
-
-  <!-- Tu flujo original -->
-  <button class="btn-primary" (click)="simulatePurchase()">
-    Simular Compra
-  </button>
-
-  <!-- PayPal -->
-  <div id="paypal-button-container" class="mt-4"></div>
 </div>
-

@@ -1,16 +1,16 @@
 .dialog-backdrop {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
-  display: grid; place-items: center; z-index: 1000;
+  @extend .dialog-backdrop;
 }
+
 .dialog-card {
-  background: #1f1f1f; color: #fff; border-radius: 12px; padding: 16px; width: 420px; max-width: 90vw;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  @extend .dialog-card;
 }
-.dialog-header { margin-bottom: 8px; }
-.field { display: grid; gap: 8px; margin: 12px 0; }
-.field input { padding: 8px; border-radius: 8px; border: 1px solid #444; background: #121212; color: #fff; }
-.dialog-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
-.btn { padding: 8px 12px; border-radius: 8px; background: #333; color: #fff; border: none; cursor: pointer; }
-.btn.primary { background: #4f46e5; }
-.btn[disabled] { opacity: .6; cursor: not-allowed; }
-.help { color: #aaa; font-size: .9rem; }
+
+.field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.help {
+  color: var(--color-text-secondary);
+}
