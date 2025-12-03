@@ -77,7 +77,7 @@ export class DashboardComponent implements OnInit {
       next: () => {
         order.estado = 'listo' as PedidoEstado;
         this.pendingOrders = this.pendingOrders.filter(o => o.id_pedido !== order.id_pedido);
-        this.toast(`Pedido ${order.codigo_unico ?? order.id_pedido} marcado como listo.`, 'success');
+        this.toast(`Pedido ${this.codeLabel(order)} marcado como listo.`, 'success');
       },
       error: (err) => {
         console.error('Error actualizando estado', err);
@@ -91,7 +91,7 @@ export class DashboardComponent implements OnInit {
       next: () => {
         order.estado = 'completado' as PedidoEstado;
         this.pendingOrders = this.pendingOrders.filter(o => o.id_pedido !== order.id_pedido);
-        this.toast(`Pedido ${order.codigo_unico ?? order.id_pedido} completado.`, 'success');
+        this.toast(`Pedido ${this.codeLabel(order)} completado.`, 'success');
       },
       error: (err) => {
         console.error('Error actualizando estado', err);
@@ -105,13 +105,17 @@ export class DashboardComponent implements OnInit {
       next: () => {
         order.estado = 'rechazado' as PedidoEstado;
         this.pendingOrders = this.pendingOrders.filter(o => o.id_pedido !== order.id_pedido);
-        this.toast(`Pedido ${order.codigo_unico ?? order.id_pedido} rechazado.`, 'success');
+        this.toast(`Pedido ${this.codeLabel(order)} rechazado.`, 'success');
       },
       error: (err) => {
         console.error('Error actualizando estado', err);
         this.toast('No se pudo actualizar el estado del pedido.', 'error');
       }
     });
+  }
+
+  codeLabel(order: Order): string | number {
+    return order.codigo_pedido || order.codigo_unico || order.id_pedido;
   }
 }
 

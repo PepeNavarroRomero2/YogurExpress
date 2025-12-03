@@ -46,7 +46,7 @@ export class OrderHistoryComponent implements OnInit {
   }
 
   codeOf(o: OrderHistoryItem): string | number {
-    return o.codigo_unico || o.codigo_pedido || (o.id_pedido ?? '');
+    return o.codigo_pedido || o.codigo_unico || (o.id_pedido ?? '');
   }
 
   stateLabel(o: OrderHistoryItem): string {
