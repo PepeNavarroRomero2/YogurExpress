@@ -14,7 +14,7 @@
             <h3>{{ flavor?.nombre }}</h3>
           </div>
           <span class="stock" [class.out]="flavor?.cantidad_disponible === 0">
-            {{ flavor?.cantidad_disponible > 0 ? flavor?.cantidad_disponible + ' en stock' : 'Agotado' }}
+            {{ (flavor?.cantidad_disponible ?? 0) > 0 ? (flavor?.cantidad_disponible ?? 0) + ' en stock' : 'Agotado' }}
           </span>
         </div>
         <p class="muted" *ngIf="flavor?.descripcion">{{ flavor?.descripcion }}</p>
@@ -90,12 +90,12 @@
         </div>
         <div class="summary-row">
           <span class="label">Toppings</span>
-          <span class="value">{{ selectedToppings.length ? selectedToppings.map(t => t.nombre).join(', ') : 'Ninguno' }}</span>
+          <span class="value">{{ selectedToppingsLabel }}</span>
         </div>
         <div class="summary-row total">
           <span>Total estimado</span>
           <strong>
-            {{ (flavor?.precio || 0) + (selectedSize?.precio || 0) + selectedToppings.reduce((acc, t) => acc + (t.precio || 0), 0) | number:'1.2-2' }} €
+            {{ totalEstimate | number:'1.2-2' }} €
           </strong>
         </div>
       </div>

@@ -28,6 +28,10 @@ export class DashboardComponent implements OnInit {
   orders: Order[] = [];
   pendingOrders: Order[] = [];
 
+  // Métricas simples mostradas en el dashboard
+  inventoryCount = 0;
+  productCount = 0;
+
   showScheduleDialog = false;
   showLoyaltyDialog = false;
 

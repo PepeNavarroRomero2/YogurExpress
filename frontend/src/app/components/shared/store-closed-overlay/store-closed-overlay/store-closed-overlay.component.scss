@@ -1,9 +1,9 @@
 .closed-backdrop {
-  @extend .dialog-backdrop;
+  @extend .dialog-backdrop !optional;
 }
 
 .closed-card {
-  @extend .dialog-card;
+  @extend .dialog-card !optional;
   text-align: center;
 }
 

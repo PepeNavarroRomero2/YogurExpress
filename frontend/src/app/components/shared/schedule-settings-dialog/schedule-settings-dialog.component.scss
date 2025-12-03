@@ -1,9 +1,9 @@
 .dlg-backdrop {
-  @extend .dialog-backdrop;
+  @extend .dialog-backdrop !optional;
 }
 
 .dlg {
-  @extend .dialog-card;
+  @extend .dialog-card !optional;
 }
 
 .dlg-form .row {
