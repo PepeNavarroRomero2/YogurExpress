@@ -10,7 +10,7 @@ export interface LoyaltySettings {
 }
 
 const DEFAULT_LOYALTY: LoyaltySettings = { earnRate: 1, pointsPerEuro: 10 };
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = '/api';
 
 @Injectable({ providedIn: 'root' })
 export class LoyaltyService {

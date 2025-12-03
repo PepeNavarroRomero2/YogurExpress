@@ -15,13 +15,18 @@ export class PaypalService {
   constructor(private http: HttpClient) {}
 
   getConfig() {
-  return firstValueFrom(
-    this.http.get('/api/paypal/config', { responseType: 'text' }).pipe(
-      map(txt => { try { return JSON.parse(txt) as {clientId:string;currency:string;env:'sandbox'|'live'}; }
-                  catch { return { clientId: '', currency: 'EUR', env: 'sandbox' as const }; } })
-    )
-  );
-}
+    return firstValueFrom(
+      this.http.get(`${this.base}/config`, { responseType: 'text' }).pipe(
+        map((txt) => {
+          try {
+            return JSON.parse(txt) as PaypalConfig;
+          } catch {
+            return { clientId: '', currency: 'EUR', env: 'sandbox' } as PaypalConfig;
+          }
+        })
+      )
+    );
+  }
 
 
   createOrder(payload: CreateOrderPayload) {

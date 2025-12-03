@@ -6,7 +6,7 @@ import { RouterModule, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import Swal from 'sweetalert2';
 
-import { Flavor, ProductService } from '../../../services/product.service';
+import { Producto, ProductoService } from '../../../services/producto.service';
 import { CartService } from '../../../services/cart.service';
 import { InventoryService, InventoryItem } from '../../../services/inventory.service';
 
@@ -21,16 +21,16 @@ import { InventoryService, InventoryItem } from '../../../services/inventory.ser
   styleUrls: ['./customize-order.component.scss']
 })
 export class CustomizeOrderComponent implements OnInit {
-  // Flavor seleccionado previamente (sabor)
-  flavor!: Flavor & { cantidad_disponible: number };
+  // Producto seleccionado previamente (sabor)
+  flavor!: Producto & { cantidad_disponible: number };
 
   // Listas cargadas desde el backend + cantidad disponible
-  toppings: (Flavor & { cantidad_disponible: number })[] = [];
-  sizes: (Flavor & { cantidad_disponible: number })[] = [];
+  toppings: (Producto & { cantidad_disponible: number })[] = [];
+  sizes: (Producto & { cantidad_disponible: number })[] = [];
 
   // Selecciones del usuario
-  selectedToppings: (Flavor & { cantidad_disponible: number })[] = [];
-  selectedSize?: Flavor & { cantidad_disponible: number };
+  selectedToppings: (Producto & { cantidad_disponible: number })[] = [];
+  selectedSize?: Producto & { cantidad_disponible: number };
 
   // Mensaje de error si no carga toppings/tamaÃ±os
   errorMsg: string = '';
@@ -40,7 +40,7 @@ export class CustomizeOrderComponent implements OnInit {
 
   constructor(
     private location: Location,
-    private productService: ProductService,
+    private productService: ProductoService,
     private cartService: CartService,
     private inventoryService: InventoryService,
     private router: Router
@@ -67,7 +67,7 @@ export class CustomizeOrderComponent implements OnInit {
 
         // 3) cargamos toppings y aplicamos cantidad_disponible
         this.productService.getToppings().subscribe({
-          next: (tops: Flavor[]) => {
+          next: (tops: Producto[]) => {
             this.toppings = tops.map(t => ({
               ...t,
               cantidad_disponible: this.invMap.get(t.id_producto) ?? 0
@@ -80,8 +80,8 @@ export class CustomizeOrderComponent implements OnInit {
         });
 
         // 4) cargamos tamaÃ±os y aplicamos cantidad_disponible
-        this.productService.getSizes().subscribe({
-          next: (sz: Flavor[]) => {
+        this.productService.getTamanos().subscribe({
+          next: (sz: Producto[]) => {
             this.sizes = sz.map(s => ({
               ...s,
               cantidad_disponible: this.invMap.get(s.id_producto) ?? 0
@@ -104,7 +104,7 @@ export class CustomizeOrderComponent implements OnInit {
         this.errorMsg = 'No se pudo cargar inventario.';
         // Aunque falle inventario, intentamos cargar toppings y tamaÃ±os con qty=0
         this.productService.getToppings().subscribe();
-        this.productService.getSizes().subscribe();
+        this.productService.getTamanos().subscribe();
       }
     });
   }
@@ -156,14 +156,14 @@ export class CustomizeOrderComponent implements OnInit {
   }
 
   /** Selecciona un tamaÃ±o (solo si hay stock) */
-  selectSize(s: Flavor & { cantidad_disponible: number }): void {
+  selectSize(s: Producto & { cantidad_disponible: number }): void {
     if (s.cantidad_disponible > 0) {
       this.selectedSize = s;
     }
   }
 
   /** Alterna la selecciÃ³n de un topping (solo si hay stock) */
-  toggleToppingSelection(t: Flavor & { cantidad_disponible: number }): void {
+  toggleToppingSelection(t: Producto & { cantidad_disponible: number }): void {
     if (t.cantidad_disponible <= 0) {
       return;
     }
@@ -176,12 +176,12 @@ export class CustomizeOrderComponent implements OnInit {
   }
 
   /** Indica si un topping ya estÃ¡ en selectedToppings */
-  isToppingSelected(t: Flavor & { cantidad_disponible: number }): boolean {
+  isToppingSelected(t: Producto & { cantidad_disponible: number }): boolean {
     return this.selectedToppings.some(x => x.id_producto === t.id_producto);
   }
 
   /** Indica si ese tamaÃ±o es el seleccionado */
-  isSizeSelected(s: Flavor & { cantidad_disponible: number }): boolean {
+  isSizeSelected(s: Producto & { cantidad_disponible: number }): boolean {
     return this.selectedSize?.id_producto === s.id_producto;
   }
 

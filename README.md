@@ -1,5 +1,52 @@
 # YogurExpress
 
+## Guía rápida para probar en local
+
+### 1. Preparar el backend
+1. Sitúate en la carpeta `backend` y descarga dependencias:
+   ```bash
+   cd backend
+   npm install
+   ```
+2. Crea un fichero `.env` en `backend/` con las variables que usa el servidor:
+   ```ini
+   SUPABASE_URL=tu_url_supabase
+   SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
+   JWT_SECRET=una_clave_para_tokens
+   PAYPAL_CLIENT_ID=tu_client_id_paypal
+   PAYPAL_CLIENT_SECRET=tu_client_secret_paypal
+   PAYPAL_ENV=sandbox
+   CURRENCY=EUR
+   PORT=3000
+   ```
+3. Arranca el API en modo desarrollo (escucha en `http://localhost:3000`):
+   ```bash
+   npm start
+   ```
+
+### 2. Preparar el frontend
+1. En otra terminal, entra en `frontend` e instala dependencias:
+   ```bash
+   cd frontend
+   npm install
+   ```
+2. Lanza la aplicación Angular apuntando al proxy de desarrollo (redirige `/api` al backend):
+   ```bash
+   npm start
+   ```
+   El frontend quedará disponible normalmente en `http://localhost:4200`.
+
+### 3. Probar el flujo completo
+- Comprueba que `http://localhost:3000/api/paypal/config` devuelve un JSON con tu `clientId` para que el botón de PayPal aparezca en el frontend.
+- Realiza login/registro desde la UI y prueba un pedido con tarjeta (si está disponible) y con PayPal para validar la captura.
+
+### 4. Trabajar con ramas
+Si quieres aislar los cambios, crea una rama antes de modificar código:
+```bash
+git checkout -b feature/pruebas-locales
+```
+Después de confirmar que funciona, puedes fusionar la rama en el flujo principal.
+
 ## Documentacion API Backend
 Para que el backend funcione correctamente, necesitas instalar todas las dependencias que usamos en los distintos ficheros. A continuación tienes un resumen de cada paquete y el comando para instalarlo.
 
