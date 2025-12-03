@@ -24,7 +24,7 @@ export class SelectTimeComponent implements OnInit, OnDestroy {
   // HH:mm seleccionado
   hora = '';
 
-  // Atributos dinÃ¡micos del input time
+  // Atributos dinámicos del input time
   minAttr = '';
   maxAttr = '';
 
@@ -66,7 +66,7 @@ export class SelectTimeComponent implements OnInit, OnDestroy {
     const minAllowed = new Date(Date.now() + this.minLeadMinutes * 60000);
 
     if (selected < minAllowed) {
-      Swal.fire('Hora no vÃ¡lida', `La recogida debe ser al menos dentro de ${this.minLeadMinutes} minutos.`, 'warning');
+      Swal.fire('Hora no válida', `La recogida debe ser al menos dentro de ${this.minLeadMinutes} minutos.`, 'warning');
       return;
     }
     if (!this.isWithinScheduleDate(selected)) {
@@ -126,7 +126,7 @@ export class SelectTimeComponent implements OnInit, OnDestroy {
     return `${this.pad(d.getHours())}:${this.pad(d.getMinutes())}`;
   }
 
-  private pad(n: number): string {
+  pad(n: number): string {
     return n.toString().padStart(2, '0');
   }
 

@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 import { Producto } from './producto.service';
 
 /**
- * Interfaz para el payload que envÃ­a el componente al crear un pedido.
+ * Interfaz para el payload que envía el componente al crear un pedido.
  */
 export interface CreateOrderPayload {
   productos: { id_producto: number; cantidad: number }[];
@@ -35,7 +35,7 @@ export class CartService {
 
   constructor(private http: HttpClient) {}
 
-  /** ------------- MÃ‰TODOS PARA MANEJAR LOCALSTORAGE ------------- */
+  /** ------------- MÉTODOS PARA MANEJAR LOCALSTORAGE ------------- */
 
   /** SABOR */
   setFlavor(flavor: Producto): void {
@@ -49,7 +49,7 @@ export class CartService {
     localStorage.removeItem(this.flavorKey);
   }
 
-  /** TAMAÃ‘O */
+  /** TAMAÑO */
   setSize(size: Producto): void {
     localStorage.setItem(this.sizeKey, JSON.stringify(size));
   }
@@ -92,11 +92,11 @@ export class CartService {
     this.clearPickupTime();
   }
 
-  /** ------------- MÃ‰TODO PARA CREAR PEDIDO EN BACKEND ------------- */
+  /** ------------- MÉTODO PARA CREAR PEDIDO EN BACKEND ------------- */
 
   /**
    * POST /api/orders
-   * EnvÃ­a el pedido al backend con el payload { productos, hora_recogida }.
+   * Envía el pedido al backend con el payload { productos, hora_recogida }.
    */
   createOrder(payload: CreateOrderPayload): Observable<CreateOrderResponse> {
     return this.http.post<CreateOrderResponse>(

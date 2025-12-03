@@ -25,7 +25,7 @@ export class ScheduleService {
   private readonly url = `${API_BASE}/settings/schedule`;
 
   private subj = new BehaviorSubject<Schedule>(DEFAULT_SCHEDULE);
-  /** Observable pÃºblico del horario (los componentes se suscriben a esto) */
+  /** Observable público del horario (los componentes se suscriben a esto) */
   readonly schedule$ = this.subj.asObservable();
 
   /** Indica si AHORA mismo estamos dentro del horario (se recalcula cada minuto) */
@@ -45,7 +45,7 @@ export class ScheduleService {
     return this.subj.value;
   }
 
-  /** Carga Ãºnica del horario (por si quieres llamarla manualmente) */
+  /** Carga única del horario (por si quieres llamarla manualmente) */
   fetch(): void {
     this.http.get<Schedule>(this.url, { headers: this.getAuthHeaders() })
       .subscribe({
@@ -58,10 +58,10 @@ export class ScheduleService {
    * Arranca un auto-refresh que:
    *  - Hace un GET inicial inmediatamente
    *  - Repite cada `periodMs` (por defecto 60s)
-   *  - Solo emite si cambia realmente el horario (evita renders inÃºtiles)
+   *  - Solo emite si cambia realmente el horario (evita renders inútiles)
    */
   startAutoRefresh(periodMs = 60_000): void {
-    if (this.refreshSub) return; // ya estÃ¡ activo
+    if (this.refreshSub) return; // ya está activo
     this.refreshSub = interval(periodMs).pipe(
       startWith(0),
       switchMap(() => this.http.get<Schedule>(this.url, { headers: this.getAuthHeaders() }))

@@ -1,150 +1,53 @@
-/* src/app/components/user/login-register/login-register.component.scss */
-
-/* 1) Contenedor global: fondo claro y tarjeta centrada */
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.auth-wrapper {
   min-height: 100vh;
-  background-color: #F5F7FA; /* Gris muy claro de fondo */
-  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  padding: 2rem 1rem;
 }
 
-/* 2) Tarjeta blanca con sombra suave y esquinas redondeadas */
-.login-card {
-  background-color: #FFFFFF;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  width: 100%;
-  max-width: 400px;
+.auth-card {
+  width: min(440px, 100%);
   padding: 2rem;
-  transition: padding 0.2s ease-in-out;
-}
 
-/* 3) Título centrado y con color oscuro */
-.login-title {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  font-size: 1.75rem;
-  color: #1F2937; /* Gris oscuro */
-  transition: font-size 0.2s ease-in-out;
-}
+  .auth-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
 
-/* 4) Cada “form-group” agrupa label + input */
-.form-group {
-  margin-bottom: 1rem;
+    h1 {
+      margin-bottom: 0.35rem;
+    }
 
-  label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-size: 1rem;
-    color: #374151; /* Gris medio */
-  }
-
-  input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid #D1D5DB; /* Gris claro */
-    border-radius: 4px;
-    font-size: 1rem;
-    color: #374151;
-    background-color: #F9FAFB; /* Gris muy muy claro */
-    transition: border-color 0.2s ease-in-out, background-color 0.2s ease-in-out, padding 0.2s ease-in-out;
-
-    &:focus {
-      outline: none;
-      border-color: #3B82F6; /* Azul vivo */
-      background-color: #FFFFFF;
+    .subtitle {
+      color: var(--color-text-secondary);
     }
   }
 }
 
-/* 5) Botón de acción azul con hover */
-.btn-primary {
-  display: block;
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.full-width {
   width: 100%;
-  padding: 0.75rem 1rem;
-  margin-top: 0.5rem;
-  background-color: #3B82F6; /* Azul primario */
-  color: #FFFFFF;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out, padding 0.2s ease-in-out;
-
-  &:hover {
-    background-color: #2563EB; /* Azul más oscuro al pasar ratón */
-  }
 }
 
-/* 6) Texto del toggle (cambiar Login/Registro) */
 .toggle-text {
-  text-align: center;
   margin-top: 1rem;
-  font-size: 0.875rem;
-  color: #6B7280; /* Gris más suave */
-}
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
 
-.toggle-text a {
-  color: #3B82F6; /* Mismo azul primario */
-  text-decoration: none;
-  cursor: pointer;
+  a {
+    font-weight: 700;
+    margin-left: 0.35rem;
+    text-decoration: none;
 
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
-/* ────────────── MEDIA QUERIES PARA PANTALLAS PEQUEÑAS ────────────── */
-
-/* Ajustes para pantallas de ancho máximo 400px */
-@media (max-width: 400px) {
-  .login-card {
-    padding: 1.5rem 1rem; /* Menos padding interno en móviles */
-  }
-
-  .login-title {
-    font-size: 1.5rem; /* Título un poco más pequeño */
-  }
-
-  .form-group input {
-    padding: 0.65rem 0.9rem; /* Input ligeramente más compacto */
-  }
-
-  .btn-primary {
-    padding: 0.65rem 0.9rem; /* Botón un poco más compacto */
-    font-size: 0.95rem;
-  }
-}
-
-/* Ajustes para pantallas muy pequeñas de ancho máximo 320px */
-@media (max-width: 320px) {
-  .login-card {
-    padding: 1rem 0.75rem; /* Aún menos padding si el dispositivo es muy angosto */
-  }
-
-  .login-title {
-    font-size: 1.35rem;
-    margin-bottom: 1rem;
-  }
-
-  .form-group label {
-    font-size: 0.95rem;
-  }
-
-  .form-group input {
-    padding: 0.6rem 0.8rem;
-    font-size: 0.95rem;
-  }
-
-  .btn-primary {
-    padding: 0.6rem 0.8rem;
-    font-size: 0.9rem;
-  }
-
-  .toggle-text {
-    font-size: 0.8rem;
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
