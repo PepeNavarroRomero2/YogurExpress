@@ -1,78 +1,104 @@
-﻿<!-- src/app/components/user/customize-order/customize-order.component.html -->
-
 <div class="co-wrapper">
-  <div class="co-card">
-    <!-- BotÃ³n Volver -->
-    <button class="co-btn-back" (click)="goBack()">â† Volver</button>
+  <div class="co-grid">
+    <section class="card co-panel">
+      <button class="btn-ghost back" type="button" (click)="goBack()">← Volver</button>
+      <h2 class="co-title">Personalizar pedido</h2>
+      <p class="subtitle">Elige tamaño, toppings y revisa la disponibilidad antes de confirmar.</p>
 
-    <!-- 1) Encabezado principal -->
-    <h2 class="co-page-title">Personalizar Pedido</h2>
+      <div *ngIf="errorMsg" class="alert-error">{{ errorMsg }}</div>
 
-    <!-- 2) Bloque â€œSaborâ€: recuadro que muestra el sabor ya elegido -->
-    <div class="co-section-label">Sabor</div>
-    <div class="co-box">
-      <span class="co-box-text">{{ flavor.nombre }}</span>
-      <img
-        class="co-box-icon"
-        [src]="flavor.imagen_url || 'assets/default-flavor.png'"
-        alt="{{ flavor.nombre }}"
-      />
-    </div>
+      <div class="section">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Sabor base</p>
+            <h3>{{ flavor?.nombre }}</h3>
+          </div>
+          <span class="stock" [class.out]="flavor?.cantidad_disponible === 0">
+            {{ (flavor?.cantidad_disponible ?? 0) > 0 ? (flavor?.cantidad_disponible ?? 0) + ' en stock' : 'Agotado' }}
+          </span>
+        </div>
+        <p class="muted" *ngIf="flavor?.descripcion">{{ flavor?.descripcion }}</p>
+      </div>
 
-    <!-- 3) Bloque â€œToppingsâ€: recuadro con enlace para abrir selecciÃ³n -->
-    <div class="co-section-label">Toppings</div>
-    <div class="co-box co-box-link" (click)="selectToppings()">
-      <span class="co-box-text">
-        {{
-          selectedToppings.length
-            ? selectedToppings.length + ' seleccionados'
-            : 'Seleccionar'
-        }}
-      </span>
-      <svg
-        class="co-box-arrow"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M9 5l7 7-7 7"
-        />
-      </svg>
-    </div>
-
-    <!-- 4) Bloque â€œTamaÃ±osâ€: mostramos cards para cada tamaÃ±o disponible -->
-    <div class="co-section-label">TamaÃ±o</div>
-    <div *ngIf="errorMsg" class="co-error">{{ errorMsg }}</div>
-    <div *ngIf="!errorMsg" class="co-sizes-grid">
-      <div
-        class="co-card-item"
-        *ngFor="let s of sizes"
-        [class.selected]="isSizeSelected(s)"
-        [class.disabled]="s.cantidad_disponible === 0"
-        (click)="s.cantidad_disponible > 0 && selectSize(s)"
-      >
-        <span class="co-card-label">{{ s.nombre }}</span>
-        <span class="co-card-price">â‚¬{{ s.precio.toFixed(2) }}</span>
-        <div *ngIf="s.cantidad_disponible === 0" class="co-out-of-stock">
-          Agotado
+      <div class="section">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Tamaño</p>
+            <h4>Selecciona uno</h4>
+          </div>
+        </div>
+        <div class="pill-grid">
+          <button
+            *ngFor="let s of sizes"
+            type="button"
+            class="pill"
+            [class.active]="isSizeSelected(s)"
+            [disabled]="s.cantidad_disponible <= 0"
+            (click)="selectSize(s)"
+          >
+            <span class="pill-title">{{ s.nombre }}</span>
+            <span class="pill-meta">{{ s.precio | number:'1.2-2' }} €</span>
+            <small>{{ s.cantidad_disponible > 0 ? s.cantidad_disponible + ' disponibles' : 'Agotado' }}</small>
+          </button>
         </div>
       </div>
-    </div>
 
-    <!-- 5) BotÃ³n principal para agregar al carrito -->
-    <button class="co-btn-primary" (click)="addToCart()">Agregar al pedido</button>
+      <div class="section">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Toppings</p>
+            <h4>Personaliza tu mezcla</h4>
+          </div>
+          <button type="button" class="btn-secondary" (click)="selectToppings()">Seleccionar</button>
+        </div>
+        <div class="toppings-list">
+          <label
+            class="topping"
+            *ngFor="let t of toppings"
+            [class.disabled]="t.cantidad_disponible <= 0"
+          >
+            <input
+              type="checkbox"
+              [checked]="isToppingSelected(t)"
+              [disabled]="t.cantidad_disponible <= 0"
+              (change)="toggleToppingSelection(t)"
+            />
+            <div class="topping-info">
+              <div class="name">{{ t.nombre }}</div>
+              <div class="meta">{{ t.precio | number:'1.2-2' }} € · {{ t.cantidad_disponible > 0 ? 'Disponible' : 'Agotado' }}</div>
+            </div>
+          </label>
+        </div>
+      </div>
 
-    <!-- 6) Botones inferiores (Historial, Mis Puntos, Cerrar SesiÃ³n) -->
-    <div class="co-footer-buttons">
-      <button (click)="goToHistory()">Historial</button>
-      <button (click)="goToPoints()">Mis Puntos</button>
-      <button (click)="logout()">Cerrar SesiÃ³n</button>
-    </div>
+      <div class="actions">
+        <button class="btn-secondary" type="button" (click)="goBack()">Volver al menú</button>
+        <button class="btn-primary" type="button" (click)="addToCart()">Añadir al pedido</button>
+      </div>
+    </section>
+
+    <aside class="card co-summary">
+      <div class="summary-image">
+        <img [src]="flavor?.imagen_url || 'assets/images/placeholders/product-placeholder-1.webp'" [alt]="flavor?.nombre || 'Yogur helado'" />
+      </div>
+      <div class="summary-body">
+        <p class="eyebrow">Resumen</p>
+        <h3>{{ flavor?.nombre }}</h3>
+        <div class="summary-row">
+          <span class="label">Tamaño</span>
+          <span class="value">{{ selectedSize?.nombre || 'Sin seleccionar' }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="label">Toppings</span>
+          <span class="value">{{ selectedToppingsLabel }}</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total estimado</span>
+          <strong>
+            {{ totalEstimate | number:'1.2-2' }} €
+          </strong>
+        </div>
+      </div>
+    </aside>
   </div>
 </div>
-

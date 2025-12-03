@@ -126,7 +126,7 @@ export class SelectTimeComponent implements OnInit, OnDestroy {
     return `${this.pad(d.getHours())}:${this.pad(d.getMinutes())}`;
   }
 
-  private pad(n: number): string {
+  pad(n: number): string {
     return n.toString().padStart(2, '0');
   }
 

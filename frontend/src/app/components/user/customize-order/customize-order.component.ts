@@ -185,6 +185,19 @@ export class CustomizeOrderComponent implements OnInit {
     return this.selectedSize?.id_producto === s.id_producto;
   }
 
+  get selectedToppingsLabel(): string {
+    return this.selectedToppings.length
+      ? this.selectedToppings.map(t => t.nombre).join(', ')
+      : 'Ninguno';
+  }
+
+  get totalEstimate(): number {
+    const base = this.flavor?.precio ?? 0;
+    const sizePrice = this.selectedSize?.precio ?? 0;
+    const toppingsTotal = this.selectedToppings.reduce((acc, t) => acc + (t.precio ?? 0), 0);
+    return base + sizePrice + toppingsTotal;
+  }
+
   /**
    * Al hacer clic en "Agregar al pedido":
    *  - Verifica stock de flavor, tamaÃ±o y toppings seleccionados.
