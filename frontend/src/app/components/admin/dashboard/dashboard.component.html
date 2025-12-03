@@ -39,17 +39,17 @@
     <section class="tab-content">
       <div *ngIf="activeTab==='stats'" class="tab-panel">
         <div *ngIf="pendingOrders?.length; else noPendientes" class="orders">
-          <div class="order card" *ngFor="let o of pendingOrders">
+          <div class="order card" *ngFor="let o of pendingOrders; let i = index" [class.is-priority-order]="i === 0">
             <div class="order-header">
               <div>
                 <p class="code">#{{ codeLabel(o) }}</p>
+                <p class="muted">Recogida: {{ pickupLabel(o) }}</p>
                 <p class="muted">Total {{ o.total?.toFixed?.(2) ?? o.total }} €</p>
               </div>
               <span class="badge tag-warning">{{ o.estado }}</span>
             </div>
             <div class="order-actions">
-              <button class="btn-primary" (click)="markReady(o)">Marcar listo</button>
-              <button class="btn-secondary" (click)="markDelivered(o)">Marcar completado</button>
+              <button class="btn-primary" (click)="markDelivered(o)">Marcar como completado</button>
               <button class="btn-ghost" (click)="markRejected(o)">Rechazar</button>
             </div>
           </div>

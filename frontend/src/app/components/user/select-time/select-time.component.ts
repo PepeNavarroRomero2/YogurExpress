@@ -57,6 +57,10 @@ export class SelectTimeComponent implements OnInit, OnDestroy {
   /** Alias si tu template/otros llaman confirm() */
   confirm(): void { this.onConfirm(); }
 
+  onBackToCustomize(): void {
+    this.router.navigate(['/user/personalize']);
+  }
+
   onConfirm(): void {
     if (!this.hora) {
       Swal.fire('Error', 'Debes seleccionar una hora de recogida.', 'error');

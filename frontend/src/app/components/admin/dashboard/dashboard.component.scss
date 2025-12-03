@@ -83,6 +83,11 @@
 
 .order {
   padding: 1.1rem 1.25rem;
+
+  &.is-priority-order {
+    border: 2px solid rgba(239, 68, 68, 0.6);
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.08);
+  }
 }
 
 .order-header {

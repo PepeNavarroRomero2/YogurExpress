@@ -65,6 +65,14 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
     private paypalApi: PaypalService
   ) {}
 
+  onBackToMenu(): void {
+    this.router.navigate(['/user/menu']);
+  }
+
+  onBackToSelectTime(): void {
+    this.router.navigate(['/user/pickup']);
+  }
+
   ngOnInit(): void {
     // Datos del carrito
     this.flavor = this.cartService.getFlavor() as any;

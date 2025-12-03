@@ -2,7 +2,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 
-export type PedidoEstado = 'pendiente' | 'listo' | 'completado' | 'rechazado';
+export type PedidoEstado = 'pendiente' | 'completado' | 'rechazado';
 
 export interface Order {
   id_pedido: number;

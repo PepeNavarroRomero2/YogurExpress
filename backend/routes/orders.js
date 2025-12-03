@@ -114,7 +114,7 @@ router.get('/pending', authenticateToken, isAdmin, async (_req, res) => {
       .from('pedidos')
       .select('id_pedido, codigo_unico, fecha_hora, hora_recogida, estado, total')
       .in('estado', ['pendiente', 'listo'])
-      .order('fecha_hora', { ascending: false });
+      .order('fecha_hora', { ascending: true });
 
     if (error) {
       console.error('[orders] pending error:', error);
@@ -479,7 +479,7 @@ router.patch('/:id/status', authenticateToken, isAdmin, async (req, res) => {
   try {
     const id = Number(req.params.id);
     const { status } = req.body || {};
-    const allowed = new Set(['pendiente', 'listo', 'completado', 'rechazado']);
+    const allowed = new Set(['pendiente', 'completado', 'rechazado']);
     if (!allowed.has(status)) return res.status(400).json({ error: 'Estado no válido' });
 
     const { data, error } = await supabase

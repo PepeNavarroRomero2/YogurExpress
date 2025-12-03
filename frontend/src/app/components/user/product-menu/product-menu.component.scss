@@ -45,6 +45,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 1.25rem;
+  align-items: stretch;
 }
 
 .card-item {
@@ -53,6 +54,7 @@
   flex-direction: column;
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 100%;
 
   &:hover {
     transform: translateY(-4px);
@@ -79,6 +81,7 @@
   flex-direction: column;
   gap: 0.35rem;
   flex: 1;
+  justify-content: space-between;
 }
 
 .card-name {
