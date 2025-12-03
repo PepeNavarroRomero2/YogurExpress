@@ -1,4 +1,4 @@
-// src/app/components/admin/manage-products/manage-products.component.ts
+﻿// src/app/components/admin/manage-products/manage-products.component.ts
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -24,7 +24,7 @@ export class ManageProductsComponent implements OnInit {
   // Modelo de formulario (incluye cantidad_disponible para inventario)
   product: {
     nombre: string;
-    tipo: 'sabor' | 'topping' | 'tamanos';
+    tipo: 'sabor' | 'topping' | 'tamano';
     precio: number;
     descripcion?: string;
     alergenos?: string;
@@ -59,7 +59,7 @@ export class ManageProductsComponent implements OnInit {
     });
   }
 
-  /** 2. Abre el formulario en modo “crear”. */
+  /** 2. Abre el formulario en modo "crear". */
   onCreate(): void {
     this.showForm = true;
     this.isEditing = false;
@@ -177,3 +177,4 @@ export class ManageProductsComponent implements OnInit {
     });
   }
 }
+

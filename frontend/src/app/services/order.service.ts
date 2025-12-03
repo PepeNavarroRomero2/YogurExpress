@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
-export type PedidoEstado = 'pendiente' | 'listo' | 'completado' | 'rechazado';
+export type PedidoEstado = 'pendiente' | 'completado' | 'rechazado';
 
 export interface Order {
   id_pedido: number;
@@ -49,7 +49,7 @@ export interface OrderHistoryItem {
   producto?: string;
 }
 
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = '/api';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
@@ -83,12 +83,21 @@ export class OrderService {
     );
   }
 
-  /** CLIENTE: historial de pedidos del usuario (array directo) */
+  /** CLIENTE: historial de pedidos del usuario (array directo o { data }) */
   getOrderHistory(): Observable<OrderHistoryItem[]> {
-    return this.http.get<OrderHistoryItem[]>(
-      `${this.apiUrl}/history`,
-      { headers: this.getAuthHeaders() }
-    );
+    return this.getUserOrders();
+  }
+
+  /** CLIENTE: historial (alias) */
+  getUserOrders(): Observable<OrderHistoryItem[]> {
+    return this.http
+      .get<OrderHistoryItem[] | { data: OrderHistoryItem[] }>(
+        `${this.apiUrl}/history`,
+        { headers: this.getAuthHeaders() }
+      )
+      .pipe(
+        map((res) => (Array.isArray(res) ? res : res?.data || []))
+      );
   }
 
   /** ADMIN: pendientes */
@@ -108,3 +117,4 @@ export class OrderService {
     );
   }
 }
+

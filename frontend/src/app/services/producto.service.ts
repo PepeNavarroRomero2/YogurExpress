@@ -1,4 +1,4 @@
-// src/app/services/producto.service.ts
+﻿// src/app/services/producto.service.ts
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 export interface Producto {
   id_producto: number;
   nombre: string;
-  tipo: 'sabor' | 'topping' | 'tamanos';
+  tipo: 'sabor' | 'topping' | 'tamano';
   precio: number;
   descripcion?: string;
   alergenos?: string;
@@ -18,8 +18,8 @@ export interface Producto {
   providedIn: 'root'
 })
 export class ProductoService {
-  // Debe coincidir con el backend: http://localhost:3000/api/products
-  private apiUrl = 'http://localhost:3000/api/products';
+  // Debe coincidir con el backend y aprovechar el proxy en dev
+  private apiUrl = '/api/products';
 
   constructor(private http: HttpClient) {}
 
@@ -38,7 +38,7 @@ export class ProductoService {
     return this.http.get<Producto[]>(`${this.apiUrl}/toppings`);
   }
 
-  /** 4. Devuelve todos los tamaños (tipo = 'tamanos'). */
+  /** 4. Devuelve todos los tamaños (tipo = 'tamano'). */
   getTamanos(): Observable<Producto[]> {
     return this.http.get<Producto[]>(`${this.apiUrl}/tamanos`);
   }
@@ -46,7 +46,7 @@ export class ProductoService {
   /**
    * 5. Crea un producto (sabor, topping o tamaño).
    *    Envía JSON con:
-   *    { nombre:String, tipo:'sabor'|'topping'|'tamanos', precio:Number,
+   *    { nombre:String, tipo:'sabor'|'topping'|'tamano', precio:Number,
    *      descripcion?:String, alergenos?:String, imagen_url?:String }
    */
   createProducto(producto: Omit<Producto, 'id_producto'>): Observable<Producto> {
@@ -68,3 +68,4 @@ export class ProductoService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }
+

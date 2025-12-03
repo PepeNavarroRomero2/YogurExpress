@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import Swal, { SweetAlertIcon } from 'sweetalert2';
 
@@ -7,7 +7,6 @@ import { OrderService, Order, PedidoEstado } from '../../../services/order.servi
 
 import { ManageProductsComponent } from '../manage-products/manage-products.component';
 import { ManageInventoryComponent } from '../manage-inventory/manage-inventory.component';
-import { ManagePromotionsComponent } from '../manage-promotions/manage-promotions.component';
 import { ScheduleSettingsDialogComponent } from '../../shared/schedule-settings-dialog/schedule-settings-dialog.component';
 import { LoyaltySettingsDialogComponent } from '../../shared/loyalty-settings-dialog/loyalty-settings-dialog.component';
 
@@ -18,7 +17,6 @@ import { LoyaltySettingsDialogComponent } from '../../shared/loyalty-settings-di
     CommonModule,
     ManageProductsComponent,
     ManageInventoryComponent,
-    ManagePromotionsComponent,
     ScheduleSettingsDialogComponent,
     LoyaltySettingsDialogComponent
   ],
@@ -26,9 +24,13 @@ import { LoyaltySettingsDialogComponent } from '../../shared/loyalty-settings-di
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
-  activeTab: 'stats' | 'products' | 'inventory' | 'promotions' = 'stats';
+  activeTab: 'stats' | 'products' | 'inventory' = 'stats';
   orders: Order[] = [];
   pendingOrders: Order[] = [];
+
+  // Métricas simples mostradas en el dashboard
+  inventoryCount = 0;
+  productCount = 0;
 
   showScheduleDialog = false;
   showLoyaltyDialog = false;
@@ -47,7 +49,7 @@ export class DashboardComponent implements OnInit {
     this.authService.logout();
   }
 
-  setTab(tab: 'stats' | 'products' | 'inventory' | 'promotions'): void {
+  setTab(tab: 'stats' | 'products' | 'inventory'): void {
     this.activeTab = tab;
     if (tab === 'stats') this.loadPending();
   }
@@ -56,8 +58,13 @@ export class DashboardComponent implements OnInit {
     this.orderService.getPendingOrders().subscribe({
       next: (orders) => {
         // El endpoint devuelve pendientes; mantenemos ambas colecciones por compatibilidad
-        this.orders = orders ?? [];
-        this.pendingOrders = orders ?? [];
+        const normalized = (orders ?? []).sort((a, b) => {
+          const aDate = new Date(a.fecha_hora).getTime();
+          const bDate = new Date(b.fecha_hora).getTime();
+          return aDate - bDate;
+        });
+        this.orders = normalized;
+        this.pendingOrders = normalized;
       },
       error: (err) => {
         console.error('Error obteniendo pedidos', err);
@@ -70,26 +77,12 @@ export class DashboardComponent implements OnInit {
     Swal.fire({ text, icon, timer: 1400, showConfirmButton: false });
   }
 
-  markReady(order: Order): void {
-    this.orderService.updateStatus(order.id_pedido, 'listo').subscribe({
-      next: () => {
-        order.estado = 'listo' as PedidoEstado;
-        this.pendingOrders = this.pendingOrders.filter(o => o.id_pedido !== order.id_pedido);
-        this.toast(`Pedido ${order.codigo_unico ?? order.id_pedido} marcado como listo.`, 'success');
-      },
-      error: (err) => {
-        console.error('Error actualizando estado', err);
-        this.toast('No se pudo actualizar el estado del pedido.', 'error');
-      }
-    });
-  }
-
   markDelivered(order: Order): void {
     this.orderService.updateStatus(order.id_pedido, 'completado').subscribe({
       next: () => {
         order.estado = 'completado' as PedidoEstado;
         this.pendingOrders = this.pendingOrders.filter(o => o.id_pedido !== order.id_pedido);
-        this.toast(`Pedido ${order.codigo_unico ?? order.id_pedido} completado.`, 'success');
+        this.toast(`Pedido ${this.codeLabel(order)} completado.`, 'success');
       },
       error: (err) => {
         console.error('Error actualizando estado', err);
@@ -103,7 +96,7 @@ export class DashboardComponent implements OnInit {
       next: () => {
         order.estado = 'rechazado' as PedidoEstado;
         this.pendingOrders = this.pendingOrders.filter(o => o.id_pedido !== order.id_pedido);
-        this.toast(`Pedido ${order.codigo_unico ?? order.id_pedido} rechazado.`, 'success');
+        this.toast(`Pedido ${this.codeLabel(order)} rechazado.`, 'success');
       },
       error: (err) => {
         console.error('Error actualizando estado', err);
@@ -111,4 +104,13 @@ export class DashboardComponent implements OnInit {
       }
     });
   }
+
+  codeLabel(order: Order): string | number {
+    return order.codigo_pedido || order.codigo_unico || order.id_pedido;
+  }
+
+  pickupLabel(order: Order): string {
+    return order.hora_recogida || '—';
+  }
 }
+

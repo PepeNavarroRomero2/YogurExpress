@@ -1,78 +1,80 @@
-<div class="dashboard-wrapper">
-  <header class="dashboard-header">
-    <div class="logo-area">LOGO</div>
-    <h1>Admin Dashboard</h1>
+<div class="dashboard-wrapper page-wrapper">
+  <div class="card dashboard-card">
+    <header class="dashboard-header">
+      <div class="brand">
+        <div class="logo">YE</div>
+        <div>
+          <p class="eyebrow">Panel administrativo</p>
+          <h1>Yogur Express</h1>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-secondary" (click)="showScheduleDialog = true">Ajustar horario</button>
+        <button class="btn-secondary" (click)="showLoyaltyDialog = true">Configurar puntos</button>
+        <button class="btn-ghost" (click)="onLogout()">Cerrar sesión</button>
+      </div>
+    </header>
 
-    <div class="header-actions">
-      <button class="btn" (click)="showScheduleDialog = true" aria-label="Ajustar horario">
-        ⚙ Ajustar horario
-      </button>
-      <button class="btn" (click)="showLoyaltyDialog = true" aria-label="Configurar puntos">
-        ⭐ Puntos
-      </button>
-      <button class="btn-logout" (click)="onLogout()">Cerrar Sesión</button>
-    </div>
-  </header>
+    <section class="metrics-grid">
+      <div class="metric card">
+        <p class="muted">Pedidos pendientes</p>
+        <h3>{{ pendingOrders?.length || 0 }}</h3>
+      </div>
+      <div class="metric card">
+        <p class="muted">Inventario activo</p>
+        <h3>{{ inventoryCount }}</h3>
+      </div>
+      <div class="metric card">
+        <p class="muted">Productos</p>
+        <h3>{{ productCount }}</h3>
+      </div>
+    </section>
 
-  <nav class="dashboard-nav">
-    <button (click)="setTab('stats')"      [class.active]="activeTab==='stats'">Pendientes</button>
-    <button (click)="setTab('products')"   [class.active]="activeTab==='products'">Productos</button>
-    <button (click)="setTab('inventory')"  [class.active]="activeTab==='inventory'">Inventario</button>
-    <button (click)="setTab('promotions')" [class.active]="activeTab==='promotions'">Promociones</button>
-  </nav>
+    <nav class="dashboard-nav">
+      <button (click)="setTab('stats')" [class.active]="activeTab==='stats'">Pedidos pendientes</button>
+      <button (click)="setTab('products')" [class.active]="activeTab==='products'">Productos</button>
+      <button (click)="setTab('inventory')" [class.active]="activeTab==='inventory'">Inventario</button>
+    </nav>
 
-  <section class="tab-content">
-    <!-- Pendientes -->
-    <div *ngIf="activeTab==='stats'" class="tab-panel">
-      <div class="mi-container">
-
-        <ng-container *ngIf="pendingOrders?.length; else noPendientes">
-          <ul class="orders">
-            <li *ngFor="let o of pendingOrders" class="order">
-              <div class="row">
-                <div><strong>#{{ o.codigo_unico || o.id_pedido }}</strong></div>
-                <div>Total: €{{ o.total?.toFixed?.(2) ?? o.total }}</div>
-                <div>Estado: {{ o.estado }}</div>
+    <section class="tab-content">
+      <div *ngIf="activeTab==='stats'" class="tab-panel">
+        <div *ngIf="pendingOrders?.length; else noPendientes" class="orders">
+          <div class="order card" *ngFor="let o of pendingOrders; let i = index" [class.is-priority-order]="i === 0">
+            <div class="order-header">
+              <div>
+                <p class="code">#{{ codeLabel(o) }}</p>
+                <p class="muted">Recogida: {{ pickupLabel(o) }}</p>
+                <p class="muted">Total {{ o.total?.toFixed?.(2) ?? o.total }} €</p>
               </div>
-              <div class="actions">
-                <button class="btn" (click)="markReady(o)">Marcar listo</button>
-                <button class="btn" (click)="markDelivered(o)">Marcar completado</button>
-                <button class="btn danger" (click)="markRejected(o)">Rechazar</button>
-              </div>
-            </li>
-          </ul>
-        </ng-container>
-
+              <span class="badge tag-warning">{{ o.estado }}</span>
+            </div>
+            <div class="order-actions">
+              <button class="btn-primary" (click)="markDelivered(o)">Marcar como completado</button>
+              <button class="btn-ghost" (click)="markRejected(o)">Rechazar</button>
+            </div>
+          </div>
+        </div>
         <ng-template #noPendientes>
           <div class="empty">No hay pedidos pendientes.</div>
         </ng-template>
       </div>
-    </div>
 
-    <!-- Productos -->
-    <div *ngIf="activeTab==='products'" class="tab-panel">
-      <app-manage-products></app-manage-products>
-    </div>
+      <div *ngIf="activeTab==='products'" class="tab-panel">
+        <app-manage-products></app-manage-products>
+      </div>
 
-    <!-- Inventario -->
-    <div *ngIf="activeTab==='inventory'" class="tab-panel">
-      <app-manage-inventory></app-manage-inventory>
-    </div>
-
-    <!-- Promociones (en desuso; lo limpiaremos cuando quitemos promos) -->
-    <div *ngIf="activeTab==='promotions'" class="tab-panel">
-      <app-manage-promotions></app-manage-promotions>
-    </div>
-  </section>
+      <div *ngIf="activeTab==='inventory'" class="tab-panel">
+        <app-manage-inventory></app-manage-inventory>
+      </div>
+    </section>
+  </div>
 </div>
 
-<!-- Diálogo Horario -->
 <app-schedule-settings-dialog
   *ngIf="showScheduleDialog"
   (closed)="showScheduleDialog = false">
 </app-schedule-settings-dialog>
 
-<!-- Diálogo Puntos -->
 <app-loyalty-settings-dialog
   *ngIf="showLoyaltyDialog"
   (closed)="showLoyaltyDialog = false">

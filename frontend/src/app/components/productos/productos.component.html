@@ -1,10 +1,16 @@
-<div class="productos-container">
-    <div *ngFor="let p of productos" class="producto-card">
-      <img [src]="p.imagen_url" alt="{{ p.nombre }}" class="imagen">
-      <h3>{{ p.nombre }}</h3>
-      <p>{{ p.descripcion }}</p>
-      <p><strong>Precio:</strong> {{ p.precio | currency:'EUR' }}</p>
-      <p *ngIf="p.alergenos"><em>Alergenos:</em> {{ p.alergenos }}</p>
+<div class="productos-container page-wrapper">
+  <h2>Catálogo</h2>
+  <div class="productos-grid">
+    <div *ngFor="let p of productos" class="producto-card card">
+      <div class="producto-image">
+        <img [src]="p.imagen_url || 'assets/images/placeholders/product-placeholder-1.webp'" [alt]="p.nombre || 'Producto'" />
+      </div>
+      <div class="producto-body">
+        <h3>{{ p.nombre }}</h3>
+        <p class="descripcion" *ngIf="p.descripcion">{{ p.descripcion }}</p>
+        <p class="precio"><strong>Precio:</strong> {{ p.precio | currency:'EUR' }}</p>
+        <p class="alergenos" *ngIf="p.alergenos"><em>Alérgenos:</em> {{ p.alergenos }}</p>
+      </div>
     </div>
   </div>
-  
+</div>

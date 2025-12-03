@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
@@ -12,7 +12,7 @@ export interface Promotion {
 
 @Injectable({ providedIn: 'root' })
 export class PromotionService {
-  private API_URL = 'http://localhost:3000/api/promotions';
+  private API_URL = '/api/promotions';
   constructor(private http: HttpClient, private auth: AuthService) {}
 
   // Públicas
@@ -40,3 +40,4 @@ export class PromotionService {
     return this.http.delete<void>(`${this.API_URL}/${id}`, { headers: this.auth.getAuthHeaders() });
   }
 }
+

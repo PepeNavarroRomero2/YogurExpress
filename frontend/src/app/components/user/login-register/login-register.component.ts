@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+﻿import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -42,7 +42,7 @@ export class LoginRegisterComponent {
 
       this.auth.login(this.email, this.password).subscribe({
         next: res => {
-          console.log('Usuario logueado:', res.user); // 👈 log útil para depuración
+          console.log('Usuario logueado:', res.user); // 👍 log útil para depuración
 
           const rol = res.user?.rol?.toLowerCase?.() ?? 'user';
 
@@ -74,3 +74,4 @@ export class LoginRegisterComponent {
     }
   }
 }
+

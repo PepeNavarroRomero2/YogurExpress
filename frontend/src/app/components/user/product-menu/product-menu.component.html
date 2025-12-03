@@ -1,31 +1,43 @@
 <div class="menu-wrapper" [class.closed]="!isOpen">
-  <div class="menu-card">
-    <h2 class="menu-title">Menú de productos</h2>
+  <div class="menu-card card">
+    <header class="menu-header">
+      <div>
+        <p class="eyebrow">Explora nuestro catálogo</p>
+        <h2 class="menu-title">Menú de productos</h2>
+        <p class="subtitle">Elige tu sabor favorito y personaliza tu yogur helado.</p>
+      </div>
+      <div class="status" *ngIf="!isOpen">Actualmente cerrado</div>
+    </header>
 
-    <div *ngIf="errorMsg" class="menu-error">{{ errorMsg }}</div>
+    <div *ngIf="errorMsg" class="alert-error">{{ errorMsg }}</div>
 
     <ng-container *ngIf="!errorMsg">
       <div class="cards-grid">
         <div
-          class="card-item"
+          class="card-item card"
           *ngFor="let f of flavors"
           (click)="onSelectFlavor(f)"
           tabindex="0"
           [attr.aria-disabled]="!isOpen"
         >
-          <div class="card-image" [style.backgroundImage]="'url(' + (f.imagen_url || 'assets/placeholder.png') + ')'"></div>
+          <div class="card-image">
+            <img [src]="f.imagen_url || 'assets/images/placeholders/product-placeholder-1.webp'" [alt]="f.nombre || 'Yogur helado'" />
+          </div>
           <div class="card-body">
             <div class="card-name">{{ f.nombre }}</div>
-            <div class="card-price">{{ f.precio | number:'1.2-2' }} €</div>
-            <a class="info-link" (click)="$event.stopPropagation()">Más información</a>
+            <div class="card-meta">
+              <span class="card-type">{{ f.tipo }}</span>
+              <span class="card-price">{{ f.precio | number:'1.2-2' }} €</span>
+            </div>
+            <p class="card-description" *ngIf="f.descripcion">{{ f.descripcion }}</p>
           </div>
         </div>
       </div>
 
       <div class="bottom-buttons">
         <button class="btn-secondary" (click)="goToHistory()">Historial</button>
-        <button class="btn-secondary" (click)="goToPoints()">Mis Puntos</button>
-        <button class="btn-secondary" (click)="logout()">Cerrar Sesión</button>
+        <button class="btn-secondary" (click)="goToPoints()">Mis puntos</button>
+        <button class="btn-secondary" (click)="logout()">Cerrar sesión</button>
       </div>
     </ng-container>
   </div>

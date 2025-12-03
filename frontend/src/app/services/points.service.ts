@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { AuthService, User } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
@@ -53,3 +53,4 @@ export class PointsService {
     localStorage.setItem('currentUser', JSON.stringify(user));
   }
 }
+

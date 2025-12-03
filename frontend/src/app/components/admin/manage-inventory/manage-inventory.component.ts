@@ -1,4 +1,4 @@
-// src/app/components/admin/manage-inventory/manage-inventory.component.ts
+﻿// src/app/components/admin/manage-inventory/manage-inventory.component.ts
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -108,3 +108,4 @@ export class ManageInventoryComponent implements OnInit {
       });
   }
 }
+

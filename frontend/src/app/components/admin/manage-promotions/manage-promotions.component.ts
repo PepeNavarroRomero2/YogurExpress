@@ -1,4 +1,4 @@
-// frontend/src/app/components/admin/manage-promotions/manage-promotions.component.ts
+﻿// frontend/src/app/components/admin/manage-promotions/manage-promotions.component.ts
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -128,3 +128,4 @@ export class ManagePromotionsComponent implements OnInit {
     this.editingPromotionId = null;
   }
 }
+

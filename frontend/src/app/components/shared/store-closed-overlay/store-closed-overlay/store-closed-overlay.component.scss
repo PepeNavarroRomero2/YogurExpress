@@ -1,50 +1,27 @@
 .closed-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
-  backdrop-filter: blur(1.5px);
-  z-index: 9998;
+  @extend .dialog-backdrop !optional;
 }
 
 .closed-card {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: min(560px, 92vw);
-  background: #111;
-  color: #eee;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  @extend .dialog-card !optional;
   text-align: center;
-  z-index: 9999;
 }
 
-.title { margin: 0 0 8px; font-size: 1.4rem; font-weight: 700; }
-.subtitle { margin: 0 0 6px; opacity: .95; }
-.hint { margin: 0 0 12px; opacity: .8; font-size: .95rem; }
+.title {
+  margin: 0 0 0.5rem;
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+  margin: 0 0 0.35rem;
+}
+
+.hint {
+  color: var(--color-muted);
+}
 
 .actions {
-  margin-top: 12px;
+  margin-top: 1rem;
   display: flex;
   justify-content: center;
-  gap: 10px;
-}
-
-.btn {
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid #333;
-  background: #1c1c1c;
-  color: #eee;
-  cursor: pointer;
-}
-.btn.primary {
-  background: #2d6cdf;
-  border-color: #264fa2;
-}
-.btn:disabled {
-  opacity: .6;
-  cursor: not-allowed;
 }

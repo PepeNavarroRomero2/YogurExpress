@@ -1,75 +1,46 @@
-<!-- src/app/components/admin/manage-inventory/manage-inventory.component.html -->
+<div class="admin-section">
+  <header class="section-header">
+    <div>
+      <p class="eyebrow">Almacén</p>
+      <h2>Gestión de inventario</h2>
+    </div>
+    <div class="search-box">
+      <input
+        type="text"
+        placeholder="Buscar por nombre de producto..."
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearchTermChange()"
+      />
+    </div>
+  </header>
 
-<div class="mi-container">
-  <h2>Gestión de Inventario</h2>
-
-  <!-- Búsqueda -->
-  <div class="mi-search">
-    <input
-      type="text"
-      placeholder="Buscar por nombre de producto..."
-      [(ngModel)]="searchTerm"
-      (ngModelChange)="onSearchTermChange()"
-    />
+  <div class="card section-card">
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID Producto</th>
+            <th>Nombre</th>
+            <th>Cantidad disponible</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of filteredInventory">
+            <td>{{ item.id_producto }}</td>
+            <td>{{ item.productName }}</td>
+            <td *ngIf="editId !== item.id_producto">{{ item.cantidad_disponible }}</td>
+            <td *ngIf="editId === item.id_producto">
+              <input type="number" min="0" [(ngModel)]="editQuantity" />
+            </td>
+            <td class="actions-cell">
+              <button *ngIf="editId !== item.id_producto" class="btn-ghost" (click)="enableEdit(item)">Editar</button>
+              <button *ngIf="editId === item.id_producto" class="btn-primary" (click)="saveEdit(item)">Guardar</button>
+              <button *ngIf="editId === item.id_producto" class="btn-secondary" (click)="cancelEdit()">Cancelar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
-
-  <!-- Tabla de inventario -->
-  <table class="mi-table">
-    <thead>
-      <tr>
-        <th>ID Producto</th>
-        <th>Nombre</th>
-        <th>Cantidad Disponible</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let item of filteredInventory">
-        <!-- Columna: ID Producto -->
-        <td>{{ item.id_producto }}</td>
-
-        <!-- Columna: Nombre del producto -->
-        <td>{{ item.productName }}</td>
-
-        <!-- Columna: Cantidad (o input si estamos editando esta fila) -->
-        <td *ngIf="editId !== item.id_producto">
-          {{ item.cantidad_disponible }}
-        </td>
-        <td *ngIf="editId === item.id_producto">
-          <input
-            type="number"
-            min="0"
-            [(ngModel)]="editQuantity"
-            class="mi-input-quantity"
-          />
-        </td>
-
-        <!-- Columna: Botones de Acción -->
-        <td>
-          <button
-            *ngIf="editId !== item.id_producto"
-            (click)="enableEdit(item)"
-            class="mi-btn mi-btn-edit"
-          >
-            Editar
-          </button>
-
-          <button
-            *ngIf="editId === item.id_producto"
-            (click)="saveEdit(item)"
-            class="mi-btn mi-btn-save"
-          >
-            Guardar
-          </button>
-          <button
-            *ngIf="editId === item.id_producto"
-            (click)="cancelEdit()"
-            class="mi-btn mi-btn-cancel"
-          >
-            Cancelar
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
 </div>

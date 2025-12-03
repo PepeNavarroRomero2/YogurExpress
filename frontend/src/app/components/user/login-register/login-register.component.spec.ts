@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { LoginRegisterComponent } from './login-register.component';
 
@@ -21,3 +21,4 @@ describe('LoginRegisterComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+

@@ -13,6 +13,10 @@ function signToken(user) {
   );
 }
 
+function getPassword(body = {}) {
+  return body.password ?? body.contrasena ?? body.contraseña ?? '';
+}
+
 /**
  * POST /api/auth/register
  * Body: { nombre, email, contraseña | contrasena | password }
@@ -24,11 +28,7 @@ router.post('/register', async (req, res) => {
     const email = String(req.body?.email || '').toLowerCase().trim();
 
     // Aceptamos varias claves por comodidad:
-    const plain =
-      req.body?.contraseña ??
-      req.body?.contrasena ??
-      req.body?.password ??
-      '';
+    const plain = getPassword(req.body);
 
     if (!nombre || !email || !plain) {
       return res.status(400).json({ error: 'nombre, email y contraseña son obligatorios' });
@@ -89,11 +89,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const email = String(req.body?.email || '').toLowerCase().trim();
-    const plain =
-      req.body?.contraseña ??
-      req.body?.contrasena ??
-      req.body?.password ??
-      '';
+    const plain = getPassword(req.body);
 
     if (!email || !plain) {
       return res.status(400).json({ error: 'email y contraseña son obligatorios' });

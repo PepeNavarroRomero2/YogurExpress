@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+﻿import { Routes } from '@angular/router';
 import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
@@ -14,3 +14,4 @@ export const routes: Routes = [
   { path: '',    redirectTo: '/user/login', pathMatch: 'full' },
   { path: '**',  redirectTo: '/user/login' }
 ];
+

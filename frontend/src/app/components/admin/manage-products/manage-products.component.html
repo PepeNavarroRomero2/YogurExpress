@@ -1,144 +1,87 @@
-<!-- src/app/components/admin/manage-products/manage-products.component.html -->
-
-<div class="products-wrapper">
-  <header class="products-header">
-    <h1>Manage Products</h1>
-    <button class="btn-create" (click)="onCreate()">New Product</button>
+<div class="admin-section">
+  <header class="section-header">
+    <div>
+      <p class="eyebrow">Catálogo</p>
+      <h2>Productos</h2>
+    </div>
+    <button class="btn-primary" (click)="onCreate()">Nuevo producto</button>
   </header>
 
-  <!-- Tarjeta blanca que envuelve formulario o tabla -->
-  <div class="products-card">
-    <!-- Formulario de creación / edición -->
-    <div *ngIf="showForm">
-      <form #f="ngForm" (ngSubmit)="onSave(f)" class="product-form">
+  <div class="card section-card">
+    <div *ngIf="showForm" class="form-wrapper">
+      <form #f="ngForm" (ngSubmit)="onSave(f)" class="admin-form">
         <div class="form-group">
-          <label for="name">Name</label>
-          <input
-            id="name"
-            name="nombre"
-            class="form-input"
-            required
-            [(ngModel)]="product.nombre"
-          />
+          <label for="name">Nombre</label>
+          <input id="name" name="nombre" required [(ngModel)]="product.nombre" />
         </div>
 
-        <div class="form-group inline-group">
-          <div class="form-group--half">
-            <label for="type">Type</label>
-            <select
-              id="type"
-              name="tipo"
-              class="form-select"
-              required
-              [(ngModel)]="product.tipo"
-            >
+        <div class="form-row">
+          <div class="form-group">
+            <label for="type">Tipo</label>
+            <select id="type" name="tipo" required [(ngModel)]="product.tipo">
               <option value="sabor">Sabor</option>
               <option value="topping">Topping</option>
-              <option value="tamanos">Tamaño</option>
+              <option value="tamano">Tamaño</option>
             </select>
           </div>
-          <div class="form-group--half">
-            <label for="price">Price</label>
-            <input
-              id="price"
-              name="precio"
-              class="form-input"
-              required
-              [(ngModel)]="product.precio"
-              type="number"
-              step="0.01"
-            />
+          <div class="form-group">
+            <label for="price">Precio</label>
+            <input id="price" name="precio" type="number" step="0.01" required [(ngModel)]="product.precio" />
           </div>
         </div>
 
         <div class="form-group">
-          <label for="descripcion">Description</label>
-          <input
-            id="descripcion"
-            name="descripcion"
-            class="form-input"
-            [(ngModel)]="product.descripcion"
-          />
+          <label for="descripcion">Descripción</label>
+          <input id="descripcion" name="descripcion" [(ngModel)]="product.descripcion" />
         </div>
 
         <div class="form-group">
-          <label for="alergenos">Allergens</label>
-          <input
-            id="alergenos"
-            name="alergenos"
-            class="form-input"
-            [(ngModel)]="product.alergenos"
-          />
+          <label for="alergenos">Alérgenos</label>
+          <input id="alergenos" name="alergenos" [(ngModel)]="product.alergenos" />
         </div>
 
         <div class="form-group">
-          <label for="imagen">Image URL</label>
-          <input
-            id="imagen"
-            name="imagen_url"
-            class="form-input"
-            [(ngModel)]="product.imagen_url"
-          />
+          <label for="imagen">URL de imagen</label>
+          <input id="imagen" name="imagen_url" [(ngModel)]="product.imagen_url" />
         </div>
 
-        <!-- Campo opcional para cantidad en inventario -->
         <div class="form-group">
           <label for="cantidad_disponible">Cantidad en inventario</label>
-          <input
-            id="cantidad_disponible"
-            name="cantidad_disponible"
-            class="form-input"
-            type="number"
-            min="0"
-            [(ngModel)]="product.cantidad_disponible"
-          />
+          <input id="cantidad_disponible" name="cantidad_disponible" type="number" min="0" [(ngModel)]="product.cantidad_disponible" />
         </div>
 
-        <div class="buttons-group">
-          <button type="submit" class="btn-save">
-            {{ isEditing ? 'Save Changes' : 'Create' }}
-          </button>
-          <button type="button" class="btn-cancel" (click)="onCancel()">Cancel</button>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">{{ isEditing ? 'Guardar cambios' : 'Crear' }}</button>
+          <button type="button" class="btn-secondary" (click)="onCancel()">Cancelar</button>
         </div>
       </form>
     </div>
 
-    <!-- Tabla de productos -->
-    <div *ngIf="!showForm" class="products-list-placeholder">
-      <div class="table-wrapper">
-        <table class="products-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Price</th>
-              <th>Description</th>
-              <th>Allergens</th>
-              <th>Image</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let p of products">
-              <td>{{ p.nombre }}</td>
-              <td>{{ p.tipo }}</td>
-              <td>{{ p.precio | currency:'EUR':'symbol' }}</td>
-              <td>{{ p.descripcion }}</td>
-              <td>{{ p.alergenos }}</td>
-              <td>
-                <img *ngIf="p.imagen_url" [src]="p.imagen_url" class="thumb" />
-              </td>
-              <td class="actions-cell">
-                <button class="btn-edit" (click)="onEdit(p)">Edit</button>
-                <button class="btn-delete" (click)="onDelete(p.id_producto)">Delete</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div *ngIf="!products.length" class="no-products">
-          No products yet.
-        </div>
-      </div>
+    <div *ngIf="!showForm" class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nombre</th><th>Tipo</th><th>Precio</th><th>Descripción</th><th>Alérgenos</th><th>Imagen</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of products">
+            <td>{{ p.nombre }}</td>
+            <td>{{ p.tipo }}</td>
+            <td>{{ p.precio | currency:'EUR':'symbol' }}</td>
+            <td>{{ p.descripcion }}</td>
+            <td>{{ p.alergenos }}</td>
+            <td>
+              <img *ngIf="p.imagen_url" [src]="p.imagen_url" class="thumb" />
+            </td>
+            <td class="actions-cell">
+              <button class="btn-ghost" (click)="onEdit(p)">Editar</button>
+              <button class="btn-ghost" (click)="onDelete(p.id_producto)">Eliminar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div *ngIf="!products.length" class="empty">No hay productos aún.</div>
     </div>
   </div>
 </div>

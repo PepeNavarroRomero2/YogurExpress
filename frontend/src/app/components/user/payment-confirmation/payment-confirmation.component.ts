@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+﻿import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 import { AuthService, User } from '../../../services/auth.service';
 import { UserService } from '../../../services/user.service';
 import { CartService } from '../../../services/cart.service';
-import { Flavor } from '../../../services/product.service';
+import { Producto } from '../../../services/producto.service';
 import {
   OrderService,
   OrderProduct,
@@ -32,9 +32,9 @@ declare global {
   styleUrls: ['./payment-confirmation.component.scss']
 })
 export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
-  flavor!: Flavor;
-  toppings: Flavor[] = [];
-  size!: Flavor;
+  flavor!: Producto;
+  toppings: Producto[] = [];
+  size!: Producto;
 
   /** Hora del carrito en formato HH:mm (viene de SelectTime) */
   pickupTimeHM: string = '';
@@ -64,6 +64,14 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
     private loyaltyService: LoyaltyService,
     private paypalApi: PaypalService
   ) {}
+
+  onBackToMenu(): void {
+    this.router.navigate(['/user/menu']);
+  }
+
+  onBackToSelectTime(): void {
+    this.router.navigate(['/user/pickup']);
+  }
 
   ngOnInit(): void {
     // Datos del carrito
@@ -180,50 +188,6 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
     };
   }
 
-  // ========= BOTÓN "SIMULAR COMPRA" (TU FLUJO ORIGINAL) =========
-
-  simulatePurchase(): void {
-    this.createOrder();
-  }
-
-  private createOrder(): void {
-    if (!this.pickupTimeHM) {
-      this.errorMsg = 'Selecciona una hora de recogida';
-      return;
-    }
-
-    const pickupIso = this.toLocalIsoToday(this.pickupTimeHM);
-    if (!pickupIso) {
-      Swal.fire('Error', 'Formato de hora de recogida inválido.', 'error');
-      return;
-    }
-
-    const body = this.buildCreateOrderRequest();
-
-    this.orderService.createOrder(body).subscribe({
-      next: (res: CreateOrderResponse) => {
-        Swal.fire({
-          title: '¡Pedido confirmado!',
-          html: `
-            Código: <strong>${res.codigo_pedido}</strong><br>
-            Total pagado: <strong>€${res.total.toFixed(2)}</strong><br>
-            Has ganado <strong>${res.puntos_ganados}</strong> puntos.<br>
-            Puntos restantes: <strong>${res.puntos_totales}</strong>.
-          `,
-          icon: 'success',
-          confirmButtonText: 'Aceptar'
-        }).then(() => {
-          this.cartService.clear();
-          this.router.navigate(['/user/menu']);
-        });
-      },
-      error: err => {
-        const msg = err?.error?.error || 'Error al crear el pedido.';
-        Swal.fire('Error', msg, 'error');
-      }
-    });
-  }
-
   // ========= PAYPAL =========
 
   private renderPaypalButtons(): void {
@@ -313,3 +277,4 @@ export class PaymentConfirmationComponent implements OnInit, AfterViewInit {
     }).render('#paypal-button-container');
   }
 }
+

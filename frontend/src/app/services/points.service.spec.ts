@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+﻿import { TestBed } from '@angular/core/testing';
 
 import { PointsService } from './points.service';
 
@@ -14,3 +14,4 @@ describe('PointsService', () => {
     expect(service).toBeTruthy();
   });
 });
+

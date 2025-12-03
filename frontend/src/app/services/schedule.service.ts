@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import {
   BehaviorSubject,
@@ -18,7 +18,7 @@ export interface Schedule {
 }
 
 const DEFAULT_SCHEDULE: Schedule = { openHour: 10, closeHour: 22, minLeadMinutes: 30 };
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = '/api';
 
 @Injectable({ providedIn: 'root' })
 export class ScheduleService {
@@ -81,7 +81,7 @@ export class ScheduleService {
     );
   }
 
-  /* ─────────── Helpers ─────────── */
+  /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('auth_token') || '';
@@ -116,3 +116,4 @@ export class ScheduleService {
     return { openHour: open, closeHour: close, minLeadMinutes: lead };
   }
 }
+

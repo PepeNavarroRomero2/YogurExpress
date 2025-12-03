@@ -1,31 +1,29 @@
-<div class="select-time-wrapper">
-  <h1>Selecciona hora de recogida</h1>
+<div class="time-wrapper">
+  <div class="card time-card">
+    <h2>Selecciona hora de recogida</h2>
+    <p class="subtitle">Nuestro horario es de {{ pad(openHour) }}:00 a {{ pad(closeHour) }}:00. Respeta la antelación mínima de {{ minLeadMinutes }} minutos.</p>
 
-  <p class="hint">
-    Horario: {{ openHour }}:00–{{ closeHour }}:00 ·
-    Mínimo {{ minLeadMinutes }} min
-  </p>
+    <div *ngIf="!hora" class="alert-info">Elige una hora disponible para continuar.</div>
 
-  <form (ngSubmit)="onConfirm()" class="st-form">
-    <div class="field">
-      <label for="pickup">Hora</label>
-      <input
-        id="pickup"
-        type="time"
-        name="hora"
-        required
-        [step]="900"              
-        [attr.min]="minAttr"
-        [attr.max]="maxAttr"
-        [(ngModel)]="hora"
-      />
-      <small class="help" *ngIf="!hora">
-        Elige una hora entre {{ minAttr }} y {{ maxAttr }}.
-      </small>
-    </div>
+    <form (ngSubmit)="onConfirm()" class="time-form">
+      <div class="form-group">
+        <label for="hora">Hora de recogida</label>
+        <input
+          type="time"
+          id="hora"
+          name="hora"
+          [(ngModel)]="hora"
+          [min]="minAttr"
+          [max]="maxAttr"
+          step="900"
+          required
+        />
+      </div>
 
-    <div class="actions">
-      <button type="submit" class="btn primary">Continuar</button>
-    </div>
-  </form>
+      <div class="actions">
+        <button class="btn-secondary" type="button" (click)="onBackToCustomize()">Volver</button>
+        <button class="btn-primary" type="submit">Confirmar hora</button>
+      </div>
+    </form>
+  </div>
 </div>

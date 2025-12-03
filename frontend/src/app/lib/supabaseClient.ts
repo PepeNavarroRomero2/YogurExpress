@@ -1,4 +1,4 @@
-// backend/lib/supabaseClient.js
+﻿// backend/lib/supabaseClient.js
 
 import { createClient } from '@supabase/supabase-js';
 
@@ -10,3 +10,4 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
+

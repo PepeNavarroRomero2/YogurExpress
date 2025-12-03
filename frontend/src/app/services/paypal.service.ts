@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+﻿import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
 
 type PaypalConfig = { clientId: string; currency: string; env: 'sandbox' | 'live' };
 
@@ -15,8 +15,19 @@ export class PaypalService {
   constructor(private http: HttpClient) {}
 
   getConfig() {
-    return firstValueFrom(this.http.get<PaypalConfig>(`${this.base}/config`));
+    return firstValueFrom(
+      this.http.get(`${this.base}/config`, { responseType: 'text' }).pipe(
+        map((txt) => {
+          try {
+            return JSON.parse(txt) as PaypalConfig;
+          } catch {
+            return { clientId: '', currency: 'EUR', env: 'sandbox' } as PaypalConfig;
+          }
+        })
+      )
+    );
   }
+
 
   createOrder(payload: CreateOrderPayload) {
     return firstValueFrom(this.http.post<{ id: string }>(`${this.base}/orders`, payload));
@@ -30,3 +41,4 @@ export class PaypalService {
     return firstValueFrom(this.http.post<{ linked: boolean }>(`${this.base}/link-order`, { paypalOrderId, pedidoId }));
   }
 }
+

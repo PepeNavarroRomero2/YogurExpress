@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { StoreClosedOverlayComponent } from './store-closed-overlay.component';
 
@@ -21,3 +21,4 @@ describe('StoreClosedOverlayComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+

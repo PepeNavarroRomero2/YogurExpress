@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+﻿import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -57,6 +57,10 @@ export class SelectTimeComponent implements OnInit, OnDestroy {
   /** Alias si tu template/otros llaman confirm() */
   confirm(): void { this.onConfirm(); }
 
+  onBackToCustomize(): void {
+    this.router.navigate(['/user/personalize']);
+  }
+
   onConfirm(): void {
     if (!this.hora) {
       Swal.fire('Error', 'Debes seleccionar una hora de recogida.', 'error');
@@ -79,7 +83,7 @@ export class SelectTimeComponent implements OnInit, OnDestroy {
     this.router.navigate(['/user/payment']);
   }
 
-  /* ─────────── Helpers ─────────── */
+  /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
   private applySchedule(s: Schedule): void {
     this.openHour = s.openHour;
@@ -126,7 +130,7 @@ export class SelectTimeComponent implements OnInit, OnDestroy {
     return `${this.pad(d.getHours())}:${this.pad(d.getMinutes())}`;
   }
 
-  private pad(n: number): string {
+  pad(n: number): string {
     return n.toString().padStart(2, '0');
   }
 
@@ -138,3 +142,4 @@ export class SelectTimeComponent implements OnInit, OnDestroy {
     return res;
   }
 }
+

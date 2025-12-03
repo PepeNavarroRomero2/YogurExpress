@@ -1,4 +1,4 @@
-// frontend/src/app/components/user/points/points.component.ts
+﻿// frontend/src/app/components/user/points/points.component.ts
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';    // para NgIf
@@ -19,6 +19,7 @@ import { AuthService, User } from '../../../services/auth.service';
 export class PointsComponent implements OnInit {
   puntos: number = 0;
   errorMsg: string = '';
+  Math = Math;
 
   // Cambiado a 'public' para poder usar 'router' desde el HTML
   constructor(
@@ -42,3 +43,4 @@ export class PointsComponent implements OnInit {
     });
   }
 }
+

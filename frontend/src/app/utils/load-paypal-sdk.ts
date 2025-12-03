@@ -1,4 +1,4 @@
-export function loadPaypalSdk(clientId: string, currency = 'EUR'): Promise<void> {
+﻿export function loadPaypalSdk(clientId: string, currency = 'EUR'): Promise<void> {
   if ((window as any).paypal) return Promise.resolve();
 
   const existing = document.querySelector<HTMLScriptElement>('script[data-paypal-sdk="true"]');
@@ -23,3 +23,4 @@ export function loadPaypalSdk(clientId: string, currency = 'EUR'): Promise<void>
     document.head.appendChild(s);
   });
 }
+

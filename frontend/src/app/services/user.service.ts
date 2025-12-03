@@ -1,4 +1,4 @@
-// src/app/services/user.service.ts
+﻿// src/app/services/user.service.ts
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -9,7 +9,7 @@ import { AuthService, User } from './auth.service';
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = 'http://localhost:3000/api/users';
+  private apiUrl = '/api/users';
 
   constructor(
     private http: HttpClient,
@@ -28,3 +28,4 @@ export class UserService {
     );
   }
 }
+

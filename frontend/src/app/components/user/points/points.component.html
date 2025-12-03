@@ -1,22 +1,37 @@
-<!-- src/app/components/user/points/points.component.html -->
+<div class="points-wrapper page-wrapper">
+  <div class="card points-card">
+    <header class="points-header">
+      <div>
+        <p class="eyebrow">Programa de fidelidad</p>
+        <h2>Mis puntos</h2>
+      </div>
+      <button class="btn-secondary" (click)="router.navigate(['/user/menu'])">Volver al menú</button>
+    </header>
 
-<div class="points-container">
-  <h2>Mis Puntos</h2>
+    <div *ngIf="errorMsg" class="alert-error">{{ errorMsg }}</div>
 
-  <!-- Mensaje de error si falla la carga -->
-  <div *ngIf="errorMsg" class="error">
-    {{ errorMsg }}
-  </div>
+    <div *ngIf="!errorMsg" class="points-body">
+      <div class="balance-card">
+        <div class="balance">
+          <span class="points-number">{{ puntos }}</span>
+          <span class="points-label">Puntos acumulados</span>
+        </div>
+        <div class="equivalence">Equivalente aproximado: {{ (puntos / 10) | number:'1.2-2' }} €</div>
+        <div class="progress">
+          <div class="progress-track">
+            <div class="progress-bar" [style.width]="Math.min((puntos / 100) * 100, 100) + '%'" aria-hidden="true"></div>
+          </div>
+          <div class="progress-labels">
+            <span>0</span>
+            <span>Próxima recompensa en 100 pts</span>
+          </div>
+        </div>
+      </div>
 
-  <!-- Mostrar puntos si no hay error -->
-  <div *ngIf="!errorMsg" class="points-info">
-    <div class="points-balance">
-      <span class="points-number">{{ puntos }}</span>
-      <span class="points-label">Puntos acumulados</span>
+      <div class="movements">
+        <h3>Actividad reciente</h3>
+        <p class="muted">Aún no hay movimientos registrados en este dispositivo.</p>
+      </div>
     </div>
-
-    <button class="btn-back" (click)="router.navigate(['/user/menu'])">
-      Volver al Menú
-    </button>
   </div>
 </div>

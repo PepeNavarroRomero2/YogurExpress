@@ -1,16 +1,16 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, tap } from 'rxjs';
 
 export interface LoyaltySettings {
   /** Puntos que se ganan por cada € pagado (tras canje) */
   earnRate: number;
-  /** Puntos necesarios para descontar 1 € (ej: 10 = 10 puntos → 1 €) */
+  /** Puntos necesarios para descontar 1 € (ej: 10 = 10 puntos â†’ 1 €) */
   pointsPerEuro: number;
 }
 
 const DEFAULT_LOYALTY: LoyaltySettings = { earnRate: 1, pointsPerEuro: 10 };
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = '/api';
 
 @Injectable({ providedIn: 'root' })
 export class LoyaltyService {
@@ -51,3 +51,4 @@ export class LoyaltyService {
     return { earnRate: earn, pointsPerEuro: ppe };
   }
 }
+

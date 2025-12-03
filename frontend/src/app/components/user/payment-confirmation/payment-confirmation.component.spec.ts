@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PaymentConfirmationComponent } from './payment-confirmation.component';
 
@@ -21,3 +21,4 @@ describe('PaymentConfirmationComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+
