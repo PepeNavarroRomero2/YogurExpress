@@ -1,34 +1,36 @@
-﻿<div class="history-wrapper">
-  <h1>Historial de pedidos</h1>
+<div class="history-wrapper page-wrapper">
+  <div class="card history-card">
+    <header class="history-header">
+      <div>
+        <p class="eyebrow">Pedidos anteriores</p>
+        <h2>Historial de pedidos</h2>
+      </div>
+      <button class="btn-secondary" routerLink="/user/menu">Volver al menú</button>
+    </header>
 
-  <div *ngIf="loading" class="loading">Cargando...</div>
-  <div *ngIf="!loading && errorMsg" class="error">{{ errorMsg }}</div>
+    <div *ngIf="loading" class="alert-info">Cargando...</div>
+    <div *ngIf="!loading && errorMsg" class="alert-error">{{ errorMsg }}</div>
 
-  <table *ngIf="!loading && !errorMsg && history?.length" class="table">
-    <thead>
-      <tr>
-        <th>CÃ³digo</th>
-        <th>Fecha</th>
-        <th>Hora recogida</th>
-        <th>Resumen</th>
-        <th>Total (â‚¬)</th>
-        <th>Estado</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let o of history">
-        <td>{{ codeOf(o) }}</td>
-        <td>{{ o.fecha_hora || 'â€”' }}</td>
-        <td>{{ o.hora_recogida || 'â€”' }}</td>
-        <td>{{ o.producto || 'â€”' }}</td>
-        <td>{{ (o.total ?? 0) | number:'1.2-2' }}</td>
-        <td>{{ o.estado || 'â€”' }}</td>
-      </tr>
-    </tbody>
-  </table>
+    <div *ngIf="!loading && !errorMsg && history?.length" class="history-list">
+      <div class="history-item" *ngFor="let o of history">
+        <div class="item-header">
+          <div>
+            <p class="order-code">Pedido {{ codeOf(o) }}</p>
+            <p class="order-time">{{ o.fecha_hora || '—' }} · Recogida {{ o.hora_recogida || '—' }}</p>
+          </div>
+          <span class="badge" [ngClass]="{
+            'tag-warning': o.estado === 'PENDIENTE',
+            'tag-info': o.estado === 'LISTO',
+            'tag-success': o.estado === 'COMPLETADO'
+          }">{{ o.estado || '—' }}</span>
+        </div>
+        <div class="item-body">
+          <p class="product">{{ o.producto || '—' }}</p>
+          <p class="total">{{ (o.total ?? 0) | number:'1.2-2' }} €</p>
+        </div>
+      </div>
+    </div>
 
-  <div *ngIf="!loading && !errorMsg && !history?.length" class="empty">
-    No tienes pedidos todavÃ­a.
+    <div *ngIf="!loading && !errorMsg && !history?.length" class="empty">No tienes pedidos todavía.</div>
   </div>
 </div>
-
