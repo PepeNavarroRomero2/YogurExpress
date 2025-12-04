@@ -124,14 +124,23 @@ public class ApiClient {
                 main.post(() -> cb.onError(e.getMessage()));
             }
             @Override public void onResponse(Call call, Response response) throws IOException {
+                String body = response.body().string();
                 if (!response.isSuccessful()) {
-                    main.post(() -> cb.onError("Credenciales inválidas"));
+                    String serverMsg = "Credenciales inválidas";
+                    try {
+                        JsonObject err = gson.fromJson(body, JsonObject.class);
+                        if (err != null && err.has("error")) serverMsg = err.get("error").getAsString();
+                    } catch (Exception ignored) {}
+                    final String msg = serverMsg;
+                    main.post(() -> cb.onError(msg));
                     return;
                 }
-                String body = response.body().string();
+
                 JsonObject obj = gson.fromJson(body, JsonObject.class);
                 Usuario user = gson.fromJson(obj.get("user"), Usuario.class);
-                if (user == null || user.getRol() == null || !"admin".equalsIgnoreCase(user.getRol())) {
+                String rol = user != null ? user.getRol() : null;
+                boolean isAdmin = rol != null && ("admin".equalsIgnoreCase(rol) || "administrador".equalsIgnoreCase(rol));
+                if (!isAdmin) {
                     main.post(() -> cb.onError("Se requiere rol administrador"));
                     return;
                 }
