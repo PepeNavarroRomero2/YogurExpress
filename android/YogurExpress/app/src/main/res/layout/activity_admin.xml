@@ -12,71 +12,117 @@
         android:gravity="center"
         android:padding="24dp">
 
-        <!-- Tarjeta principal tipo panel -->
-        <com.google.android.material.card.MaterialCardView
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Panel de Administración"
+            android:textStyle="bold"
+            android:textSize="22sp"
+            android:textColor="#1F2937"
+            android:layout_marginBottom="16dp"/>
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="8dp"
-            android:backgroundTint="#FFFFFF"
-            android:maxWidth="500dp"
-            android:padding="24dp">
+            android:orientation="vertical"
+            android:spacing="8dp"
+            android:layout_marginBottom="12dp">
 
-            <LinearLayout
-                android:orientation="vertical"
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center">
+                app:cardElevation="6dp"
+                app:cardCornerRadius="12dp"
+                android:layout_marginBottom="12dp">
 
-                <TextView
-                    android:id="@+id/tvTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Panel de Administración"
-                    android:textSize="20sp"
-                    android:textColor="#1F2937"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="24dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnProductos"
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:padding="16dp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Gestionar Productos"
-                    android:layout_marginBottom="12dp"
-                    android:backgroundTint="#3B82F6"
-                    android:textColor="#FFFFFF"
-                    app:cornerRadius="8dp"/>
+                    android:layout_height="wrap_content">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnInventario"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Gestionar Inventario"
-                    android:layout_marginBottom="12dp"
-                    android:backgroundTint="#3B82F6"
-                    android:textColor="#FFFFFF"
-                    app:cornerRadius="8dp"/>
+                    <TextView
+                        android:id="@+id/tvPending"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pendientes: 0"
+                        android:textStyle="bold"
+                        android:textSize="16sp"/>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnPromos"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Gestionar Promociones"
-                    android:layout_marginBottom="24dp"
-                    android:backgroundTint="#3B82F6"
-                    android:textColor="#FFFFFF"
-                    app:cornerRadius="8dp"/>
+                    <TextView
+                        android:id="@+id/tvReady"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Listos: 0"
+                        android:layout_marginTop="4dp"
+                        android:textSize="15sp"/>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnCerrarSesion"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Cerrar sesión"
-                    android:backgroundTint="#EF4444"
-                    android:textColor="#FFFFFF"
-                    app:cornerRadius="8dp"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+                    <TextView
+                        android:id="@+id/tvCompleted"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Completados hoy: 0"
+                        android:layout_marginTop="4dp"
+                        android:textSize="15sp"/>
+
+                    <TextView
+                        android:id="@+id/tvLowStock"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Stock bajo: sin alertas"
+                        android:layout_marginTop="8dp"
+                        android:textSize="14sp"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPedidos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pedidos"
+            android:layout_marginBottom="12dp"
+            android:backgroundTint="#3B82F6"
+            android:textColor="#FFFFFF"
+            app:cornerRadius="8dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnProductos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Gestionar Productos"
+            android:layout_marginBottom="12dp"
+            android:backgroundTint="#3B82F6"
+            android:textColor="#FFFFFF"
+            app:cornerRadius="8dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnInventario"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Gestionar Inventario"
+            android:layout_marginBottom="12dp"
+            android:backgroundTint="#3B82F6"
+            android:textColor="#FFFFFF"
+            app:cornerRadius="8dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPromos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Gestionar Promociones"
+            android:layout_marginBottom="24dp"
+            android:backgroundTint="#3B82F6"
+            android:textColor="#FFFFFF"
+            app:cornerRadius="8dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCerrarSesion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cerrar sesión"
+            android:backgroundTint="#EF4444"
+            android:textColor="#FFFFFF"
+            app:cornerRadius="8dp"/>
     </LinearLayout>
 </ScrollView>

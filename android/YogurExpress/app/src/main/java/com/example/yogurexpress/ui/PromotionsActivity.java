@@ -10,8 +10,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.yogurexpress.R;
+import com.example.yogurexpress.api.ApiClient;
 import com.example.yogurexpress.models.Promotion;
-import com.example.yogurexpress.supabase.SupabaseHelper;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -20,7 +20,7 @@ import java.util.List;
 
 public class PromotionsActivity extends AppCompatActivity {
 
-    private SupabaseHelper supa;
+    private ApiClient api;
     private RecyclerView rv;
     private PromotionAdapter adapter;
     private FloatingActionButton fab;
@@ -33,7 +33,7 @@ public class PromotionsActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
 
         rv   = findViewById(R.id.rvPromotions);
-        supa = new SupabaseHelper();
+        api = new ApiClient(this);
 
         adapter = new PromotionAdapter(new ArrayList<>(), promo -> {
             Intent i = new Intent(this, AddPromotionActivity.class);
@@ -51,7 +51,7 @@ public class PromotionsActivity extends AppCompatActivity {
             @Override public void onSwiped(RecyclerView.ViewHolder vh, int dir) {
                 int pos = vh.getAdapterPosition();
                 Promotion p = adapter.getItems().get(pos);
-                supa.deletePromotion(p.getId_promocion(), new SupabaseHelper.DeletePromotionCallback() {
+                api.deletePromotion(p.getId_promocion(), new ApiClient.SimpleCallback() {
                     @Override public void onSuccess() {
                         runOnUiThread(() -> {
                             Toast.makeText(PromotionsActivity.this,
@@ -82,7 +82,7 @@ public class PromotionsActivity extends AppCompatActivity {
     }
 
     private void loadPromotions() {
-        supa.fetchPromotions(new SupabaseHelper.PromotionsCallback() {
+        api.getPromotions(new ApiClient.PromotionsCallback() {
             @Override public void onSuccess(List<Promotion> promos) {
                 adapter.updateData(promos);
             }

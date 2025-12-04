@@ -10,8 +10,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.yogurexpress.R;
+import com.example.yogurexpress.api.ApiClient;
 import com.example.yogurexpress.models.Producto;
-import com.example.yogurexpress.supabase.SupabaseHelper;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -19,7 +19,7 @@ import java.util.ArrayList;
 
 public class ListProductsActivity extends AppCompatActivity {
 
-    private SupabaseHelper supa;
+    private ApiClient api;
     private RecyclerView rv;
     private ProductAdapter adapter;
     private FloatingActionButton fab;
@@ -33,7 +33,7 @@ public class ListProductsActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
 
         rv = findViewById(R.id.rvProducts);
-        supa = new SupabaseHelper();
+        api = new ApiClient(this);
 
         adapter = new ProductAdapter(new ArrayList<>(), p -> {
             Intent i = new Intent(this, AddProductActivity.class);
@@ -51,7 +51,7 @@ public class ListProductsActivity extends AppCompatActivity {
             @Override public void onSwiped(RecyclerView.ViewHolder vh, int dir) {
                 int pos = vh.getAdapterPosition();
                 Producto toDelete = adapter.getItems().get(pos);
-                supa.deleteProducto(toDelete.getId_producto(), new SupabaseHelper.DeleteCallback() {
+                api.deleteProduct(toDelete.getId_producto(), new ApiClient.SimpleCallback() {
                     @Override public void onSuccess() {
                         runOnUiThread(() -> {
                             Toast.makeText(ListProductsActivity.this,
@@ -84,7 +84,7 @@ public class ListProductsActivity extends AppCompatActivity {
     }
 
     private void loadProducts() {
-        supa.fetchProductos(new SupabaseHelper.ProductosCallback() {
+        api.getProducts(new ApiClient.ProductsCallback() {
             @Override public void onSuccess(java.util.List<Producto> productos) {
                 adapter.updateData(productos);
             }
