@@ -9,7 +9,6 @@ import com.example.yogurexpress.models.AdminSummary;
 import com.example.yogurexpress.models.Inventario;
 import com.example.yogurexpress.models.Order;
 import com.example.yogurexpress.models.Producto;
-import com.example.yogurexpress.models.Promotion;
 import com.example.yogurexpress.models.Usuario;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -58,10 +57,6 @@ public class ApiClient {
     }
     public interface SimpleCallback {
         void onSuccess();
-        void onError(String msg);
-    }
-    public interface PromotionsCallback {
-        void onSuccess(List<Promotion> promotions);
         void onError(String msg);
     }
     public interface OrdersCallback {
@@ -129,14 +124,23 @@ public class ApiClient {
                 main.post(() -> cb.onError(e.getMessage()));
             }
             @Override public void onResponse(Call call, Response response) throws IOException {
+                String body = response.body().string();
                 if (!response.isSuccessful()) {
-                    main.post(() -> cb.onError("Credenciales inválidas"));
+                    String serverMsg = "Credenciales inválidas";
+                    try {
+                        JsonObject err = gson.fromJson(body, JsonObject.class);
+                        if (err != null && err.has("error")) serverMsg = err.get("error").getAsString();
+                    } catch (Exception ignored) {}
+                    final String msg = serverMsg;
+                    main.post(() -> cb.onError(msg));
                     return;
                 }
-                String body = response.body().string();
+
                 JsonObject obj = gson.fromJson(body, JsonObject.class);
                 Usuario user = gson.fromJson(obj.get("user"), Usuario.class);
-                if (user == null || user.getRol() == null || !"admin".equalsIgnoreCase(user.getRol())) {
+                String rol = user != null ? user.getRol() : null;
+                boolean isAdmin = rol != null && ("admin".equalsIgnoreCase(rol) || "administrador".equalsIgnoreCase(rol));
+                if (!isAdmin) {
                     main.post(() -> cb.onError("Se requiere rol administrador"));
                     return;
                 }
@@ -245,42 +249,6 @@ public class ApiClient {
         enqueueSingle(req, AdminSummary.class, cb);
     }
 
-    // ─── Promociones ─────────────────────────────────────────
-    public void getPromotions(PromotionsCallback cb) {
-        Request req = new Request.Builder()
-                .url(BASE_URL + "/promotions")
-                .headers(authHeaders())
-                .get().build();
-        enqueueList(req, new TypeToken<List<Promotion>>(){}.getType(), cb);
-    }
-
-    public void createPromotion(Promotion p, PromotionsCallback cb) {
-        Request req = new Request.Builder()
-                .url(BASE_URL + "/promotions")
-                .headers(authHeaders())
-                .post(RequestBody.create(gson.toJson(p), MediaType.get("application/json")))
-                .build();
-        enqueueList(req, new TypeToken<List<Promotion>>(){}.getType(), cb);
-    }
-
-    public void updatePromotion(Promotion p, PromotionsCallback cb) {
-        Request req = new Request.Builder()
-                .url(BASE_URL + "/promotions/" + p.getId_promocion())
-                .headers(authHeaders())
-                .put(RequestBody.create(gson.toJson(p), MediaType.get("application/json")))
-                .build();
-        enqueueList(req, new TypeToken<List<Promotion>>(){}.getType(), cb);
-    }
-
-    public void deletePromotion(Long id, SimpleCallback cb) {
-        Request req = new Request.Builder()
-                .url(BASE_URL + "/promotions/" + id)
-                .headers(authHeaders())
-                .delete()
-                .build();
-        enqueueVoid(req, cb);
-    }
-
     // ─── Helpers ─────────────────────────────────────────────
     private <T> void enqueueList(Request req, Type type, Object cbObj) {
         client.newCall(req).enqueue(new Callback() {
@@ -337,8 +305,6 @@ public class ApiClient {
             ((ProductsCallback) cbObj).onSuccess((List<Producto>) list);
         } else if (cbObj instanceof InventoryCallback) {
             ((InventoryCallback) cbObj).onSuccess((List<Inventario>) list);
-        } else if (cbObj instanceof PromotionsCallback) {
-            ((PromotionsCallback) cbObj).onSuccess((List<Promotion>) list);
         } else if (cbObj instanceof OrdersCallback) {
             ((OrdersCallback) cbObj).onSuccess((List<Order>) list);
         }
@@ -359,8 +325,6 @@ public class ApiClient {
             ((ProductsCallback) cbObj).onError(msg);
         } else if (cbObj instanceof InventoryCallback) {
             ((InventoryCallback) cbObj).onError(msg);
-        } else if (cbObj instanceof PromotionsCallback) {
-            ((PromotionsCallback) cbObj).onError(msg);
         } else if (cbObj instanceof OrdersCallback) {
             ((OrdersCallback) cbObj).onError(msg);
         } else if (cbObj instanceof OrderCallback) {

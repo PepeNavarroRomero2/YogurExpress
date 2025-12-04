@@ -33,8 +33,6 @@ public class AdminActivity extends AppCompatActivity {
                 startActivity(new Intent(this, ListProductsActivity.class)));
         findViewById(R.id.btnInventario).setOnClickListener(v ->
                 startActivity(new Intent(this, InventoryActivity.class)));
-        findViewById(R.id.btnPromos).setOnClickListener(v ->
-                startActivity(new Intent(this, PromotionsActivity.class)));
         findViewById(R.id.btnPedidos).setOnClickListener(v ->
                 startActivity(new Intent(this, OrdersActivity.class)));
 

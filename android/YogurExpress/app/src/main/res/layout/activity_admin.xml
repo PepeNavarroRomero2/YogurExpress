@@ -107,16 +107,6 @@
             app:cornerRadius="8dp"/>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnPromos"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Gestionar Promociones"
-            android:layout_marginBottom="24dp"
-            android:backgroundTint="#3B82F6"
-            android:textColor="#FFFFFF"
-            app:cornerRadius="8dp"/>
-
-        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCerrarSesion"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

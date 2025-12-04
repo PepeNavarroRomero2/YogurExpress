@@ -10,6 +10,7 @@
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.YogurExpress">
 
         <activity
@@ -25,8 +26,6 @@
         <activity android:name=".ui.ListProductsActivity" android:exported="false"/>
         <activity android:name=".ui.AddProductActivity" android:exported="false"/>
         <activity android:name=".ui.InventoryActivity" android:exported="false"/>
-        <activity android:name=".ui.PromotionsActivity" android:exported="false"/>
-        <activity android:name=".ui.AddPromotionActivity" android:exported="false"/>
         <activity android:name=".ui.OrdersActivity" android:exported="false"/>
         <activity android:name=".ui.OrderDetailActivity" android:exported="false"/>
     </application>
