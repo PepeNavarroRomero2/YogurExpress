@@ -112,7 +112,13 @@ router.get('/pending', authenticateToken, isAdmin, async (_req, res) => {
   try {
     const { data, error } = await supabase
       .from('pedidos')
-      .select('id_pedido, codigo_unico, fecha_hora, hora_recogida, estado, total')
+      .select(`
+        id_pedido, codigo_unico, fecha_hora, hora_recogida, estado, total,
+        pedido_items (
+          id_producto, cantidad, precio_unit,
+          productos (id_producto, nombre, tipo)
+        )
+      `)
       .in('estado', ['pendiente', 'listo'])
       .order('fecha_hora', { ascending: true });
 
@@ -123,7 +129,19 @@ router.get('/pending', authenticateToken, isAdmin, async (_req, res) => {
 
     const mapped = (data || []).map(row => ({
       ...row,
-      codigo_pedido: buildOrderCode(row)
+      codigo_pedido: buildOrderCode(row),
+      items: (row.pedido_items || []).map(item => ({
+        id_producto: item.id_producto,
+        cantidad: item.cantidad,
+        precio_unit: item.precio_unit,
+        producto: item.productos
+          ? {
+              id_producto: item.productos.id_producto,
+              nombre: item.productos.nombre,
+              tipo: item.productos.tipo
+            }
+          : undefined
+      }))
     }));
 
     return res.json(mapped);
@@ -238,7 +256,19 @@ router.post('/', authenticateToken, async (req, res) => {
 
     const codigo = buildOrderCode(inserted) || fallbackOrderCode();
 
-    // 6) Descontar inventario
+    // 6) Insertar líneas
+    const lineas = productos.map(item => ({
+      id_pedido: inserted.id_pedido,
+      id_producto: item.id_producto,
+      cantidad: Math.max(1, Math.floor(Number(item.cantidad || 1))),
+      precio_unit: priceMap.get(item.id_producto) ?? 0
+    }));
+    const { error: itemsErr } = await supabase.from('pedido_items').insert(lineas);
+    if (itemsErr) {
+      console.warn('[orders] insert pedido_items warning:', itemsErr.message);
+    }
+
+    // 7) Descontar inventario
     for (const item of productos) {
       const qty = Math.max(1, Math.floor(Number(item.cantidad || 1)));
       const { error: upErr } = await supabase.rpc('decrementar_inventario', {
@@ -268,7 +298,7 @@ router.post('/', authenticateToken, async (req, res) => {
       }
     }
 
-    // 7) Actualizar puntos del usuario
+    // 8) Actualizar puntos del usuario
     const nuevoSaldo = saldo - puntosCanjeados + puntosGanados;
     const { error: upUserErr } = await supabase
       .from('usuarios')

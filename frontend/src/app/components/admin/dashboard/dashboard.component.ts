@@ -112,5 +112,22 @@ export class DashboardComponent implements OnInit {
   pickupLabel(order: Order): string {
     return order.hora_recogida || '—';
   }
+
+  orderDetails(order: Order): { flavor?: string; size?: string; toppings: string[] } {
+    const result = { flavor: undefined as string | undefined, size: undefined as string | undefined, toppings: [] as string[] };
+    const items = order.items || [];
+
+    for (const item of items) {
+      const tipo = item.producto?.tipo;
+      const nombre = item.producto?.nombre;
+      if (!tipo || !nombre) continue;
+
+      if (tipo === 'sabor') result.flavor = nombre;
+      else if (tipo === 'tamano') result.size = nombre;
+      else if (tipo === 'topping') result.toppings.push(nombre);
+    }
+
+    return result;
+  }
 }
 
