@@ -1,6 +1,7 @@
 package com.example.yogurexpress.ui;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,30 +36,42 @@ public class AddProductActivity extends AppCompatActivity {
 
         if (getIntent().hasExtra("producto")) {
             editing = (Producto) getIntent().getSerializableExtra("producto");
-            etName.setText(editing.getNombre());
-            etType.setText(editing.getTipo());
-            etPrice.setText(editing.getPrecio().toString());
-            etDesc.setText(editing.getDescripcion());
-            etAllergens.setText(editing.getAlergenos());
-            etImageUrl.setText(editing.getImagen_url());
-            btnSubmit.setText("Guardar Cambios");
+            if (editing != null) {
+                if (editing.getNombre() != null) etName.setText(editing.getNombre());
+                if (editing.getTipo() != null) etType.setText(editing.getTipo());
+                if (editing.getPrecio() != null) etPrice.setText(String.valueOf(editing.getPrecio()));
+                if (editing.getDescripcion() != null) etDesc.setText(editing.getDescripcion());
+                if (editing.getAlergenos() != null) etAllergens.setText(editing.getAlergenos());
+                if (editing.getImagen_url() != null) etImageUrl.setText(editing.getImagen_url());
+                btnSubmit.setText("Guardar Cambios");
+            }
         }
 
         btnSubmit.setOnClickListener(v -> {
-            if (etName.getText().toString().isEmpty() ||
-                    etType.getText().toString().isEmpty() ||
-                    etPrice.getText().toString().isEmpty()) {
+            String nombre = etName.getText() != null ? etName.getText().toString().trim() : "";
+            String tipo = etType.getText() != null ? etType.getText().toString().trim() : "";
+            String precioStr = etPrice.getText() != null ? etPrice.getText().toString().trim() : "";
+
+            if (TextUtils.isEmpty(nombre) || TextUtils.isEmpty(tipo) || TextUtils.isEmpty(precioStr)) {
                 Toast.makeText(this, "Nombre, Tipo y Precio son obligatorios", Toast.LENGTH_SHORT).show();
                 return;
             }
 
+            Double precio;
+            try {
+                precio = Double.parseDouble(precioStr);
+            } catch (NumberFormatException ex) {
+                Toast.makeText(this, "Precio inválido", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             Producto p = (editing != null) ? editing : new Producto();
-            p.setNombre(etName.getText().toString());
-            p.setTipo(etType.getText().toString());
-            p.setPrecio(Double.parseDouble(etPrice.getText().toString()));
-            p.setDescripcion(etDesc.getText().toString());
-            p.setAlergenos(etAllergens.getText().toString());
-            p.setImagen_url(etImageUrl.getText().toString());
+            p.setNombre(nombre);
+            p.setTipo(tipo);
+            p.setPrecio(precio);
+            p.setDescripcion(etDesc.getText() != null ? etDesc.getText().toString() : "");
+            p.setAlergenos(etAllergens.getText() != null ? etAllergens.getText().toString() : "");
+            p.setImagen_url(etImageUrl.getText() != null ? etImageUrl.getText().toString() : "");
 
             if (editing != null) {
                 api.updateProduct(p, new ApiClient.ProductCallback() {

@@ -32,7 +32,7 @@ public class ApiClient {
     private static final String PREFS = "APP_PREFS";
     private static final String KEY_TOKEN = "auth_token";
     private static final String KEY_USER = "auth_user";
-    private static final String BASE_URL = "http://10.0.2.2:3000/api";
+    private static String BASE_URL = "http://10.0.2.2:3000/api";
 
     private final OkHttpClient client;
     private final Gson gson = new Gson();
@@ -70,6 +70,16 @@ public class ApiClient {
     public interface SummaryCallback {
         void onSuccess(AdminSummary summary);
         void onError(String msg);
+    }
+
+    public static void setBaseUrl(String baseUrl) {
+        if (baseUrl != null && !baseUrl.trim().isEmpty()) {
+            BASE_URL = baseUrl;
+        }
+    }
+
+    public static String getBaseUrl() {
+        return BASE_URL;
     }
 
     public ApiClient(Context ctx) {

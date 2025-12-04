@@ -16,6 +16,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ListProductsActivity extends AppCompatActivity {
 
@@ -50,7 +51,14 @@ public class ListProductsActivity extends AppCompatActivity {
             }
             @Override public void onSwiped(RecyclerView.ViewHolder vh, int dir) {
                 int pos = vh.getAdapterPosition();
-                Producto toDelete = adapter.getItems().get(pos);
+                Producto toDelete = adapter.getItemAt(pos);
+                if (toDelete == null || toDelete.getId_producto() == null) {
+                    Toast.makeText(ListProductsActivity.this,
+                            "No se pudo borrar el producto seleccionado",
+                            Toast.LENGTH_LONG).show();
+                    adapter.notifyItemChanged(pos);
+                    return;
+                }
                 api.deleteProduct(toDelete.getId_producto(), new ApiClient.SimpleCallback() {
                     @Override public void onSuccess() {
                         runOnUiThread(() -> {
@@ -85,12 +93,14 @@ public class ListProductsActivity extends AppCompatActivity {
 
     private void loadProducts() {
         api.getProducts(new ApiClient.ProductsCallback() {
-            @Override public void onSuccess(java.util.List<Producto> productos) {
+            @Override public void onSuccess(List<Producto> productos) {
+                if (productos == null) productos = new ArrayList<>();
                 adapter.updateData(productos);
             }
             @Override public void onError(String e) {
                 Toast.makeText(ListProductsActivity.this,
                         e, Toast.LENGTH_LONG).show();
+                adapter.updateData(new ArrayList<>());
             }
         });
     }

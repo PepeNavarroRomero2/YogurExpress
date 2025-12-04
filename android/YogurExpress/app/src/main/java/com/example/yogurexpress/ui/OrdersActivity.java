@@ -16,7 +16,6 @@ import com.example.yogurexpress.models.Order;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class OrdersActivity extends AppCompatActivity {
 
@@ -58,8 +57,8 @@ public class OrdersActivity extends AppCompatActivity {
     private void loadOrders() {
         api.getPendingOrders(new ApiClient.OrdersCallback() {
             @Override public void onSuccess(List<Order> orders) {
-                all = orders;
-                adapter.setItems(orders);
+                all = orders != null ? orders : new ArrayList<>();
+                adapter.setItems(all);
             }
             @Override public void onError(String msg) {
                 Toast.makeText(OrdersActivity.this, msg, Toast.LENGTH_LONG).show();
@@ -71,9 +70,12 @@ public class OrdersActivity extends AppCompatActivity {
         if (estado.equals("todos")) {
             adapter.setItems(all);
         } else {
-            List<Order> filtered = all.stream()
-                    .filter(o -> estado.equalsIgnoreCase(o.getEstado()))
-                    .collect(Collectors.toList());
+            List<Order> filtered = new ArrayList<>();
+            for (Order o : all) {
+                if (o != null && estado.equalsIgnoreCase(o.getEstado())) {
+                    filtered.add(o);
+                }
+            }
             adapter.setItems(filtered);
         }
     }
