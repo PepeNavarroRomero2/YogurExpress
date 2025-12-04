@@ -5,7 +5,8 @@ import java.io.Serializable;
 public class Inventario implements Serializable {
     private Long id_producto;
     private Integer cantidad_disponible;
-    private Producto productos; // join único
+    private Producto productos;
+    private String productName;
 
     public Inventario() {}
 
@@ -30,8 +31,11 @@ public class Inventario implements Serializable {
         this.productos = productos;
     }
 
-    /** Nombre del producto asociado, o vacío si falta */
+    public String getProductName() { return productName; }
+    public void setProductName(String productName) { this.productName = productName; }
+
     public String getNombre() {
+        if (productName != null) return productName;
         return productos != null ? productos.getNombre() : "";
     }
 }
