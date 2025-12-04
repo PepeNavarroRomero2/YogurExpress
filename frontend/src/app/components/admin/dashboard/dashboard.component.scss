@@ -107,6 +107,14 @@
   flex-wrap: wrap;
 }
 
+.order-details {
+  margin-top: 0.5rem;
+
+  p {
+    margin: 0.15rem 0;
+  }
+}
+
 .empty {
   text-align: center;
   color: var(--color-text-secondary);

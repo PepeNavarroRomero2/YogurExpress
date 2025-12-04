@@ -48,6 +48,12 @@
               </div>
               <span class="badge tag-warning">{{ o.estado }}</span>
             </div>
+            <div class="order-details" *ngIf="orderDetails(o) as details">
+              <p *ngIf="details.flavor"><strong>Sabor:</strong> {{ details.flavor }}</p>
+              <p *ngIf="details.size"><strong>Tamaño:</strong> {{ details.size }}</p>
+              <p *ngIf="details.toppings.length"><strong>Toppings:</strong> {{ details.toppings.join(', ') }}</p>
+              <p *ngIf="!details.flavor && !details.size && !details.toppings.length" class="muted">Detalle no disponible.</p>
+            </div>
             <div class="order-actions">
               <button class="btn-primary" (click)="markDelivered(o)">Marcar como completado</button>
               <button class="btn-ghost" (click)="markRejected(o)">Rechazar</button>

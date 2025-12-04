@@ -13,11 +13,23 @@ export interface Order {
   total: number;
   codigo_unico?: string;
   codigo_pedido?: string; // compatibilidad
+  items?: OrderItem[];
 }
 
 export interface OrderProduct {
   id_producto: number;
   cantidad: number;
+}
+
+export interface OrderItem {
+  id_producto: number;
+  cantidad: number;
+  precio_unit?: number;
+  producto?: {
+    id_producto?: number;
+    nombre?: string;
+    tipo?: 'sabor' | 'topping' | 'tamano' | string;
+  };
 }
 
 export interface CreateOrderRequest {
