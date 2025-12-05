@@ -9,7 +9,6 @@ import productsRouter from './routes/products.js';
 import ordersRouter from './routes/orders.js';
 import usersRouter from './routes/users.js';
 import inventoryRouter from './routes/inventory.js';
-import promotionsRouter from './routes/promotions.js';
 import settingsRouter from './routes/settings.js';
 import paypalRouter from './routes/paypal.js';
 
@@ -24,7 +23,6 @@ app.use('/api/products', productsRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/inventory', inventoryRouter);
-app.use('/api/promotions', promotionsRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/paypal', paypalRouter);
 
