@@ -11,11 +11,15 @@ import com.example.yogurexpress.models.Order;
 import com.example.yogurexpress.models.Producto;
 import com.example.yogurexpress.models.Usuario;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.List;
 
 import okhttp3.Call;
@@ -272,10 +276,37 @@ public class ApiClient {
                 }
                 String body = response.body().string();
                 try {
-                    List<T> list = gson.fromJson(body, type);
-                    main.post(() -> dispatchList(cbObj, list));
-                } catch (Exception ex) {
-                    main.post(() -> dispatchError(cbObj, "Error de parseo"));
+                    JsonElement element = JsonParser.parseString(body);
+                    if (element.isJsonObject()) {
+                        JsonObject obj = element.getAsJsonObject();
+                        if (obj.has("error")) {
+                            String message = obj.get("error").isJsonPrimitive() ? obj.get("error").getAsString() : "Error";
+                            main.post(() -> dispatchError(cbObj, message));
+                            return;
+                        }
+                        if (obj.has("data") && obj.get("data").isJsonArray()) {
+                            List<T> list = gson.fromJson(obj.get("data"), type);
+                            main.post(() -> dispatchList(cbObj, list != null ? list : Collections.emptyList()));
+                            return;
+                        }
+                        if (obj.has("productos") && obj.get("productos").isJsonArray()) {
+                            List<T> list = gson.fromJson(obj.get("productos"), type);
+                            main.post(() -> dispatchList(cbObj, list != null ? list : Collections.emptyList()));
+                            return;
+                        }
+                        // If object but not wrapped, try parsing entire object as list fallback to empty
+                        List<T> list = gson.fromJson(obj, type);
+                        main.post(() -> dispatchList(cbObj, list != null ? list : Collections.emptyList()));
+                        return;
+                    }
+
+                    List<T> list = element.isJsonArray() ? gson.fromJson(element, type) : Collections.emptyList();
+                    main.post(() -> dispatchList(cbObj, list != null ? list : Collections.emptyList()));
+                } catch (JsonParseException ex) {
+                    String parseMsg = (cbObj instanceof ProductsCallback)
+                            ? "Error al interpretar productos"
+                            : "Error de parseo";
+                    main.post(() -> dispatchError(cbObj, parseMsg));
                 }
             }
         });
