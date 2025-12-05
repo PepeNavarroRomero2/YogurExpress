@@ -116,7 +116,7 @@ router.get('/pending', authenticateToken, isAdmin, async (_req, res) => {
         id_pedido, codigo_unico, fecha_hora, hora_recogida, estado, total,
         pedido_items (
           id_producto, cantidad, precio_unit,
-          productos (id_producto, nombre, tipo)
+          productos (id_producto, nombre, tipo, alergenos, precio)
         )
       `)
       .in('estado', ['pendiente', 'listo'])
@@ -522,6 +522,62 @@ router.patch('/:id/status', authenticateToken, isAdmin, async (req, res) => {
     return res.json(data);
   } catch (err) {
     return res.status(500).json({ error: 'Error interno al actualizar estado.' });
+  }
+});
+
+// ───────────────────────────────────────────────────────────
+// GET /api/orders/admin/summary → KPIs dashboard admin
+// ───────────────────────────────────────────────────────────
+router.get('/admin/summary', authenticateToken, isAdmin, async (_req, res) => {
+  try {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    const { data: statusRows, error: statusErr } = await supabase
+      .from('pedidos')
+      .select('estado')
+      .in('estado', ['pendiente', 'listo']);
+    if (statusErr) throw statusErr;
+
+    let pending = 0;
+    let ready = 0;
+    for (const row of statusRows || []) {
+      if (row.estado === 'pendiente') pending += 1;
+      if (row.estado === 'listo') ready += 1;
+    }
+
+    const { data: completedRows, error: completedErr } = await supabase
+      .from('pedidos')
+      .select('id_pedido')
+      .eq('estado', 'completado')
+      .gte('fecha_hora', todayStart.toISOString())
+      .lte('fecha_hora', todayEnd.toISOString());
+    if (completedErr) throw completedErr;
+
+    const { data: lowStockRows, error: invErr } = await supabase
+      .from('inventario')
+      .select('id_producto, cantidad_disponible, productos(nombre)')
+      .lte('cantidad_disponible', 5)
+      .order('cantidad_disponible', { ascending: true });
+    if (invErr) throw invErr;
+
+    const lowStock = (lowStockRows || []).map(item => ({
+      id_producto: item.id_producto,
+      cantidad_disponible: item.cantidad_disponible,
+      productName: item.productos?.nombre || '—'
+    }));
+
+    return res.json({
+      pending,
+      ready,
+      completedToday: (completedRows || []).length,
+      lowStock
+    });
+  } catch (err) {
+    console.error('[orders] admin summary error:', err);
+    return res.status(500).json({ error: 'Error interno al cargar dashboard.' });
   }
 });
 

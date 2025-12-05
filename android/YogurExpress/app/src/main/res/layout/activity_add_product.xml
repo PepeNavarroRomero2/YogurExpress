@@ -29,16 +29,18 @@
                     android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tipo"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:layout_marginTop="12dp"/>
+            <Spinner
+                android:id="@+id/spinnerType"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Tipo"
-                android:layout_marginTop="12dp">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etType"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
-            </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginTop="4dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
