@@ -76,6 +76,10 @@ public class ApiClient {
         void onSuccess(AdminSummary summary);
         void onError(String msg);
     }
+    public interface ProductTypesCallback {
+        void onSuccess(List<String> types);
+        void onError(String msg);
+    }
 
     public static void setBaseUrl(String baseUrl) {
         if (baseUrl != null && !baseUrl.trim().isEmpty()) {
@@ -223,6 +227,54 @@ public class ApiClient {
                 .delete()
                 .build();
         enqueueVoid(req, cb);
+    }
+
+    public void getProductTypes(ProductTypesCallback cb) {
+        Request req = new Request.Builder()
+                .url(BASE_URL + "/products/types")
+                .headers(authHeaders())
+                .get()
+                .build();
+
+        client.newCall(req).enqueue(new Callback() {
+            @Override public void onFailure(Call call, IOException e) {
+                main.post(() -> cb.onError(e.getMessage()));
+            }
+
+            @Override public void onResponse(Call call, Response response) throws IOException {
+                String body = response.body().string();
+                if (!response.isSuccessful()) {
+                    main.post(() -> cb.onError("HTTP " + response.code()));
+                    return;
+                }
+                try {
+                    JsonElement root = JsonParser.parseString(body);
+                    List<String> types = new java.util.ArrayList<>();
+                    if (root.isJsonObject() && root.getAsJsonObject().has("types")) {
+                        JsonArray arr = root.getAsJsonObject().getAsJsonArray("types");
+                        if (arr != null) {
+                            for (JsonElement el : arr) {
+                                if (el != null && el.isJsonPrimitive()) {
+                                    String val = el.getAsString();
+                                    if (val != null && !val.isEmpty()) types.add(val);
+                                }
+                            }
+                        }
+                    } else if (root.isJsonArray()) {
+                        JsonArray arr = root.getAsJsonArray();
+                        for (JsonElement el : arr) {
+                            if (el != null && el.isJsonPrimitive()) {
+                                String val = el.getAsString();
+                                if (val != null && !val.isEmpty()) types.add(val);
+                            }
+                        }
+                    }
+                    main.post(() -> cb.onSuccess(types));
+                } catch (Exception ex) {
+                    main.post(() -> cb.onError("Error al interpretar tipos"));
+                }
+            }
+        });
     }
 
     // ─── Inventario ──────────────────────────────────────────
