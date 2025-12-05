@@ -81,7 +81,8 @@ public class AddProductActivity extends AppCompatActivity {
             p.setTipo(tipo);
             p.setPrecio(precio);
             p.setDescripcion(etDesc.getText() != null ? etDesc.getText().toString() : "");
-            p.setAlergenos(etAllergens.getText() != null ? etAllergens.getText().toString() : "");
+            String allergensInput = etAllergens.getText() != null ? etAllergens.getText().toString().trim() : "";
+            p.setAlergenos(allergensInput.isEmpty() ? null : allergensInput);
             p.setImagen_url(etImageUrl.getText() != null ? etImageUrl.getText().toString() : "");
 
             if (editing != null) {

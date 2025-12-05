@@ -20,6 +20,19 @@ async function fetchAllowedTypes() {
   return Array.from(set);
 }
 
+function normalizeArrayField(input) {
+  if (Array.isArray(input)) return input;
+  if (typeof input === 'string') {
+    const trimmed = input.trim();
+    if (!trimmed) return [];
+    return trimmed
+      .split(',')
+      .map((v) => v.trim())
+      .filter((v) => v.length > 0);
+  }
+  return [];
+}
+
 // 1) GET /api/products → público
 router.get('/', async (_req, res) => {
   try {
@@ -128,7 +141,16 @@ router.post('/', authenticateToken, isAdmin, async (req, res) => {
 
     const { data: prod, error } = await supabase
       .from('productos')
-      .insert([{ nombre, tipo, precio: parsedPrecio, descripcion, alergenos, imagen_url }])
+      .insert([
+        {
+          nombre,
+          tipo,
+          precio: parsedPrecio,
+          descripcion,
+          alergenos: normalizeArrayField(alergenos),
+          imagen_url,
+        },
+      ])
       .select()
       .single();
     if (error) throw error;
@@ -170,7 +192,7 @@ router.put('/:id', authenticateToken, isAdmin, async (req, res) => {
       updates.precio = parsed;
     }
     if (descripcion !== undefined) updates.descripcion = descripcion;
-    if (alergenos !== undefined) updates.alergenos = alergenos;
+    if (alergenos !== undefined) updates.alergenos = normalizeArrayField(alergenos);
     if (imagen_url !== undefined) updates.imagen_url = imagen_url;
 
     const { data: updatedProd, error: updateError } = await supabase
