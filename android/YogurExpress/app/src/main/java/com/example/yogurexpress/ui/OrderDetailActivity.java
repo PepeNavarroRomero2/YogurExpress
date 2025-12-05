@@ -40,7 +40,6 @@ public class OrderDetailActivity extends AppCompatActivity {
         rvItems.setAdapter(new OrderItemsAdapter(order != null ? order.getItems() : null));
 
         findViewById(R.id.btnRechazar).setOnClickListener(v -> updateStatus("rechazado"));
-        findViewById(R.id.btnListo).setOnClickListener(v -> updateStatus("listo"));
         findViewById(R.id.btnCompletar).setOnClickListener(v -> updateStatus("completado"));
         findViewById(R.id.btnBackDetail).setOnClickListener(v -> finish());
 

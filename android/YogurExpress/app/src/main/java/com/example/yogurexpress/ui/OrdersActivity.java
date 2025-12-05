@@ -41,7 +41,7 @@ public class OrdersActivity extends AppCompatActivity {
         Spinner spinner = findViewById(R.id.spinnerEstado);
         ArrayAdapter<String> spAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item,
-                new String[]{"todos", "pendiente", "listo", "completado", "rechazado"});
+                new String[]{"todos", "pendiente", "completado", "rechazado"});
         spinner.setAdapter(spAdapter);
         findViewById(R.id.btnFiltrar).setOnClickListener(v -> applyFilter(spinner.getSelectedItem().toString()));
 

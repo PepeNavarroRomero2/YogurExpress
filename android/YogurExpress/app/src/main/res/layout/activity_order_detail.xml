@@ -64,13 +64,6 @@
             android:text="Rechazar"/>
 
         <Button
-            android:id="@+id/btnListo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Listo"
-            android:layout_marginStart="8dp"/>
-
-        <Button
             android:id="@+id/btnCompletar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

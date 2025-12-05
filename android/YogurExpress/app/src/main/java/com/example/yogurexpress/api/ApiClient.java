@@ -32,7 +32,7 @@ public class ApiClient {
     private static final String PREFS = "APP_PREFS";
     private static final String KEY_TOKEN = "auth_token";
     private static final String KEY_USER = "auth_user";
-    private static String BASE_URL = "http://10.0.2.2:3000/api";
+    private static String BASE_URL = "http://192.168.18.165:3000/api";
 
     private final OkHttpClient client;
     private final Gson gson = new Gson();
@@ -271,8 +271,12 @@ public class ApiClient {
                     return;
                 }
                 String body = response.body().string();
-                List<T> list = gson.fromJson(body, type);
-                main.post(() -> dispatchList(cbObj, list));
+                try {
+                    List<T> list = gson.fromJson(body, type);
+                    main.post(() -> dispatchList(cbObj, list));
+                } catch (Exception ex) {
+                    main.post(() -> dispatchError(cbObj, "Error de parseo"));
+                }
             }
         });
     }
@@ -288,8 +292,12 @@ public class ApiClient {
                     return;
                 }
                 String body = response.body().string();
-                T obj = gson.fromJson(body, clazz);
-                main.post(() -> dispatchSingle(cbObj, obj));
+                try {
+                    T obj = gson.fromJson(body, clazz);
+                    main.post(() -> dispatchSingle(cbObj, obj));
+                } catch (Exception ex) {
+                    main.post(() -> dispatchError(cbObj, "Error de parseo"));
+                }
             }
         });
     }

@@ -35,6 +35,7 @@ public class AdminActivity extends AppCompatActivity {
         NotificationHelper.createNotificationChannel(this);
         NotificationHelper.requestNotificationPermissionIfNeeded(this);
         orderPollingManager = new OrderPollingManager(this);
+        orderPollingManager.setListener(this::loadSummary);
 
         findViewById(R.id.btnProductos).setOnClickListener(v ->
                 startActivity(new Intent(this, ListProductsActivity.class)));
@@ -50,6 +51,8 @@ public class AdminActivity extends AppCompatActivity {
             startActivity(i);
             finish();
         });
+
+        loadSummary();
     }
 
     @Override

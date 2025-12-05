@@ -19,12 +19,22 @@ public class OrderPollingManager {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final ApiClient apiClient;
     private final Set<Long> seenOrders = new HashSet<>();
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private OrderPollingListener listener;
     private boolean running = false;
     private Context appContext;
+
+    public interface OrderPollingListener {
+        void onNewOrders();
+    }
 
     public OrderPollingManager(Context context) {
         this.appContext = context.getApplicationContext();
         this.apiClient = new ApiClient(this.appContext);
+    }
+
+    public void setListener(OrderPollingListener listener) {
+        this.listener = listener;
     }
 
     public void start(Context context) {
@@ -73,6 +83,9 @@ public class OrderPollingManager {
             if (id != null && !seenOrders.contains(id)) {
                 seenOrders.add(id);
                 NotificationHelper.showNewOrderNotification(appContext, o);
+                if (listener != null) {
+                    mainHandler.post(listener::onNewOrders);
+                }
             }
         }
     }
