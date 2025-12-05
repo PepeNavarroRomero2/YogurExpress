@@ -11,6 +11,7 @@ import com.example.yogurexpress.models.Order;
 import com.example.yogurexpress.models.Producto;
 import com.example.yogurexpress.models.Usuario;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -171,7 +172,30 @@ public class ApiClient {
                 .url(BASE_URL + "/products")
                 .headers(authHeaders())
                 .get().build();
-        enqueueList(req, new TypeToken<List<Producto>>(){}.getType(), cb);
+
+        client.newCall(req).enqueue(new Callback() {
+            @Override public void onFailure(Call call, IOException e) {
+                main.post(() -> cb.onError(e.getMessage()));
+            }
+
+            @Override public void onResponse(Call call, Response response) throws IOException {
+                String body = response.body().string();
+                if (!response.isSuccessful()) {
+                    main.post(() -> cb.onError("HTTP " + response.code()));
+                    return;
+                }
+
+                try {
+                    List<Producto> productos = parseProductos(body);
+                    if (productos == null) productos = java.util.Collections.emptyList();
+                    List<Producto> finalProductos = productos;
+                    main.post(() -> cb.onSuccess(finalProductos));
+                } catch (Exception ex) {
+                    android.util.Log.e("ApiClient", "Error interpretando productos. Respuesta: " + body, ex);
+                    main.post(() -> cb.onError("Error al interpretar productos"));
+                }
+            }
+        });
     }
 
     public void createProduct(Producto p, ProductCallback cb) {
@@ -261,6 +285,100 @@ public class ApiClient {
                 .headers(authHeaders())
                 .get().build();
         enqueueSingle(req, AdminSummary.class, cb);
+    }
+
+    private List<Producto> parseProductos(String body) {
+        JsonElement root = JsonParser.parseString(body);
+        JsonElement listElement = null;
+
+        if (root.isJsonArray()) {
+            listElement = root;
+        } else if (root.isJsonObject()) {
+            JsonObject obj = root.getAsJsonObject();
+            if (obj.has("error")) {
+                throw new IllegalStateException(obj.get("error").isJsonNull() ? "" : obj.get("error").getAsString());
+            }
+            if (obj.has("data")) {
+                listElement = obj.get("data");
+            } else if (obj.has("productos")) {
+                listElement = obj.get("productos");
+            } else {
+                listElement = obj;
+            }
+        }
+
+        if (listElement == null) {
+            throw new IllegalStateException("Formato de productos no reconocido");
+        }
+
+        List<Producto> productos = new java.util.ArrayList<>();
+        if (listElement.isJsonArray()) {
+            JsonArray array = listElement.getAsJsonArray();
+            for (JsonElement el : array) {
+                if (el != null && el.isJsonObject()) {
+                    productos.add(mapProducto(el.getAsJsonObject()));
+                }
+            }
+        } else if (listElement.isJsonObject()) {
+            productos.add(mapProducto(listElement.getAsJsonObject()));
+        }
+        return productos;
+    }
+
+    private Producto mapProducto(JsonObject obj) {
+        Producto p = new Producto();
+        p.setId_producto(optLong(obj, "id_producto"));
+        p.setNombre(optString(obj, "nombre"));
+        p.setTipo(optString(obj, "tipo"));
+        p.setPrecio(optDouble(obj, "precio"));
+        p.setDescripcion(optString(obj, "descripcion"));
+        p.setAlergenos(optString(obj, "alergenos"));
+        p.setImagen_url(optString(obj, "imagen_url"));
+        return p;
+    }
+
+    private Long optLong(JsonObject obj, String key) {
+        if (obj.has(key) && !obj.get(key).isJsonNull()) {
+            JsonElement el = obj.get(key);
+            if (el.isJsonPrimitive()) {
+                try {
+                    return el.getAsLong();
+                } catch (NumberFormatException ignored) {
+                    try {
+                        return Long.parseLong(el.getAsString());
+                    } catch (Exception ignored2) {}
+                }
+            }
+        }
+        return null;
+    }
+
+    private Double optDouble(JsonObject obj, String key) {
+        if (obj.has(key) && !obj.get(key).isJsonNull()) {
+            JsonElement el = obj.get(key);
+            if (el.isJsonPrimitive()) {
+                try {
+                    return el.getAsDouble();
+                } catch (NumberFormatException ignored) {
+                    try {
+                        String val = el.getAsString();
+                        if (val != null && !val.isEmpty()) {
+                            return Double.parseDouble(val);
+                        }
+                    } catch (Exception ignored2) {}
+                }
+            }
+        }
+        return null;
+    }
+
+    private String optString(JsonObject obj, String key) {
+        if (obj.has(key) && !obj.get(key).isJsonNull()) {
+            try {
+                return obj.get(key).getAsString();
+            } catch (Exception ignored) {}
+        }
+        return null;
     }
 
     // ─── Helpers ─────────────────────────────────────────────
