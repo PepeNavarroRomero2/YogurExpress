@@ -37,7 +37,7 @@ public class ApiClient {
     private static final String PREFS = "APP_PREFS";
     private static final String KEY_TOKEN = "auth_token";
     private static final String KEY_USER = "auth_user";
-    private static String BASE_URL = "http://192.168.18.165:3000/api";
+    private static String BASE_URL = "https://yogurexpressback.onrender.com/api/";
 
     private final OkHttpClient client;
     private final Gson gson = new Gson();
