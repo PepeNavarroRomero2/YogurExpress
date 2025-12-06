@@ -37,7 +37,9 @@ public class ApiClient {
     private static final String PREFS = "APP_PREFS";
     private static final String KEY_TOKEN = "auth_token";
     private static final String KEY_USER = "auth_user";
-    private static String BASE_URL = "https://yogurexpressback.onrender.com/api/";
+
+    // BASE_URL sin barra final para evitar rutas tipo /api//auth/login
+    private static String BASE_URL = "https://yogurexpressback.onrender.com/api";
 
     private final OkHttpClient client;
     private final Gson gson = new Gson();
@@ -48,42 +50,56 @@ public class ApiClient {
         void onSuccess(Usuario user);
         void onError(String msg);
     }
+
     public interface ProductsCallback {
         void onSuccess(List<Producto> productos);
         void onError(String msg);
     }
+
     public interface ProductCallback {
         void onSuccess(Producto producto);
         void onError(String msg);
     }
+
     public interface InventoryCallback {
         void onSuccess(List<Inventario> inventario);
         void onError(String msg);
     }
+
     public interface SimpleCallback {
         void onSuccess();
         void onError(String msg);
     }
+
     public interface OrdersCallback {
         void onSuccess(List<Order> orders);
         void onError(String msg);
     }
+
     public interface OrderCallback {
         void onSuccess(Order order);
         void onError(String msg);
     }
+
     public interface SummaryCallback {
         void onSuccess(AdminSummary summary);
         void onError(String msg);
     }
+
     public interface ProductTypesCallback {
         void onSuccess(List<String> types);
         void onError(String msg);
     }
 
     public static void setBaseUrl(String baseUrl) {
-        if (baseUrl != null && !baseUrl.trim().isEmpty()) {
-            BASE_URL = baseUrl;
+        if (baseUrl != null) {
+            String trimmed = baseUrl.trim();
+            if (trimmed.endsWith("/")) {
+                trimmed = trimmed.substring(0, trimmed.length() - 1);
+            }
+            if (!trimmed.isEmpty()) {
+                BASE_URL = trimmed;
+            }
         }
     }
 
@@ -134,21 +150,27 @@ public class ApiClient {
         JsonObject payload = new JsonObject();
         payload.addProperty("email", email);
         payload.addProperty("password", password);
+
         Request req = new Request.Builder()
                 .url(BASE_URL + "/auth/login")
                 .post(RequestBody.create(payload.toString(), MediaType.get("application/json")))
                 .build();
+
         client.newCall(req).enqueue(new Callback() {
             @Override public void onFailure(Call call, IOException e) {
                 main.post(() -> cb.onError(e.getMessage()));
             }
+
             @Override public void onResponse(Call call, Response response) throws IOException {
-                String body = response.body().string();
+                String body = response.body() != null ? response.body().string() : "";
+
                 if (!response.isSuccessful()) {
                     String serverMsg = "Credenciales inválidas";
                     try {
                         JsonObject err = gson.fromJson(body, JsonObject.class);
-                        if (err != null && err.has("error")) serverMsg = err.get("error").getAsString();
+                        if (err != null && err.has("error")) {
+                            serverMsg = err.get("error").getAsString();
+                        }
                     } catch (Exception ignored) {}
                     final String msg = serverMsg;
                     main.post(() -> cb.onError(msg));
@@ -338,7 +360,7 @@ public class ApiClient {
                     main.post(() -> cb.onError("HTTP " + response.code()));
                     return;
                 }
-                String body = response.body().string();
+                String body = response.body() != null ? response.body().string() : "";
                 Inventario updated = gson.fromJson(body, Inventario.class);
                 main.post(() -> cb.onSuccess(java.util.Collections.singletonList(updated)));
             }
@@ -427,7 +449,6 @@ public class ApiClient {
                         if (first != null && first.isJsonObject()) return mapProducto(first.getAsJsonObject());
                     }
                 }
-                // If the object already looks like a product
                 return mapProducto(obj);
             } else if (root.isJsonArray() && root.getAsJsonArray().size() > 0) {
                 JsonElement first = root.getAsJsonArray().get(0);
@@ -529,7 +550,7 @@ public class ApiClient {
                     main.post(() -> dispatchError(cbObj, "HTTP " + response.code()));
                     return;
                 }
-                String body = response.body().string();
+                String body = response.body() != null ? response.body().string() : "";
                 try {
                     JsonElement element = JsonParser.parseString(body);
                     if (element.isJsonObject()) {
@@ -549,7 +570,6 @@ public class ApiClient {
                             main.post(() -> dispatchList(cbObj, list != null ? list : Collections.emptyList()));
                             return;
                         }
-                        // If object but not wrapped, try parsing entire object as list fallback to empty
                         List<T> list = gson.fromJson(obj, type);
                         main.post(() -> dispatchList(cbObj, list != null ? list : Collections.emptyList()));
                         return;
@@ -577,7 +597,7 @@ public class ApiClient {
                     main.post(() -> dispatchError(cbObj, "HTTP " + response.code()));
                     return;
                 }
-                String body = response.body().string();
+                String body = response.body() != null ? response.body().string() : "";
                 try {
                     T obj = gson.fromJson(body, clazz);
                     main.post(() -> dispatchSingle(cbObj, obj));
