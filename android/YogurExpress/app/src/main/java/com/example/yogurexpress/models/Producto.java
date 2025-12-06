@@ -1,14 +1,23 @@
 package com.example.yogurexpress.models;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 
 public class Producto implements Serializable {
+    @SerializedName("id_producto")
     private Long id_producto;
+    @SerializedName("nombre")
     private String nombre;
+    @SerializedName("tipo")
     private String tipo;
+    @SerializedName("precio")
     private Double precio;
+    @SerializedName("descripcion")
     private String descripcion;
+    @SerializedName("alergenos")
     private String alergenos;
+    @SerializedName("imagen_url")
     private String imagen_url;
 
     public Producto() {}

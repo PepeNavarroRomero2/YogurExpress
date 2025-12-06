@@ -11,26 +11,35 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.yogurexpress.R;
 import com.example.yogurexpress.models.Producto;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
 
     private List<Producto> items;
-    private OnItemClickListener listener;
+    private final OnItemClickListener listener;
 
     public interface OnItemClickListener {
         void onItemClick(Producto p);
     }
 
     public ProductAdapter(List<Producto> items, OnItemClickListener listener) {
-        this.items = items;
+        this.items = items != null ? items : new ArrayList<>();
         this.listener = listener;
     }
 
-    public List<Producto> getItems() { return items; }
+    public Producto getItemAt(int position) {
+        if (items == null || position < 0 || position >= items.size()) return null;
+        return items.get(position);
+    }
 
     public void updateData(List<Producto> newItems) {
-        this.items = newItems;
+        if (newItems == null) {
+            this.items = new ArrayList<>();
+        } else {
+            this.items = newItems;
+        }
         notifyDataSetChanged();
     }
 
@@ -44,9 +53,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
         Producto p = items.get(position);
-        holder.name.setText(p.getNombre());
-        holder.type.setText(p.getTipo());
-        holder.price.setText(String.format("€ %.2f", p.getPrecio()));
+        holder.name.setText(p.getNombre() != null ? p.getNombre() : "Sin nombre");
+        holder.type.setText(p.getTipo() != null ? p.getTipo() : "");
+        Double price = p.getPrecio();
+        String priceText = price != null ? String.format(Locale.getDefault(), "€ %.2f", price) : "€ 0.00";
+        holder.price.setText(priceText);
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onItemClick(p);
         });
