@@ -179,13 +179,14 @@ public class ApiClient {
 
         client.newCall(req).enqueue(new Callback() {
             @Override public void onFailure(Call call, IOException e) {
-                main.post(() -> cb.onError(e.getMessage()));
+                main.post(() -> cb.onError("Error de conexión: " + e.getMessage()));
             }
 
             @Override public void onResponse(Call call, Response response) throws IOException {
-                String body = response.body().string();
+                String body = response.body() != null ? response.body().string() : "";
                 if (!response.isSuccessful()) {
-                    main.post(() -> cb.onError("HTTP " + response.code()));
+                    String error = extractServerError(body, response.code());
+                    main.post(() -> cb.onError(error));
                     return;
                 }
 
@@ -208,7 +209,23 @@ public class ApiClient {
                 .headers(authHeaders())
                 .post(RequestBody.create(gson.toJson(p), MediaType.get("application/json")))
                 .build();
-        enqueueSingle(req, Producto.class, cb);
+        client.newCall(req).enqueue(new Callback() {
+            @Override public void onFailure(Call call, IOException e) {
+                main.post(() -> cb.onError("Error de conexión: " + e.getMessage()));
+            }
+
+            @Override public void onResponse(Call call, Response response) throws IOException {
+                String body = response.body() != null ? response.body().string() : "";
+                if (!response.isSuccessful()) {
+                    String error = extractServerError(body, response.code());
+                    main.post(() -> cb.onError(error));
+                    return;
+                }
+
+                Producto parsed = parseProductoSingle(body);
+                main.post(() -> cb.onSuccess(parsed));
+            }
+        });
     }
 
     public void updateProduct(Producto p, ProductCallback cb) {
@@ -217,7 +234,23 @@ public class ApiClient {
                 .headers(authHeaders())
                 .put(RequestBody.create(gson.toJson(p), MediaType.get("application/json")))
                 .build();
-        enqueueSingle(req, Producto.class, cb);
+        client.newCall(req).enqueue(new Callback() {
+            @Override public void onFailure(Call call, IOException e) {
+                main.post(() -> cb.onError("Error de conexión: " + e.getMessage()));
+            }
+
+            @Override public void onResponse(Call call, Response response) throws IOException {
+                String body = response.body() != null ? response.body().string() : "";
+                if (!response.isSuccessful()) {
+                    String error = extractServerError(body, response.code());
+                    main.post(() -> cb.onError(error));
+                    return;
+                }
+
+                Producto parsed = parseProductoSingle(body);
+                main.post(() -> cb.onSuccess(parsed));
+            }
+        });
     }
 
     public void deleteProduct(Long id, SimpleCallback cb) {
@@ -238,13 +271,14 @@ public class ApiClient {
 
         client.newCall(req).enqueue(new Callback() {
             @Override public void onFailure(Call call, IOException e) {
-                main.post(() -> cb.onError(e.getMessage()));
+                main.post(() -> cb.onError("Error de conexión: " + e.getMessage()));
             }
 
             @Override public void onResponse(Call call, Response response) throws IOException {
-                String body = response.body().string();
+                String body = response.body() != null ? response.body().string() : "";
                 if (!response.isSuccessful()) {
-                    main.post(() -> cb.onError("HTTP " + response.code()));
+                    String error = extractServerError(body, response.code());
+                    main.post(() -> cb.onError(error));
                     return;
                 }
                 try {
@@ -377,6 +411,36 @@ public class ApiClient {
         return productos;
     }
 
+    private Producto parseProductoSingle(String body) {
+        if (body == null || body.trim().isEmpty()) return null;
+        try {
+            JsonElement root = JsonParser.parseString(body);
+            if (root.isJsonObject()) {
+                JsonObject obj = root.getAsJsonObject();
+                if (obj.has("data")) {
+                    JsonElement data = obj.get("data");
+                    if (data != null && data.isJsonObject()) {
+                        return mapProducto(data.getAsJsonObject());
+                    }
+                    if (data != null && data.isJsonArray() && data.getAsJsonArray().size() > 0) {
+                        JsonElement first = data.getAsJsonArray().get(0);
+                        if (first != null && first.isJsonObject()) return mapProducto(first.getAsJsonObject());
+                    }
+                }
+                // If the object already looks like a product
+                return mapProducto(obj);
+            } else if (root.isJsonArray() && root.getAsJsonArray().size() > 0) {
+                JsonElement first = root.getAsJsonArray().get(0);
+                if (first != null && first.isJsonObject()) {
+                    return mapProducto(first.getAsJsonObject());
+                }
+            }
+        } catch (Exception ex) {
+            android.util.Log.w("ApiClient", "No se pudo mapear producto de la respuesta", ex);
+        }
+        return null;
+    }
+
     private Producto mapProducto(JsonObject obj) {
         Producto p = new Producto();
         p.setId_producto(optLong(obj, "id_producto"));
@@ -431,6 +495,27 @@ public class ApiClient {
             } catch (Exception ignored) {}
         }
         return null;
+    }
+
+    private String extractServerError(String body, int code) {
+        if (body != null && !body.isEmpty()) {
+            try {
+                JsonElement el = JsonParser.parseString(body);
+                if (el.isJsonObject()) {
+                    JsonObject obj = el.getAsJsonObject();
+                    if (obj.has("error") && !obj.get("error").isJsonNull()) {
+                        String msg = obj.get("error").getAsString();
+                        if (msg != null && !msg.isEmpty()) return msg;
+                    }
+                    if (obj.has("message") && !obj.get("message").isJsonNull()) {
+                        String msg = obj.get("message").getAsString();
+                        if (msg != null && !msg.isEmpty()) return msg;
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        return "Error del servidor (" + code + ")";
     }
 
     // ─── Helpers ─────────────────────────────────────────────
