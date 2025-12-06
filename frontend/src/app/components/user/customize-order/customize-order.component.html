@@ -36,9 +36,19 @@
             [disabled]="s.cantidad_disponible <= 0"
             (click)="selectSize(s)"
           >
-            <span class="pill-title">{{ s.nombre }}</span>
-            <span class="pill-meta">{{ s.precio | number:'1.2-2' }} €</span>
-            <small>{{ s.cantidad_disponible > 0 ? s.cantidad_disponible + ' disponibles' : 'Agotado' }}</small>
+            <div class="pill-thumb">
+              <img
+                [src]="s.imagen_url || 'assets/images/placeholders/product-placeholder-1.webp'"
+                [alt]="s.nombre"
+              />
+            </div>
+            <div class="pill-content">
+              <span class="pill-title">{{ s.nombre }}</span>
+              <span class="pill-meta">{{ s.precio | number:'1.2-2' }} €</span>
+              <small>
+                {{ s.cantidad_disponible > 0 ? s.cantidad_disponible + ' disponibles' : 'Agotado' }}
+              </small>
+            </div>
           </button>
         </div>
       </div>
@@ -63,9 +73,20 @@
               [disabled]="t.cantidad_disponible <= 0"
               (change)="toggleToppingSelection(t)"
             />
+
+            <div class="topping-thumb">
+              <img
+                [src]="t.imagen_url || 'assets/images/placeholders/product-placeholder-1.webp'"
+                [alt]="t.nombre"
+              />
+            </div>
+
             <div class="topping-info">
               <div class="name">{{ t.nombre }}</div>
-              <div class="meta">{{ t.precio | number:'1.2-2' }} € · {{ t.cantidad_disponible > 0 ? 'Disponible' : 'Agotado' }}</div>
+              <div class="meta">
+                {{ t.precio | number:'1.2-2' }} €
+                · {{ t.cantidad_disponible > 0 ? 'Disponible' : 'Agotado' }}
+              </div>
             </div>
           </label>
         </div>
