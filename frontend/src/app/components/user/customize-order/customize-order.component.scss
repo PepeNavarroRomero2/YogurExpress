@@ -96,6 +96,27 @@
   }
 }
 
+.pill-thumb {
+  width: 100%;
+  height: 120px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.pill-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
 .pill-title {
   font-weight: 700;
 }
@@ -120,6 +141,7 @@
   border-radius: 10px;
   background: #fff;
   cursor: pointer;
+  align-items: center;
 
   &.selected {
     border-color: var(--color-primary);
@@ -133,6 +155,21 @@
   &.disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+}
+
+.topping-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 }
 
