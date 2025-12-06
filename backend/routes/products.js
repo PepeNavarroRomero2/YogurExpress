@@ -6,6 +6,33 @@ import { authenticateToken, isAdmin } from './authMiddleware.js';
 
 const router = express.Router();
 
+async function fetchAllowedTypes() {
+  const { data, error } = await supabase
+    .from('productos')
+    .select('tipo');
+  if (error) throw error;
+  const set = new Set();
+  data?.forEach((row) => {
+    if (row?.tipo) {
+      set.add(row.tipo);
+    }
+  });
+  return Array.from(set);
+}
+
+function normalizeArrayField(input) {
+  if (Array.isArray(input)) return input;
+  if (typeof input === 'string') {
+    const trimmed = input.trim();
+    if (!trimmed) return [];
+    return trimmed
+      .split(',')
+      .map((v) => v.trim())
+      .filter((v) => v.length > 0);
+  }
+  return [];
+}
+
 // 1) GET /api/products → público
 router.get('/', async (_req, res) => {
   try {
@@ -69,7 +96,18 @@ router.get('/tamanos', async (_req, res) => {
   }
 });
 
-// 5) GET /api/products/:id → público
+// 5) GET /api/products/types → obtener tipos disponibles
+router.get('/types', authenticateToken, isAdmin, async (_req, res) => {
+  try {
+    const types = await fetchAllowedTypes();
+    res.json({ types });
+  } catch (e) {
+    console.error('GET /products/types error:', e);
+    res.status(500).json({ error: 'No se pudieron obtener los tipos de producto.' });
+  }
+});
+
+// 6) GET /api/products/:id → público
 router.get('/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
@@ -86,18 +124,33 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// 6) POST /api/products → ADMIN
+// 7) POST /api/products → ADMIN
 router.post('/', authenticateToken, isAdmin, async (req, res) => {
   const { nombre, tipo, precio, descripcion, alergenos, imagen_url, cantidad_disponible } = req.body;
 
-  if (!nombre || !tipo || typeof precio !== 'number') {
-    return res.status(400).json({ error: 'Datos incompletos' });
+  let parsedPrecio = typeof precio === 'number' ? precio : parseFloat(precio);
+  if (!nombre || !tipo || Number.isNaN(parsedPrecio)) {
+    return res.status(400).json({ error: 'Datos incompletos o precio inválido' });
   }
 
   try {
+    const allowedTypes = await fetchAllowedTypes();
+    if (allowedTypes.length > 0 && !allowedTypes.includes(tipo)) {
+      return res.status(400).json({ error: 'Tipo de producto no válido' });
+    }
+
     const { data: prod, error } = await supabase
       .from('productos')
-      .insert([{ nombre, tipo, precio, descripcion, alergenos, imagen_url }])
+      .insert([
+        {
+          nombre,
+          tipo,
+          precio: parsedPrecio,
+          descripcion,
+          alergenos: normalizeArrayField(alergenos),
+          imagen_url,
+        },
+      ])
       .select()
       .single();
     if (error) throw error;
@@ -117,18 +170,29 @@ router.post('/', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// 7) PUT /api/products/:id → ADMIN
+// 8) PUT /api/products/:id → ADMIN
 router.put('/:id', authenticateToken, isAdmin, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const { nombre, tipo, precio, descripcion, alergenos, imagen_url, cantidad_disponible } = req.body;
 
   try {
+    const allowedTypes = await fetchAllowedTypes();
+    if (tipo !== undefined && allowedTypes.length > 0 && !allowedTypes.includes(tipo)) {
+      return res.status(400).json({ error: 'Tipo de producto no válido' });
+    }
+
     const updates = {};
     if (nombre !== undefined) updates.nombre = nombre;
     if (tipo !== undefined) updates.tipo = tipo;
-    if (precio !== undefined) updates.precio = precio;
+    if (precio !== undefined) {
+      const parsed = typeof precio === 'number' ? precio : parseFloat(precio);
+      if (Number.isNaN(parsed)) {
+        return res.status(400).json({ error: 'Precio inválido' });
+      }
+      updates.precio = parsed;
+    }
     if (descripcion !== undefined) updates.descripcion = descripcion;
-    if (alergenos !== undefined) updates.alergenos = alergenos;
+    if (alergenos !== undefined) updates.alergenos = normalizeArrayField(alergenos);
     if (imagen_url !== undefined) updates.imagen_url = imagen_url;
 
     const { data: updatedProd, error: updateError } = await supabase
