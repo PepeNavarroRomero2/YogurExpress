@@ -11,6 +11,14 @@
   width: min(440px, 100%);
   padding: 2rem;
 
+  .login-logo {
+    display: block;
+    margin: 0 auto 1.5rem;
+    max-width: 160px;
+    width: 100%;
+    height: auto;
+  }
+
   .auth-header {
     text-align: center;
     margin-bottom: 1.5rem;
@@ -21,6 +29,14 @@
 
     .subtitle {
       color: var(--color-text-secondary);
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    .login-logo {
+      max-width: 60%;
     }
   }
 }
